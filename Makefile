@@ -3,22 +3,36 @@ GNU=arm-none-eabi
 CC=$(GNU)-gcc
 OBJCOPY=$(GNU)-objcopy
 
-CPU=cortex-a7
+ifeq ($(RASPI_MODEL),1)
+    CPU=arm1176jzf-s
+    DIRECTIVES=-D MODEL_1
+    ARCHDIR=model1
+else
+    CPU=cortex-a7
+	DIRECTIVES=
+    ARCHDIR=model2
+endif
 
 SRC_DIR=src
 BUILD_DIR=build
 DIST_DIR=dist
 
-C_FILES=$(wildcard $(SRC_DIR)/*.c)
-ASM_FILES=$(wildcard $(SRC_DIR)/*.S)
+SUBDIRS=common kernel kernel/$(ARCHDIR)
+
+C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
+ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))
 OBJ_FILES=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
 OBJ_FILES+=$(ASM_FILES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%_s.o)
 
-FLAGS=-mcpu=$(CPU) -fpic -ffreestanding -Iinclude
+C_ASM_FILES=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.S)
+
+FLAGS=$(DIRECTIVES) -mcpu=$(CPU) -fpic -ffreestanding -Iinclude
 CFLAGS=$(FLAGS) -std=gnu99 -O2 -Wall -Wextra
 LDFLAGS=-ffreestanding -O2 -nostdlib
 
 all: build
+
+assembly: $(C_ASM_FILES)
 
 run: build
 	# qemu-system-arm -m 256 -M raspi2 -serial stdio -kernel myos.elf

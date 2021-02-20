@@ -1,8 +1,8 @@
 /*
- * mmio.c
+ * mmio.c - memory-mapped I/O
  */
 
-#include <stdint.h>
+#include <common/stdint.h>
 
 /* Memory-Mapped I/O output */
 void mmio_write(uint32_t reg, uint32_t data)

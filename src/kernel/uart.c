@@ -1,11 +1,20 @@
-#include <stddef.h>
-#include "delay.h"
-#include "gpio_regs.h"
-#include "mmio.h"
+/*
+ * uart.c - routines for Mini-UART (on GPIO)
+ */
+
+#include <common/stddef.h>
+#include <common/stdlib.h>
+#include <kernel/delay.h>
+#include <kernel/gpio.h>
+#include <kernel/mmio.h>
+#include <kernel/uart.h>
 
 void uart_init()
 {
+    uart_control_t control;
+
     /* Disable UART0. */
+    bzero(&control, 4);
     mmio_write(UART0_CR, 0x00000000);
     /* Setup the GPIO pin 14 && 15. */
 
@@ -43,20 +52,38 @@ void uart_init()
             (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10));
 
     /* Enable UART0, receive & transfer part of UART. */
+    control.uart_enabled = 1;
+    control.transmit_enabled = 1;
+    control.receive_enabled = 1;
     mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
+}
+
+uart_flags_t read_flags(void)
+{
+    uart_flags_t flags;
+    flags.as_int = mmio_read(UART0_FR);
+    return flags;
 }
 
 void uart_putc(unsigned char c)
 {
+    uart_flags_t flags;
     /* Wait for UART to become ready to transmit. */
-    while ( mmio_read(UART0_FR) & (1 << 5) ) { }
+    do {
+        flags = read_flags();
+    }
+    while (flags.transmit_queue_full);
     mmio_write(UART0_DR, c);
 }
 
 unsigned char uart_getc()
 {
+    uart_flags_t flags;
     /* Wait for UART to have received something. */
-    while ( mmio_read(UART0_FR) & (1 << 4) ) { }
+    do {
+        flags = read_flags();
+    }
+    while (flags.receive_queue_empty);
     return mmio_read(UART0_DR);
 }
 
