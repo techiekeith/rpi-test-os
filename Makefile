@@ -17,7 +17,7 @@ SRC_DIR=src
 BUILD_DIR=build
 DIST_DIR=dist
 
-SUBDIRS=common kernel kernel/$(ARCHDIR)
+SUBDIRS=common kernel kernel/$(ARCHDIR) saa5050
 
 C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))

@@ -4,14 +4,12 @@
 
 #pragma once
 
+#include <kernel/peripheral.h>
+
 enum
 {
     /* The GPIO registers base address. */
-#ifdef MODEL_1
-    GPIO_BASE = 0x20200000, /* for raspi2 & 3, 0x20200000 for raspi1 */
-#else
-    GPIO_BASE = 0x3F200000, /* for raspi2 & 3, 0x20200000 for raspi1 */
-#endif
+    GPIO_BASE = PERIPHERAL_BASE + GPIO_OFFSET,
 
     /* The offsets for reach register. */
 
@@ -22,11 +20,7 @@ enum
     GPPUDCLK0 = (GPIO_BASE + 0x98),
 
     /* The base address for UART. */
-#ifdef MODEL_1
-    UART0_BASE = 0x20201000, /* for raspi2 & 3, 0x20201000 for raspi1 */
-#else
-    UART0_BASE = 0x3F201000, /* for raspi2 & 3, 0x20201000 for raspi1 */
-#endif
+    UART0_BASE = PERIPHERAL_BASE + UART0_OFFSET,
 
     /* The offsets for reach register for the UART. */
     UART0_DR     = (UART0_BASE + 0x00),

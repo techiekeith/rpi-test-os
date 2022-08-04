@@ -2,10 +2,12 @@
  * kernel.c
  */
 
+#include <common/stdbool.h>
 #include <common/stdint.h>
 #include <common/stdio.h>
 #include <common/stdlib.h>
 #include <kernel/atag.h>
+#include <kernel/gpu.h>
 #include <kernel/mem.h>
 #include <kernel/uart.h>
 
@@ -21,18 +23,19 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 
     uart_init();
 
-    if (atags)
-    {
-        puts("Initializing Memory Module\n");
-        mem_init((atag_t *)atags);
-    }
+    puts("Initializing Memory Module\n");
+    mem_init((atag_t *)atags);
+
+    puts("Initializing GPU\n");
+    gpu_init();
 
     puts("Hello, kernel World!\r\n");
+    set_output_channel(OUTPUT_CHANNEL_GPU);
+    puts("Hello, GPU World!\r\n");
+    // set_output_channel(OUTPUT_CHANNEL_UART);
 
-    while (1)
+    while (true)
     {
         gets(buf, 256);
-        puts(buf);
-        putc('\n');
     }
 }
