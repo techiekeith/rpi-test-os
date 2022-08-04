@@ -61,7 +61,7 @@ static uint32_t get_value_buffer_len(property_message_tag_t * tag)
         case FB_SET_BITS_PER_PIXEL:
         case FB_GET_BYTES_PER_ROW:
             return 4;
-        case FB_RELESE_BUFFER:
+        case FB_RELEASE_BUFFER:
         default:
             return 0;
     }
@@ -132,7 +132,7 @@ int send_messages(property_message_tag_t *tags)
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
         len = get_value_buffer_len(&tags[i]);
-        bufpos += 3; //skip over the tag bookkepping info
+        bufpos += 3; //skip over the tag bookkeeping info
         memcpy(&tags[i].value_buffer, msg->tags+bufpos,len);
         bufpos += len/4;
     }

@@ -72,6 +72,16 @@ void memcpy(void *dest, const void *src, int bytes)
     }
 }
 
+void memcpyr(void *dest, const void *src, int bytes)
+{
+    char *d = dest + bytes;
+    const char *s = src + bytes;
+    while (bytes--)
+    {
+        *--d = *--s;
+    }
+}
+
 void bzero(void *dest, int bytes)
 {
     char *d = dest;
@@ -112,21 +122,6 @@ char *itoa(int num, int base)
     if (isneg)
     {
         intbuf[j++] = '-';
-    }
-
-    if (base == 16)
-    {
-        intbuf[j++] = 'x';
-        intbuf[j++] = '0';
-    }
-    else if (base == 8)
-    {
-        intbuf[j++] = '0';
-    }
-    else if (base == 2)
-    {
-        intbuf[j++] = 'b';
-        intbuf[j++] = '0';
     }
 
     intbuf[j] = '\0';

@@ -57,6 +57,7 @@ void gets(char *buf, int buflen)
         buf[i] = c;
     }
 
+    putc('\r');
     putc('\n');
     buf[i] = '\0';
 }
