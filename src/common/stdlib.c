@@ -2,11 +2,70 @@
  * stdlib.c
  */
 
+#include <common/stdint.h>
 #include <common/stdlib.h>
 
-void memcpy(void *dest, void *src, int bytes)
+// raspi model 1 does not have division instruction, so we need to define our own
+inline uint32_t div(uint32_t dividend, uint32_t divisor)
 {
-    char *d = dest, *s = src;
+#ifdef MODEL_1
+    // Use long division, but in binary.  Copied from Stack overflow...
+    uint32_t denom = divisor;
+    uint32_t current = 1;
+    uint32_t answer=0;
+
+    if ( denom > dividend)
+    {
+        return 0;
+    }
+
+    if ( denom == dividend)
+    {
+        return 1;
+    }
+
+    while (denom <= dividend)
+    {
+        denom <<= 1;
+        current <<= 1;
+    }
+
+    denom >>= 1;
+    current >>= 1;
+
+    while (current != 0)
+    {
+        if ( dividend >= denom)
+        {
+            dividend -= denom;
+            answer |= current;
+        }
+        current >>= 1;
+        denom >>= 1;
+    }
+    return answer;
+#else
+    return dividend / divisor;
+#endif
+}
+
+inline divmod_t divmod(uint32_t dividend, uint32_t divisor)
+{
+    divmod_t res;
+#ifdef MODEL_1
+    res.div = div(dividend, divisor);
+    res.mod = dividend - res.div*divisor;
+#else
+    res.div = dividend / divisor;
+    res.mod = dividend % divisor;
+#endif
+    return res;
+}
+
+void memcpy(void *dest, const void *src, int bytes)
+{
+    char *d = dest;
+    const char *s = src;
     while (bytes--)
     {
         *d++ = *s++;
@@ -22,33 +81,52 @@ void bzero(void *dest, int bytes)
     }
 }
 
-char *itoa(int i)
+char *itoa(int num, int base)
 {
-    static char intbuf[12];
-    int j = 0, isneg = 0;
+    static char intbuf[32];
+    uint32_t j = 0, isneg = 0, i;
+    divmod_t divmod_res;
 
-    if (i == 0)
+    if (num == 0)
     {
         intbuf[0] = '0';
         intbuf[1] = '\0';
         return intbuf;
     }
 
-    if (i < 0)
+    if (base == 10 && num < 0)
     {
         isneg = 1;
-        i = -i;
+        num = -num;
     }
+
+    i = (uint32_t) num;
 
     while (i != 0)
     {
-       intbuf[j++] = '0' + (i % 10); 
-       i /= 10;
+       divmod_res = divmod(i,base);
+       intbuf[j++] = (divmod_res.mod) < 10 ? '0' + (divmod_res.mod) : 'a' + (divmod_res.mod) - 10;
+       i = divmod_res.div;
     }
 
     if (isneg)
     {
         intbuf[j++] = '-';
+    }
+
+    if (base == 16)
+    {
+        intbuf[j++] = 'x';
+        intbuf[j++] = '0';
+    }
+    else if (base == 8)
+    {
+        intbuf[j++] = '0';
+    }
+    else if (base == 2)
+    {
+        intbuf[j++] = 'b';
+        intbuf[j++] = '0';
     }
 
     intbuf[j] = '\0';
@@ -64,4 +142,32 @@ char *itoa(int i)
     }
 
     return intbuf;
+}
+
+int atoi(char *num)
+{
+    int res = 0, power = 0, digit, i;
+    char * start = num;
+
+    // Find the end
+    while (*num >= '0' && *num <= '9')
+    {
+        num++;     
+    }
+
+    num--;
+
+    while (num != start)
+    {
+        digit = *num - '0'; 
+        for (i = 0; i < power; i++)
+        {
+            digit *= 10;
+        }
+        res += digit;
+        power++;
+        num--;
+    }
+
+    return res;
 }

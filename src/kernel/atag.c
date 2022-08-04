@@ -8,30 +8,17 @@
 
 uint32_t get_mem_size(atag_t *tag)
 {
-   while (tag->tag != NONE)
-   {
-       if (tag->tag == MEM)
-       {
-           puts("Memory size: ");
-           puts(itoa(tag->mem.size));
-           putc('\n');
-           return tag->mem.size;
-       }
-       else
-       {
-           puts("Tag: ");
-           puts(itoa(tag->tag));
-           putc('\n');
-           char *p = (char *)tag;
-           for (uint32_t i = 0; i < tag->tag_size; i++)
-           {
-               int a = (int) *p;
-               puts(itoa(a));
-               p++;
-           }
-           putc('\n');
-       }
-       tag = (atag_t *)(((uint32_t *)tag) + tag->tag_size);
-   }
-   return 0;
+    if (!tag)
+    {
+        return 1024 * 1024 * 1024; /* 1GB defined in run.bat */
+    }
+    while (tag->tag != NONE)
+    {
+        if (tag->tag == MEM)
+        {
+            return tag->mem.size;
+        }
+        tag = (atag_t *)(((uint32_t *)tag) + tag->tag_size);
+    }
+    return 0;
 }
