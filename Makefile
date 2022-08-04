@@ -1,7 +1,6 @@
-GNU=./gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi
-GNU=arm-none-eabi
-CC=$(GNU)-gcc
-OBJCOPY=$(GNU)-objcopy
+ARCH=arm-none-eabi
+CC=$(ARCH)-gcc
+OBJCOPY=$(ARCH)-objcopy
 
 ifeq ($(RASPI_MODEL),1)
     CPU=arm1176jzf-s
