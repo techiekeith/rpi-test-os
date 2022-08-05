@@ -4,19 +4,28 @@
 
 #pragma once
 
-#include <common/stdint.h>
+#include <common/stddef.h>
 
-typedef struct divmod_result
-{
-    uint32_t div;
-    uint32_t mod;
-} divmod_t;
+typedef struct {
+    int quot;
+    int rem;
+} div_t;
 
-divmod_t divmod(uint32_t dividend, uint32_t divisor);
-uint32_t div(uint32_t dividend, uint32_t divisor);
+int abs(int value);
+div_t div(int numerator, int denominator);
+int quotient(int numerator, int denominator);
+int remainder(int numerator, int denominator);
 
-void memcpy(void *dest, const void *src, int bytes);
-void memcpyr(void *dest, const void *src, int bytes);
-void bzero(void *dest, int bytes);
 char *itoa(int num, int base);
 int atoi(char *num);
+
+void *malloc(size_t size);
+void free(void *ptr);
+
+#ifdef SOFTWARE_DIVISION
+#define DIV(x,y) quotient(x, y)
+#define MOD(x,y) remainder(x, y)
+#else
+#define DIV(x,y) x/y
+#define MOD(x,y) x%y
+#endif

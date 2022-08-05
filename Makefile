@@ -2,7 +2,7 @@ RASPI_MODEL?=2
 
 ifeq ($(RASPI_MODEL),1)
 	CPU=arm1176jzf-s
-	DIRECTIVES=-D MODEL_1
+	DIRECTIVES=-D SOFTWARE_DIVISION -D BCM2835
 	COMPILER_PREFIX=arm-none-eabi-
 	QEMU_SUFFIX=arm
 	MACHINE=raspi1ap
@@ -21,9 +21,9 @@ OBJCOPY=$(COMPILER_PREFIX)objcopy
 
 SRC_DIR=src
 BUILD_DIR=build/$(MACHINE)
-DIST_DIR=dist/$(MACHINE)
+DIST_DIR=dist
 
-SUBDIRS=common kernel kernel/$(MACHINE) saa5050
+SUBDIRS=common kernel saa5050
 
 C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))
@@ -46,8 +46,8 @@ run: build
 
 build: $(SRC_DIR)/linker.ld $(OBJ_FILES)
 	mkdir -p $(DIST_DIR)
-	$(CC) -T $(SRC_DIR)/linker.ld -o $(DIST_DIR)/myos.elf $(LDFLAGS) $(OBJ_FILES)
-	$(OBJCOPY) $(DIST_DIR)/myos.elf -O binary $(DIST_DIR)/myos.bin
+	$(CC) -T $(SRC_DIR)/linker.ld -o $(DIST_DIR)/$(MACHINE).elf $(LDFLAGS) $(OBJ_FILES)
+	$(OBJCOPY) $(DIST_DIR)/$(MACHINE).elf -O binary $(DIST_DIR)/$(MACHINE).bin
 
 clean:
 	rm -rf build dist

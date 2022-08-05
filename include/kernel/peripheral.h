@@ -4,7 +4,7 @@
 
 #pragma once
 
-#ifdef MODEL_1
+#ifdef BCM2835
 #define PERIPHERAL_BASE     0x20000000
 #else
 #define PERIPHERAL_BASE     0x3F000000

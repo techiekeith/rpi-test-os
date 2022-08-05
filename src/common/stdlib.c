@@ -2,100 +2,85 @@
  * stdlib.c
  */
 
-#include <common/stdint.h>
+#include <common/stddef.h>
 #include <common/stdlib.h>
+#include <kernel/mem.h>
 
-// raspi model 1 does not have division instruction, so we need to define our own
-inline uint32_t div(uint32_t dividend, uint32_t divisor)
+#define INT32_SIGN_BIT (int)0x80000000
+#define TOP_COMPARE_BIT 0x40000000
+
+inline int abs(int value)
 {
-#ifdef MODEL_1
-    // Use long division, but in binary.  Copied from Stack overflow...
-    uint32_t denom = divisor;
-    uint32_t current = 1;
-    uint32_t answer=0;
+    return value < 0 ? -value : value;
+}
 
-    if ( denom > dividend)
+inline div_t div(int numerator, int denominator)
+{
+    div_t result;
+#ifdef SOFTWARE_DIVISION
+    result.quot = 0;
+    result.rem = abs(numerator);
+    int compare = abs(denominator);
+    if (compare)
     {
-        return 0;
-    }
-
-    if ( denom == dividend)
-    {
-        return 1;
-    }
-
-    while (denom <= dividend)
-    {
-        denom <<= 1;
-        current <<= 1;
-    }
-
-    denom >>= 1;
-    current >>= 1;
-
-    while (current != 0)
-    {
-        if ( dividend >= denom)
+        int sign = (numerator & INT32_SIGN_BIT) == (denominator & INT32_SIGN_BIT) ? 1 : -1;
+        int bit = 1;
+        while (compare < result.rem && bit != TOP_COMPARE_BIT)
         {
-            dividend -= denom;
-            answer |= current;
+            bit <<= 1;
+            compare <<= 1;
         }
-        current >>= 1;
-        denom >>= 1;
+        while (bit != 0)
+        {
+            if (result.rem >= compare)
+            {
+                result.quot |= bit;
+                result.rem -= compare;
+            }
+            bit >>= 1;
+            compare >>= 1;
+        }
+        if (sign < 0)
+        {
+            result.quot = -result.quot;
+        }
     }
-    return answer;
+    if (numerator < 0)
+    {
+        result.rem = -result.rem;
+    }
 #else
-    return dividend / divisor;
+    result.quot = numerator / denominator;
+    result.rem = numerator % denominator;
+#endif
+    return result;
+}
+
+inline int quotient(int numerator, int denominator)
+{
+#ifdef SOFTWARE_DIVISION
+    div_t result = div(numerator, denominator);
+    return result.quot;
+#else
+    return numerator / denominator;
 #endif
 }
 
-inline divmod_t divmod(uint32_t dividend, uint32_t divisor)
+inline int remainder(int numerator, int denominator)
 {
-    divmod_t res;
-#ifdef MODEL_1
-    res.div = div(dividend, divisor);
-    res.mod = dividend - res.div*divisor;
+#ifdef SOFTWARE_DIVISION
+    div_t result = div(numerator, denominator);
+    return result.rem;
 #else
-    res.div = dividend / divisor;
-    res.mod = dividend % divisor;
+    return numerator % denominator;
 #endif
-    return res;
-}
-
-void memcpy(void *dest, const void *src, int bytes)
-{
-    char *d = dest;
-    const char *s = src;
-    while (bytes--)
-    {
-        *d++ = *s++;
-    }
-}
-
-void memcpyr(void *dest, const void *src, int bytes)
-{
-    char *d = dest + bytes;
-    const char *s = src + bytes;
-    while (bytes--)
-    {
-        *--d = *--s;
-    }
-}
-
-void bzero(void *dest, int bytes)
-{
-    char *d = dest;
-    while (bytes--)
-    {
-        *d++ = 0;
-    }
 }
 
 char *itoa(int num, int base)
 {
     static char intbuf[32];
-    uint32_t j = 0, isneg = 0, i;
-    divmod_t divmod_res;
+    int j = 0, isneg = 0, i;
+    div_t division_result;
 
     if (num == 0)
     {
@@ -110,13 +95,13 @@ char *itoa(int num, int base)
         num = -num;
     }
 
-    i = (uint32_t) num;
+    i = num;
 
     while (i != 0)
     {
-       divmod_res = divmod(i,base);
-       intbuf[j++] = (divmod_res.mod) < 10 ? '0' + (divmod_res.mod) : 'a' + (divmod_res.mod) - 10;
-       i = divmod_res.div;
+       division_result = div(i, base);
+       intbuf[j++] = division_result.rem < 10 ? '0' + division_result.rem : 'a' + division_result.rem - 10;
+       i = division_result.quot;
     }
 
     if (isneg)
@@ -165,4 +150,14 @@ int atoi(char *num)
     }
 
     return res;
+}
+
+void *malloc(size_t bytes)
+{
+    return bytes ? kmalloc(bytes) : NULL;
+}
+
+void free(void *ptr)
+{
+    kfree(ptr);
 }

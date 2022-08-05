@@ -1,9 +1,13 @@
-#include <kernel/mem.h>
-#include <kernel/atag.h>
-#include <common/stdlib.h>
-#include <common/stdint.h>
-#include <common/stddef.h>
+/*
+ * mem.c
+ */
 
+#include <common/stddef.h>
+#include <common/stdint.h>
+#include <common/stdlib.h>
+#include <common/string.h>
+#include <kernel/atag.h>
+#include <kernel/mem.h>
 
 /*
  * Heap Stuff
@@ -57,7 +61,7 @@ void mem_init(atag_t *atags)
     /* Allocate space for all those pages' metadata.  Start this block just after the kernel image is finished */
     page_array_len = sizeof(page_t) * num_pages;
     all_pages_array = (page_t *)&__end;
-    bzero(all_pages_array, page_array_len);
+    memset(all_pages_array, 0, page_array_len);
     INITIALIZE_LIST(free_pages);
 
     /* Iterate over all pages and mark them with the appropriate flags */
@@ -105,7 +109,7 @@ void *alloc_page(void)
     page_mem = (void *)((page - all_pages_array) * PAGE_SIZE);
 
     /* Zero out the page, big security flaw to not do this :) */
-    bzero(page_mem, PAGE_SIZE);
+    memset(page_mem, 0, PAGE_SIZE);
 
     return page_mem;
 }
@@ -125,25 +129,25 @@ void free_page(void *ptr)
 
 static void heap_init(uint32_t heap_start)
 {
-   heap_segment_list_head = (heap_segment_t *) heap_start;
-   bzero(heap_segment_list_head, sizeof(heap_segment_t));
-   heap_segment_list_head->segment_size = KERNEL_HEAP_SIZE;
+    heap_segment_list_head = (heap_segment_t *) heap_start;
+    memset(heap_segment_list_head, 0, sizeof(heap_segment_t));
+    heap_segment_list_head->segment_size = KERNEL_HEAP_SIZE;
 }
 
 
-void *kmalloc(uint32_t bytes)
+void *kmalloc(size_t bytes)
 {
     heap_segment_t *curr, *best = NULL;
     int diff, best_diff = 0x7fffffff; /* Max signed int */
 
     /* Add the header to the number of bytes we need and make the size 4 byte aligned */
-    bytes += sizeof(heap_segment_t);
-    bytes += bytes % 16 ? 16 - (bytes % 16) : 0;
+    size_t total_bytes = bytes + sizeof(heap_segment_t);
+    total_bytes += total_bytes % 16 ? 16 - (total_bytes % 16) : 0;
 
     /* Find the allocation that is closest in size to this request */
     for (curr = heap_segment_list_head; curr != NULL; curr = curr->next)
     {
-        diff = curr->segment_size - bytes;
+        diff = curr->segment_size - total_bytes;
         if (!curr->is_allocated && diff < best_diff && diff >= 0)
         {
             best = curr;
@@ -164,13 +168,13 @@ void *kmalloc(uint32_t bytes)
      */
     if (best_diff > (int)(2 * sizeof(heap_segment_t)))
     {
-        bzero(((char *)(best)) + bytes, sizeof(heap_segment_t));
+        memset(((char *)(best)) + total_bytes, 0, sizeof(heap_segment_t));
         curr = best->next;
-        best->next = (heap_segment_t *)(((char *)(best)) + bytes);
+        best->next = (heap_segment_t *)(((char *)(best)) + total_bytes);
         best->next->next = curr;
         best->next->prev = best;
-        best->next->segment_size = best->segment_size - bytes;
-        best->segment_size = bytes;
+        best->next->segment_size = best->segment_size - total_bytes;
+        best->segment_size = total_bytes;
     }
 
     best->is_allocated = 1;
@@ -191,18 +195,18 @@ void kfree(void *ptr)
     seg->is_allocated = 0;
 
     /* try to coalesce segements to the left */
-    while(seg->prev != NULL && !seg->prev->is_allocated)
+    while (seg->prev != NULL && !seg->prev->is_allocated)
     {
         seg->prev->next = seg->next;
-        seg->next->prev = seg->prev;
         seg->prev->segment_size += seg->segment_size;
+        seg->next->prev = seg->prev;
         seg = seg->prev;
     }
     /* try to coalesce segments to the right */
-    while(seg->next != NULL && !seg->next->is_allocated)
+    while (seg->next != NULL && !seg->next->is_allocated)
     {
         seg->next->next->prev = seg;
-        seg->next = seg->next->next;
         seg->segment_size += seg->next->segment_size;
+        seg->next = seg->next->next;
     }
 }

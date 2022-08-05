@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <common/stdint.h>
 #include <saa5050/saa5050_glyphs.h>
 
 static uint8_t saa5050_source_glyphs[SOURCE_GLYPHS][SOURCE_GLYPH_ROWS] = {
