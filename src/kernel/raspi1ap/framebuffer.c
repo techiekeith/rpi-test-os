@@ -1,7 +1,15 @@
+/*
+ * framebuffer.c
+ */
+
+#include <common/stdio.h>
+#include <kernel/delay.h>
 #include <kernel/framebuffer.h>
 #include <kernel/gpu.h>
 #include <kernel/mem.h>
 #include <kernel/mailbox.h>
+
+framebuffer_info_t fbinfo;
 
 typedef struct
 {
@@ -13,7 +21,7 @@ typedef struct
 	uint32_t depth;
 	uint32_t ignorex;
 	uint32_t ignorey;
-	void * pointer;;
+	void * pointer;
 	uint32_t size;
 } fb_init_t;
 
@@ -27,17 +35,20 @@ int framebuffer_init(void)
 	fbinit.height = 480;
 	fbinit.vwidth = fbinit.width;
 	fbinit.vheight = fbinit.height;
+	fbinit.bytes = 0;
 	fbinit.depth = COLORDEPTH;
+	fbinit.ignorex = 0;
+	fbinit.ignorey = 0;
+	fbinit.pointer = 0;
+	fbinit.size = 0;
 
-	msg.data = ((uint32_t)&fbinit + 0x40000000) >> 4;
+	uint32_t data = ((uint32_t)&fbinit | 0x40000000) >> 4;
+	msg.data = data;
+	msg.channel = FRAMEBUFFER_CHANNEL;
 
 	mailbox_send(msg, FRAMEBUFFER_CHANNEL);
+	delay(150);
 	msg = mailbox_read(FRAMEBUFFER_CHANNEL);
-
-	if (!msg.data)
-    {
-		return -1;
-    }
 
 	fbinfo.width = fbinit.width;
 	fbinfo.height = fbinit.height;
@@ -46,7 +57,7 @@ int framebuffer_init(void)
     fbinfo.chars_x = 0;
     fbinfo.chars_y = 0;
 	fbinfo.pitch = fbinit.bytes;
-	fbinfo.buf = fbinit.pointer;
+	fbinfo.buf = (void *)((uint32_t)fbinit.pointer & 0x3fffffff);
 	fbinfo.buf_size = fbinit.size;
 
 	return 0;

@@ -1,22 +1,29 @@
-ARCH=arm-none-eabi
-CC=$(ARCH)-gcc
-OBJCOPY=$(ARCH)-objcopy
+RASPI_MODEL?=2
 
 ifeq ($(RASPI_MODEL),1)
-    CPU=arm1176jzf-s
-    DIRECTIVES=-D MODEL_1
-    ARCHDIR=model1
+	CPU=arm1176jzf-s
+	DIRECTIVES=-D MODEL_1
+	COMPILER_PREFIX=arm-none-eabi-
+	QEMU_SUFFIX=arm
+	MACHINE=raspi1ap
+	MEMORY=512M
 else
-    CPU=cortex-a7
+	CPU=cortex-a7
 	DIRECTIVES=
-    ARCHDIR=model2
+	COMPILER_PREFIX=arm-none-eabi-
+	QEMU_SUFFIX=arm
+	MACHINE=raspi2b
+	MEMORY=1G
 endif
 
-SRC_DIR=src
-BUILD_DIR=build
-DIST_DIR=dist
+CC=$(COMPILER_PREFIX)gcc
+OBJCOPY=$(COMPILER_PREFIX)objcopy
 
-SUBDIRS=common kernel kernel/$(ARCHDIR) saa5050
+SRC_DIR=src
+BUILD_DIR=build/$(MACHINE)
+DIST_DIR=dist/$(MACHINE)
+
+SUBDIRS=common kernel kernel/$(MACHINE) saa5050
 
 C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))
@@ -34,7 +41,7 @@ all: build
 assembly: $(C_ASM_FILES)
 
 run: build
-	# qemu-system-arm -m 256 -M raspi2 -serial stdio -kernel myos.elf
+	# qemu-system-$(QEMU_SUFFIX) -M $(MACHINE) -m $(MEMORY) -serial stdio -kernel dist/myos.elf
 	@echo Run 'run.bat' in a Windows shell.
 
 build: $(SRC_DIR)/linker.ld $(OBJ_FILES)

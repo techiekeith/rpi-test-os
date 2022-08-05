@@ -32,7 +32,6 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
     puts("Hello, kernel World!\r\n");
     set_output_channel(OUTPUT_CHANNEL_GPU);
     puts("Hello, GPU World!\r\n");
-    // set_output_channel(OUTPUT_CHANNEL_UART);
 
     while (true)
     {
