@@ -1,10 +1,13 @@
+/*
+ * gpu.c
+ */
+
 #include <common/stdlib.h>
 #include <kernel/framebuffer.h>
 #include <kernel/gpu.h>
 #include <kernel/mem.h>
 #include <kernel/mailbox.h>
 #include <kernel/uart.h>
-
 
 static const pixel_t WHITE = {0xff, 0xff, 0xff};
 static const pixel_t BLACK = {0x00, 0x00, 0x00};
@@ -55,6 +58,11 @@ void move_cursor_forwards()
     }
 }
 
+void clear_framebuffer()
+{
+    bzero((uint8_t *)fbinfo.buf, fbinfo.buf_size);
+}
+
 void gpu_putc(char c)
 {
     int32_t num_rows = fbinfo.height / GLYPH_HEIGHT;
@@ -78,7 +86,7 @@ void gpu_putc(char c)
             fbinfo.chars_y--;
             break;
         case 12:
-            bzero((uint8_t *)fbinfo.buf, fbinfo.buf_size);
+            clear_framebuffer();
             fbinfo.chars_x = 0;
             fbinfo.chars_y = 0;
             break;
@@ -122,16 +130,6 @@ void gpu_putc(char c)
 void gpu_init(void)
 {
     generate_saa5050_glyphs();
-
-    // Aparantly, this sometimes does not work, so try in a loop
-    while(framebuffer_init());
-
-    // clear screen
-    for (uint32_t j = 0; j < fbinfo.height; j++)
-    {
-        for (uint32_t i = 0; i < fbinfo.width; i++)
-        {
-            write_pixel(i, j, &BLACK);
-        }
-    }
+    framebuffer_init();
+    clear_framebuffer();
 }

@@ -1,8 +1,13 @@
+/*
+ * mailbox.c
+ */
+
 #include <common/stdio.h>
 #include <common/stdlib.h>
 #include <kernel/delay.h>
 #include <kernel/mailbox.h>
 #include <kernel/mem.h>
+#include <kernel/mmio.h>
 
 mail_message_t mailbox_read(int channel)
 {
@@ -15,13 +20,11 @@ mail_message_t mailbox_read(int channel)
         // Make sure there is mail to recieve
         do
         {
-            printf("%p: Reading status\n", &stat);
-            stat = *MAIL0_STATUS;
+            stat.as_int = mmio_read(MAIL0_STATUS);
         } while (stat.empty);
 
         // Get the message
-        printf("%p: Reading message\n", &res);
-        res = *MAIL0_READ;
+        res.as_int = mmio_read(MAIL0_READ);
     } while (res.channel != channel);
 
     return res;
@@ -35,13 +38,15 @@ void mailbox_send(mail_message_t msg, int channel)
     // Make sure you can send mail
     do
     {
-        printf("%p: Reading status\n", &stat);
-        stat = *MAIL0_STATUS;
+        stat.as_int = mmio_read(MAIL0_STATUS);
+        if (stat.full)
+        {
+            mmio_read(MAIL0_READ);
+        }
     } while (stat.full);
 
     // send the message
-    printf("%p: Writing message\n", &msg);
-    *MAIL0_WRITE = msg;
+    mmio_write(MAIL0_WRITE, msg.as_int);
 }
 
 /**
@@ -132,8 +137,8 @@ int send_messages(property_message_tag_t *tags)
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
         len = get_value_buffer_len(&tags[i]);
-        bufpos += 3; //skip over the tag bookkeeping info
-        memcpy(&tags[i].value_buffer, msg->tags+bufpos,len);
+        bufpos += 3; // skip over the tag bookkeeping info
+        memcpy(&tags[i].value_buffer, msg->tags+bufpos, len);
         bufpos += len/4;
     }
 
