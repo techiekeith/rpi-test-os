@@ -58,27 +58,73 @@ void vprintf(const char *fmt, va_list args)
     {
         if (*fmt == '%')
         {
-            switch (*(++fmt))
+            char modifier = *(++fmt);
+            if (!modifier) return;
+            int align = 0;
+            int pad = 0;
+            int width = 0;
+            int unsign = 0;
+            int length = 0;
+            int radix = 2;
+            if (modifier == '-')
             {
-                case '%':
-                    putc('%');
-                    break;
-                case 'd':
-                    puts(itoa(va_arg(args, int), 10));
-                    break;
-                case 'x':
-                    puts(itoa(va_arg(args, int), 16));
-                    break;
+                align = 1;
+                modifier = *(++fmt);
+                if (!modifier) return;
+            }
+            if (modifier == '0')
+            {
+                pad = 1;
+                modifier = *(++fmt);
+                if (!modifier) return;
+            }
+            while (modifier >= '0' && modifier <= '9')
+            {
+                width *= 10;
+                width += modifier - '0';
+                modifier = *(++fmt);
+                if (!modifier) return;
+            }
+            if (modifier == 'u')
+            {
+                unsign = 1;
+                modifier = *(++fmt);
+                if (!modifier) return;
+            }
+            if (modifier == 'l')
+            {
+                length = 1;
+                modifier = *(++fmt);
+                if (!modifier) return;
+            }
+            switch (modifier)
+            {
                 case 'p':
                     putc('0');
                     putc('x');
-                    puts(itoa(va_arg(args, int), 16));
+                case 'x':
+                    radix += 6;
+                case 'd':
+                    radix += 2;
+                case 'o':
+                    radix += 6;
+                case 'b':
+                    puts(
+                            length ? (
+                                    unsign ? ultoa(va_arg(args, unsigned long long), radix)
+                                    : ltoa(va_arg(args, long long), radix))
+                            : (
+                                    unsign ? uitoa(va_arg(args, unsigned int), radix)
+                                    : itoa(va_arg(args, int), radix)));
                     break;
                 case 's':
                     puts(va_arg(args, char *));
                     break;
                 case 'c':
                     putc(va_arg(args, char));
+                    break;
+                case '%':
+                    putc('%');
                     break;
             }
         } else putc(*fmt);

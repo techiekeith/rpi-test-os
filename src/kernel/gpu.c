@@ -100,12 +100,12 @@ void gpu_putc(char c)
     {
         case 2:
             background_color++;
-            background_color = remainder(background_color, PALETTE_COLORS);
+            background_color %= PALETTE_COLORS;
             debug_printf("bgcolor %d\n", background_color);
             break;
         case 6:
             foreground_color++;
-            foreground_color = remainder(foreground_color, PALETTE_COLORS);
+            foreground_color %= PALETTE_COLORS;
             debug_printf("fgcolor %d\n", foreground_color);
             break;
         case 8:
@@ -155,18 +155,16 @@ void gpu_putc(char c)
 
 void init_palette(void)
 {
-    int red, green, blue;
+    int red, green, blue, green_v, blue_v;
     for (int i = 0; i < PALETTE_COLORS; i++)
     {
         if (i < 240)
         {
-            div_t red_div = div(i, 40);
-            div_t green_div = div(red_div.rem, 5);
-            div_t blue_div = div(green_div.rem * 255, 4);
-            green_div = div(green_div.quot * 255, 7);
-            red = red_div.quot * 51;
-            green = green_div.quot + (green_div.rem >> 2);
-            blue = blue_div.quot + (blue_div.rem >> 1);
+            red = (i / 40) * 51;
+            green_v = ((i % 40) / 5) * 255;
+            blue_v = (i % 5) * 255;
+            green = (green_v / 7) + ((green_v % 7) >> 2);
+            blue = (blue_v / 4) + ((blue_v % 4) >> 1);
         }
         else
         {
@@ -189,10 +187,9 @@ void show_palette(void)
 {
     const int max_columns = 16;
     int count = 0;
-    div_t rows_div = div(PALETTE_COLORS, max_columns);
-    int max_rows = rows_div.quot + (rows_div.rem != 0);
-    int w = quotient(DISPLAY_WIDTH, max_columns);
-    int h = quotient(DISPLAY_HEIGHT, max_rows);
+    int max_rows = PALETTE_COLORS / max_columns + (PALETTE_COLORS % max_columns != 0);
+    int w = DISPLAY_WIDTH / max_columns;
+    int h = DISPLAY_HEIGHT / max_rows;
     for (int row = 0; row < max_rows; row++)
     {
         for (int column = 0; column < max_columns; column++)

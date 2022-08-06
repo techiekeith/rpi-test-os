@@ -9,6 +9,8 @@
 #include <kernel/mem.h>
 #include <kernel/uart.h>
 
+void test_all();
+
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
 #endif
@@ -20,6 +22,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
     (void) r1;
 
     uart_init();
+
+    test_all();
 
     puts("Initializing Memory Module\n");
     mem_init((atag_t *)atags);

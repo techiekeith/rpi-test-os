@@ -3,125 +3,81 @@
  */
 
 #include <common/stddef.h>
+#include <common/stdio.h>
 #include <common/stdlib.h>
 #include <kernel/mem.h>
 
-#define INT32_SIGN_BIT (int)0x80000000
-#define TOP_COMPARE_BIT 0x40000000
+/* maximum size for 64-bit binary plus sign and terminating NUL. */
+#define BUFFER_SIZE 66
+static char ntoa_buffer[BUFFER_SIZE];
 
-inline int abs(int value)
+void iprinthex(unsigned int number)
 {
-    return value < 0 ? -value : value;
+    printhex((unsigned long long) number);
 }
 
-inline div_t div(int numerator, int denominator)
+void printhex(unsigned long long number)
 {
-    div_t result;
-#ifdef SOFTWARE_DIVISION
-    result.quot = 0;
-    result.rem = abs(numerator);
-    int compare = abs(denominator);
-    if (compare)
-    {
-        int sign = (numerator & INT32_SIGN_BIT) == (denominator & INT32_SIGN_BIT) ? 1 : -1;
-        int bit = 1;
-        while (compare < result.rem && bit != TOP_COMPARE_BIT)
-        {
-            bit <<= 1;
-            compare <<= 1;
-        }
-        while (bit != 0)
-        {
-            if (result.rem >= compare)
-            {
-                result.quot |= bit;
-                result.rem -= compare;
-            }
-            bit >>= 1;
-            compare >>= 1;
-        }
-        if (sign < 0)
-        {
-            result.quot = -result.quot;
-        }
-    }
-    if (numerator < 0)
-    {
-        result.rem = -result.rem;
-    }
-#else
-    result.quot = numerator / denominator;
-    result.rem = numerator % denominator;
-#endif
-    return result;
+    unsigned long long digit = number & 15;
+    unsigned long long next = (number >> 4ULL) & 0xfffffffffffffffLL;
+    if (next) printhex(next);
+    putc(digit + (digit < 10 ? 48 : 87));
 }
 
-inline int quotient(int numerator, int denominator)
+static char *ntoa(unsigned long long number, unsigned long long radix, int sign, char *buffer)
 {
-#ifdef SOFTWARE_DIVISION
-    div_t result = div(numerator, denominator);
-    return result.quot;
-#else
-    return numerator / denominator;
-#endif
+    if (radix < 2 || radix > 36) return NULL;
+    if (buffer == NULL)
+    {
+        buffer = ntoa_buffer;
+    }
+
+    int p = 0, digit;
+    while (p == 0 || (number && p < BUFFER_SIZE))
+    {
+        digit = (int)(number % radix);
+        number /= radix;
+        buffer[p++] = digit + (digit < 10 ? 48 : 87);
+    }
+    if (sign)
+    {
+        buffer[p++] = '-';
+    }
+    buffer[p--] = '\0';
+
+    int q = 0;
+    while (p > q)
+    {
+        digit = buffer[p];
+        buffer[p--] = buffer[q];
+        buffer[q++] = digit;
+    }
+
+    return buffer;
 }
 
-inline int remainder(int numerator, int denominator)
+char *ultoa(unsigned long long number, int radix)
 {
-#ifdef SOFTWARE_DIVISION
-    div_t result = div(numerator, denominator);
-    return result.rem;
-#else
-    return numerator % denominator;
-#endif
+    return ntoa(number, radix, 0, NULL);
 }
 
-char *itoa(int num, int base)
+char *ltoa(long long number, int radix)
 {
-    static char intbuf[32];
-    int j = 0, isneg = 0, i;
-    div_t division_result;
+    unsigned long long cast = number;
+    int sign = cast >> 63ULL;
+    return ntoa(sign ? -cast : cast, radix, sign, NULL);
+}
 
-    if (num == 0)
-    {
-        intbuf[0] = '0';
-        intbuf[1] = '\0';
-        return intbuf;
-    }
+char *uitoa(unsigned int number, int radix)
+{
+    return ntoa((unsigned long long) number, radix, 0, NULL);
+}
 
-    if (base == 10 && num < 0)
-    {
-        isneg = 1;
-        num = -num;
-    }
-
-    i = num;
-
-    while (i != 0)
-    {
-       division_result = div(i, base);
-       intbuf[j++] = division_result.rem < 10 ? '0' + division_result.rem : 'a' + division_result.rem - 10;
-       i = division_result.quot;
-    }
-
-    if (isneg)
-    {
-        intbuf[j++] = '-';
-    }
-
-    intbuf[j] = '\0';
-    j--;
-    i = 0;
-    while (i < j)
-    {
-        isneg = intbuf[i];
-        intbuf[i] = intbuf[j];
-        intbuf[j] = isneg;
-        i++;
-        j--;
-    }
-
-    return intbuf;
+char *itoa(int number, int radix)
+{
+    unsigned long long cast = number;
+    int sign = cast >> 63ULL;
+    return ntoa(sign ? -cast : cast, radix, sign, NULL);
 }
 
 int atoi(char *num)

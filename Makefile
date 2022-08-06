@@ -2,11 +2,12 @@ RASPI_MODEL?=2
 
 ifeq ($(RASPI_MODEL),1)
 	CPU=arm1176jzf-s
-	DIRECTIVES=-D SOFTWARE_DIVISION -D BCM2835
+	DIRECTIVES=-D BCM2835
 	COMPILER_PREFIX=arm-none-eabi-
 	QEMU_SUFFIX=arm
 	MACHINE=raspi1ap
 	MEMORY=512M
+	SOFTWARE_MATH_LIB=software_math/32bit software_math/64bit
 else
 	CPU=cortex-a7
 	DIRECTIVES=
@@ -14,6 +15,7 @@ else
 	QEMU_SUFFIX=arm
 	MACHINE=raspi2b
 	MEMORY=1G
+	SOFTWARE_MATH_LIB=software_math/64bit
 endif
 
 CC=$(COMPILER_PREFIX)gcc
@@ -23,7 +25,7 @@ SRC_DIR=src
 BUILD_DIR=build/$(MACHINE)
 DIST_DIR=dist
 
-SUBDIRS=common kernel saa5050
+SUBDIRS=common kernel saa5050 $(SOFTWARE_MATH_LIB)
 
 C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))
