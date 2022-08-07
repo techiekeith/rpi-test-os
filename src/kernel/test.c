@@ -23,6 +23,25 @@ static long long lb_values[LVALUES_MAX] = { 7, -4, 9, -6, 0, 0,
                                             0x7fffffffLL, 0x80000000LL,
                                             1, 1, 1, 1, 1 };
 
+void printhex(unsigned long long number)
+{
+    unsigned long long digit = number & 15;
+    unsigned long long next = (number >> 4ULL) & 0xfffffffffffffffLL;
+    if (next) printhex(next);
+    putc(digit + (digit < 10 ? 48 : 87));
+}
+
+void divide64_eabi(unsigned long long numerator,
+                   unsigned long long denominator,
+                   unsigned long long *quotient,
+                   unsigned long long *remainder)
+{
+    unsigned long long quot = numerator / denominator;
+    *quotient = quot;
+    unsigned long long rem = numerator % denominator;
+    *remainder = rem;
+}
+
 void divide64(unsigned long long numerator,
               unsigned long long denominator,
               unsigned long long *quotient,
@@ -158,8 +177,6 @@ static void test_idivmod()
 void print_ldivmod_results(long long a, long long b, long long c, long long d)
 {
     printf("test_ldivmod: %ld / %ld = %ld r%ld\n", a, b, c, d);
-    printf("test_ldivmod: %lx / %lx = %lx r%lx\n", a, b, c, d);
-    printf("test_ldivmod: %lb / %lb = %lb r%lb\n", a, b, c, d);
 }
 
 static void test_ldivmod()
@@ -180,26 +197,26 @@ void test_all()
     long long values[18] = { 0, 1, 0x12345678, 0x89abcdef, 0x7fffffffLL, 0x80000000LL,
                              0xfffffffeLL, 0xffffffffLL, 0x100000000LL, 0x17fffffffLL,
                              0x180000000LL, 0x1fffffffeLL, 0x1ffffffffLL, 0x200000000LL, 0x7fffffffffffffffLL,
-                             0x8000000000000000LL, 0xfffffffffffffffeLL, 0xffffffffffffffffLL};
+                             0x8000000000000000LL, 0xfffffffffffffffeLL, 0xffffffffffffffffLL };
     for (int i = 0; i < 18; i++) {
         puts("u32: ");
         unsigned int value = values[i];
         printhex((unsigned long long)value);
         puts("\tu64: ");
         printhex(values[i]);
-        puts("\tdiv10(C): ");
         divide64(values[i], 10LL, &quot, &rem);
+        puts("\tdiv10 (C) : ");
         printhex(quot);
         putc(':');
         printhex(rem);
-        puts("\tdiv10(asm): ");
-        printhex(values[i] / 10LL);
+        divide64_eabi(values[i], 10LL, &quot, &rem);
+        puts("\tdiv10(ARM): ");
+        printhex(quot);
         putc(':');
-        printhex(values[i] % 10LL);
+        printhex(rem);
         putc('\n');
     }
-//    test_idiv();
-//    test_idivmod();
-//    test_ldivmod();
-    while (1);
+    test_idiv();
+    test_idivmod();
+    test_ldivmod();
 }

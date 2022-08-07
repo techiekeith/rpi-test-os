@@ -11,19 +11,6 @@
 #define BUFFER_SIZE 66
 static char ntoa_buffer[BUFFER_SIZE];
 
-void iprinthex(unsigned int number)
-{
-    printhex((unsigned long long) number);
-}
-
-void printhex(unsigned long long number)
-{
-    unsigned long long digit = number & 15;
-    unsigned long long next = (number >> 4ULL) & 0xfffffffffffffffLL;
-    if (next) printhex(next);
-    putc(digit + (digit < 10 ? 48 : 87));
-}
-
 static char *ntoa(unsigned long long number, unsigned long long radix, int sign, char *buffer)
 {
     if (radix < 2 || radix > 36) return NULL;
