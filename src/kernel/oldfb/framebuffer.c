@@ -3,11 +3,9 @@
  */
 
 #include <common/stdio.h>
-#include <kernel/delay.h>
 #include <kernel/framebuffer.h>
-#include <kernel/gpu.h>
-#include <kernel/mem.h>
 #include <kernel/mailbox.h>
+#include <saa5050/saa5050_glyphs.h>
 
 framebuffer_info_t fbinfo;
 
@@ -31,8 +29,8 @@ int framebuffer_init(void)
 {
 	mail_message_t msg;
 
-	fbinit.width = 640;
-	fbinit.height = 480;
+	fbinit.width = DISPLAY_WIDTH;
+	fbinit.height = DISPLAY_HEIGHT;
 	fbinit.vwidth = fbinit.width;
 	fbinit.vheight = fbinit.height;
 	fbinit.bytes = 0;
@@ -47,10 +45,11 @@ int framebuffer_init(void)
 	msg.channel = FRAMEBUFFER_CHANNEL;
 
 	mailbox_send(msg, FRAMEBUFFER_CHANNEL);
-	delay(150);
 	msg = mailbox_read(FRAMEBUFFER_CHANNEL);
 
-	fbinfo.width = fbinit.width;
+    debug_printf("Init framebuffer returned %p\n", msg);
+
+    fbinfo.width = fbinit.width;
 	fbinfo.height = fbinit.height;
 	fbinfo.chars_width = fbinfo.width / GLYPH_WIDTH; 
     fbinfo.chars_height = fbinfo.height / GLYPH_HEIGHT;
@@ -59,6 +58,8 @@ int framebuffer_init(void)
 	fbinfo.pitch = fbinit.bytes;
 	fbinfo.buf = (void *)((uint32_t)fbinit.pointer & 0x3fffffff);
 	fbinfo.buf_size = fbinit.size;
+
+    debug_printf("Framebuffer allocated, location %p, size %d\n", fbinfo.buf, fbinfo.buf_size);
 
 	return 0;
 }

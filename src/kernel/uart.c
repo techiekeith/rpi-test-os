@@ -4,6 +4,7 @@
 
 #include <common/stddef.h>
 #include <common/stdlib.h>
+#include <common/string.h>
 #include <kernel/delay.h>
 #include <kernel/gpio.h>
 #include <kernel/mmio.h>
@@ -14,7 +15,7 @@ void uart_init()
     uart_control_t control;
 
     /* Disable UART0. */
-    bzero(&control, 4);
+    memset(&control, 0, 4);
     mmio_write(UART0_CR, 0x00000000);
     /* Setup the GPIO pin 14 && 15. */
 

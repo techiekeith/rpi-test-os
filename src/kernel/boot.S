@@ -18,7 +18,7 @@
  */
 _start:
     /* shut down all cores except core 0 */
-#ifndef MODEL_1
+#ifndef BCM2835
     mrc     p15, #0, r1, c0, c0, #5
     and     r1, r1, #3          /* only interested in b0-1 of r1 */
     cmp     r1, #0              /* is this core 0? */

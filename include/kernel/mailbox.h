@@ -68,14 +68,15 @@ typedef enum
 {
     NULL_TAG = 0,
     FB_ALLOCATE_BUFFER = 0x00040001,
-    FB_RELEASE_BUFFER = 0x00048001,
     FB_GET_PHYSICAL_DIMENSIONS = 0x00040003,
-    FB_SET_PHYSICAL_DIMENSIONS = 0x00048003,
     FB_GET_VIRTUAL_DIMENSIONS = 0x00040004,
-    FB_SET_VIRTUAL_DIMENSIONS = 0x00048004,
     FB_GET_BITS_PER_PIXEL = 0x00040005,
+    FB_GET_BYTES_PER_ROW = 0x00040008,
+    FB_RELEASE_BUFFER = 0x00048001,
+    FB_SET_PHYSICAL_DIMENSIONS = 0x00048003,
+    FB_SET_VIRTUAL_DIMENSIONS = 0x00048004,
     FB_SET_BITS_PER_PIXEL = 0x00048005,
-    FB_GET_BYTES_PER_ROW = 0x00040008
+    FB_SET_PALETTE = 0x0004800b
 } property_tag_t;
 
 /**
@@ -94,6 +95,12 @@ typedef struct
     uint32_t height;
 } fb_screen_size_t;
 
+typedef struct
+{
+    uint32_t start_index;
+    uint32_t num_entries;
+    uint32_t entry[256];
+} fb_palette_t;
 
 /*
  * The value buffer can be any one of these types
@@ -103,6 +110,7 @@ typedef union
     uint32_t fb_allocate_align;
     fb_allocate_res_t fb_allocate_res;
     fb_screen_size_t fb_screen_size;
+    fb_palette_t fb_palette;
     uint32_t fb_bits_per_pixel;
     uint32_t fb_bytes_per_row;
 } value_buffer_t;

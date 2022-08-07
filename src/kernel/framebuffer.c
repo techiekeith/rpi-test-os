@@ -4,9 +4,8 @@
 
 #include <common/stdio.h>
 #include <kernel/framebuffer.h>
-#include <kernel/gpu.h>
-#include <kernel/mem.h>
 #include <kernel/mailbox.h>
+#include <saa5050/saa5050_glyphs.h>
 
 framebuffer_info_t fbinfo;
 
@@ -17,20 +16,27 @@ int framebuffer_init(void)
     property_message_tag_t tags[5];
 
     tags[0].proptag = FB_SET_PHYSICAL_DIMENSIONS;
-    tags[0].value_buffer.fb_screen_size.width = 640;
-    tags[0].value_buffer.fb_screen_size.height = 480;
+    tags[0].value_buffer.fb_screen_size.width = DISPLAY_WIDTH;
+    tags[0].value_buffer.fb_screen_size.height = DISPLAY_HEIGHT;
     tags[1].proptag = FB_SET_VIRTUAL_DIMENSIONS;
-    tags[1].value_buffer.fb_screen_size.width = 640;
-    tags[1].value_buffer.fb_screen_size.height = 480;
+    tags[1].value_buffer.fb_screen_size.width = DISPLAY_WIDTH;
+    tags[1].value_buffer.fb_screen_size.height = DISPLAY_HEIGHT;
     tags[2].proptag = FB_SET_BITS_PER_PIXEL;
     tags[2].value_buffer.fb_bits_per_pixel = COLORDEPTH;
-    tags[3].proptag = NULL_TAG;
-
+    tags[3].proptag = FB_SET_PALETTE;
+    tags[3].value_buffer.fb_palette.start_index = 0;
+    tags[3].value_buffer.fb_palette.num_entries = PALETTE_COLORS;
+    for (int palette_entry = 0; palette_entry < PALETTE_COLORS; palette_entry++)
+    {
+        tags[3].value_buffer.fb_palette.entry[palette_entry] = palette[palette_entry];
+    }
+    tags[4].proptag = NULL_TAG;
 
     // Send over the initialization
     rv = send_messages(tags);
     if (rv != 0)
     {
+        debug_printf("Set framebuffer properties failed, return code %d\n", rv);
         return -1;
     }
 
@@ -52,11 +58,14 @@ int framebuffer_init(void)
     rv = send_messages(tags);
     if (rv != 0)
     {
+        debug_printf("Allocate framebuffer failed, return code %d\n", rv);
         return -1;
     }
 
     fbinfo.buf = tags[0].value_buffer.fb_allocate_res.fb_addr;
     fbinfo.buf_size = tags[0].value_buffer.fb_allocate_res.fb_size;
+
+    debug_printf("Framebuffer allocated, location %p, size %d\n", fbinfo.buf, fbinfo.buf_size);
 
     return 0;
 }

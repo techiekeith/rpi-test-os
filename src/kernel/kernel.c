@@ -2,14 +2,14 @@
  * kernel.c
  */
 
-#include <common/stdbool.h>
 #include <common/stdint.h>
 #include <common/stdio.h>
-#include <common/stdlib.h>
 #include <kernel/atag.h>
 #include <kernel/gpu.h>
 #include <kernel/mem.h>
 #include <kernel/uart.h>
+
+void test_all();
 
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -23,6 +23,8 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 
     uart_init();
 
+    test_all();
+
     puts("Initializing Memory Module\n");
     mem_init((atag_t *)atags);
 
@@ -33,7 +35,7 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
     set_output_channel(OUTPUT_CHANNEL_GPU);
     puts("Hello, GPU World!\r\n");
 
-    while (true)
+    while (1)
     {
         gets(buf, 256);
     }

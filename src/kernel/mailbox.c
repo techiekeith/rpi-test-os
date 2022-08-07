@@ -4,6 +4,7 @@
 
 #include <common/stdio.h>
 #include <common/stdlib.h>
+#include <common/string.h>
 #include <kernel/delay.h>
 #include <kernel/mailbox.h>
 #include <kernel/mem.h>
@@ -56,7 +57,9 @@ static uint32_t get_value_buffer_len(property_message_tag_t * tag)
 {
     switch(tag->proptag)
     {
-        case FB_ALLOCATE_BUFFER: 
+        case FB_SET_PALETTE:
+            return 8 + 4 * tag->value_buffer.fb_palette.num_entries;
+        case FB_ALLOCATE_BUFFER:
         case FB_GET_PHYSICAL_DIMENSIONS:
         case FB_SET_PHYSICAL_DIMENSIONS:
         case FB_GET_VIRTUAL_DIMENSIONS:
@@ -76,7 +79,8 @@ int send_messages(property_message_tag_t *tags)
 {
     property_message_buffer_t *msg;
     mail_message_t mail;
-    uint32_t bufsize = 0, i, len, bufpos;
+    uint32_t i, len, bufpos;
+    size_t bufsize = 0;
    
     // Calculate the sizes of each tag
     for (i = 0; tags[i].proptag != NULL_TAG; i++)

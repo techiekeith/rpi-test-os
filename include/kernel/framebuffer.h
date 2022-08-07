@@ -6,8 +6,14 @@
 
 #include <common/stdint.h>
 
-#define COLORDEPTH 24
+#define DISPLAY_WIDTH 640
+#define DISPLAY_HEIGHT 384
+#define COLORDEPTH 8
 #define BYTES_PER_PIXEL COLORDEPTH/8
+#define PALETTE_COLORS 256
+#define DEFAULT_BACKGROUND_COLOR 0
+#define DEFAULT_FOREGROUND_COLOR 239
+extern uint32_t palette[PALETTE_COLORS + 1];
 
 typedef struct framebuffer_info
 {

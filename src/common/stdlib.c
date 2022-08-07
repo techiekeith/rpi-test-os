@@ -2,141 +2,69 @@
  * stdlib.c
  */
 
-#include <common/stdint.h>
+#include <common/stddef.h>
+#include <common/stdio.h>
 #include <common/stdlib.h>
+#include <kernel/mem.h>
 
-// raspi model 1 does not have division instruction, so we need to define our own
-inline uint32_t div(uint32_t dividend, uint32_t divisor)
+/* maximum size for 64-bit binary plus sign and terminating NUL. */
+#define BUFFER_SIZE 66
+static char ntoa_buffer[BUFFER_SIZE];
+
+static char *ntoa(unsigned long long number, unsigned long long radix, int sign, char *buffer)
 {
-#ifdef MODEL_1
-    // Use long division, but in binary.  Copied from Stack overflow...
-    uint32_t denom = divisor;
-    uint32_t current = 1;
-    uint32_t answer=0;
-
-    if ( denom > dividend)
+    if (radix < 2 || radix > 36) return NULL;
+    if (buffer == NULL)
     {
-        return 0;
+        buffer = ntoa_buffer;
     }
 
-    if ( denom == dividend)
+    int p = 0, digit;
+    while (p == 0 || (number && p < BUFFER_SIZE))
     {
-        return 1;
+        digit = (int)(number % radix);
+        number /= radix;
+        buffer[p++] = digit + (digit < 10 ? 48 : 87);
+    }
+    if (sign)
+    {
+        buffer[p++] = '-';
+    }
+    buffer[p--] = '\0';
+
+    int q = 0;
+    while (p > q)
+    {
+        digit = buffer[p];
+        buffer[p--] = buffer[q];
+        buffer[q++] = digit;
     }
 
-    while (denom <= dividend)
-    {
-        denom <<= 1;
-        current <<= 1;
-    }
-
-    denom >>= 1;
-    current >>= 1;
-
-    while (current != 0)
-    {
-        if ( dividend >= denom)
-        {
-            dividend -= denom;
-            answer |= current;
-        }
-        current >>= 1;
-        denom >>= 1;
-    }
-    return answer;
-#else
-    return dividend / divisor;
-#endif
+    return buffer;
 }
 
-inline divmod_t divmod(uint32_t dividend, uint32_t divisor)
+char *ultoa(unsigned long long number, int radix)
 {
-    divmod_t res;
-#ifdef MODEL_1
-    res.div = div(dividend, divisor);
-    res.mod = dividend - res.div*divisor;
-#else
-    res.div = dividend / divisor;
-    res.mod = dividend % divisor;
-#endif
-    return res;
+    return ntoa(number, radix, 0, NULL);
 }
 
-void memcpy(void *dest, const void *src, int bytes)
+char *ltoa(long long number, int radix)
 {
-    char *d = dest;
-    const char *s = src;
-    while (bytes--)
-    {
-        *d++ = *s++;
-    }
+    unsigned long long cast = number;
+    int sign = cast >> 63ULL;
+    return ntoa(sign ? -cast : cast, radix, sign, NULL);
 }
 
-void memcpyr(void *dest, const void *src, int bytes)
+char *uitoa(unsigned int number, int radix)
 {
-    char *d = dest + bytes;
-    const char *s = src + bytes;
-    while (bytes--)
-    {
-        *--d = *--s;
-    }
+    return ntoa((unsigned long long) number, radix, 0, NULL);
 }
 
-void bzero(void *dest, int bytes)
+char *itoa(int number, int radix)
 {
-    char *d = dest;
-    while (bytes--)
-    {
-        *d++ = 0;
-    }
-}
-
-char *itoa(int num, int base)
-{
-    static char intbuf[32];
-    uint32_t j = 0, isneg = 0, i;
-    divmod_t divmod_res;
-
-    if (num == 0)
-    {
-        intbuf[0] = '0';
-        intbuf[1] = '\0';
-        return intbuf;
-    }
-
-    if (base == 10 && num < 0)
-    {
-        isneg = 1;
-        num = -num;
-    }
-
-    i = (uint32_t) num;
-
-    while (i != 0)
-    {
-       divmod_res = divmod(i,base);
-       intbuf[j++] = (divmod_res.mod) < 10 ? '0' + (divmod_res.mod) : 'a' + (divmod_res.mod) - 10;
-       i = divmod_res.div;
-    }
-
-    if (isneg)
-    {
-        intbuf[j++] = '-';
-    }
-
-    intbuf[j] = '\0';
-    j--;
-    i = 0;
-    while (i < j)
-    {
-        isneg = intbuf[i];
-        intbuf[i] = intbuf[j];
-        intbuf[j] = isneg;
-        i++;
-        j--;
-    }
-
-    return intbuf;
+    unsigned long long cast = number;
+    int sign = cast >> 63ULL;
+    return ntoa(sign ? -cast : cast, radix, sign, NULL);
 }
 
 int atoi(char *num)
@@ -165,4 +93,14 @@ int atoi(char *num)
     }
 
     return res;
+}
+
+void *malloc(size_t bytes)
+{
+    return bytes ? kmalloc(bytes) : NULL;
+}
+
+void free(void *ptr)
+{
+    kfree(ptr);
 }

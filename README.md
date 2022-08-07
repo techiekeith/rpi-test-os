@@ -6,12 +6,16 @@ At the moment it's pretty much just this - https://github.com/jsandler18/raspi-k
 
 SAA505x glyphs are courtesy of Mullard.
 
-## Building
+## Prerequisites
 
-https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/downloads
+* [Arm GNU Toolchain (bare-metal)](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/downloads)
+* [QEMU](https://www.qemu.org/)
 
-use `tar -Jxvf <filename>` to extract tarballs compressed with XZ.
+Linux/WSL2:
+```
+sudo apt-get install gdb binutils-arm-none-eabi qemu qemu-system-arm
+```
 
-## Running
+## Resources
 
-https://www.qemu.org/
+* https://github.com/jsandler18/raspi-kernel
