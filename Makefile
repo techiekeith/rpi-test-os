@@ -31,25 +31,30 @@ C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(sub
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))
 OBJ_FILES=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
 OBJ_FILES+=$(ASM_FILES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%_s.o)
-
 C_ASM_FILES=$(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.S)
 
 FLAGS=$(DIRECTIVES) -mcpu=$(CPU) -fpic -ffreestanding -Iinclude
 CFLAGS=$(FLAGS) -std=gnu99 -O2 -Wall -Wextra
 LDFLAGS=-ffreestanding -O2 -nostdlib
 
-all: build
+all: raspi1ap raspi2b
+
+raspi1ap:
+	RASPI_MODEL=1 make build
+
+raspi2b:
+	RASPI_MODEL=2 make build
 
 assembly: $(C_ASM_FILES)
 
-run: build
-	# qemu-system-$(QEMU_SUFFIX) -M $(MACHINE) -m $(MEMORY) -serial stdio -kernel dist/myos.elf
-	@echo Run 'run.bat' in a Windows shell.
+build: $(DIST_DIR)/$(MACHINE).bin
 
-build: $(SRC_DIR)/linker.ld $(OBJ_FILES)
+$(DIST_DIR)/$(MACHINE).bin: $(DIST_DIR)/$(MACHINE).elf
+	$(OBJCOPY) $(DIST_DIR)/$(MACHINE).elf -O binary $(DIST_DIR)/$(MACHINE).bin
+
+$(DIST_DIR)/$(MACHINE).elf: $(SRC_DIR)/linker.ld $(OBJ_FILES)
 	mkdir -p $(DIST_DIR)
 	$(CC) -T $(SRC_DIR)/linker.ld -o $(DIST_DIR)/$(MACHINE).elf $(LDFLAGS) $(OBJ_FILES)
-	$(OBJCOPY) $(DIST_DIR)/$(MACHINE).elf -O binary $(DIST_DIR)/$(MACHINE).bin
 
 clean:
 	rm -rf build dist
