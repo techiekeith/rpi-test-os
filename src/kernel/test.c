@@ -143,7 +143,8 @@ long long lget_b()
 
 void print_idiv_results(int a, int b, int c)
 {
-    printf("test_idiv: %d / %d = %d\n", a, b, c);
+    printf("test_idiv: %d / %d = %d (%s)\n", a, b, c,
+            (b * c + a % b == a) ? "PASS" : "FAIL");
 }
 
 void test_idiv()
@@ -159,7 +160,8 @@ void test_idiv()
 
 void print_idivmod_results(int a, int b, int c, int d)
 {
-    printf("test_idivmod: %d / %d = %d r%d\n", a, b, c, d);
+    printf("test_idivmod: %d / %d = %d r%d (%s)\n", a, b, c, d,
+           (b * c + d == a) ? "PASS" : "FAIL");
 }
 
 static void test_idivmod()
@@ -176,7 +178,8 @@ static void test_idivmod()
 
 void print_ldivmod_results(long long a, long long b, long long c, long long d)
 {
-    printf("test_ldivmod: %ld / %ld = %ld r%ld\n", a, b, c, d);
+    printf("test_ldivmod: %ld / %ld = %ld r%ld (%s)\n", a, b, c, d,
+           (b * c + d == a) ? "PASS" : "FAIL");
 }
 
 static void test_ldivmod()
