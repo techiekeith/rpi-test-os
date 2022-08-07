@@ -9,7 +9,7 @@
 #include <kernel/io.h>
 #include <kernel/uart.h>
 
-char getc(void)
+char getc()
 {
     return uart_getc();
 }

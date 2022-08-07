@@ -31,3 +31,29 @@ void memset(void *dest, int value, size_t bytes)
         *d++ = value;
     }
 }
+
+int strcmp(const char *s1, const char *s2)
+{
+    char *p1 = (char *)s1;
+    char *p2 = (char *)s2;
+    while ((*p1 | *p2) && (*p1 == *p2))
+    {
+        p1++;
+        p2++;
+    }
+    return *p1 - *p2;
+}
+
+int strncmp(const char *s1, const char *s2, size_t n)
+{
+    char *p1 = (char *)s1;
+    char *p2 = (char *)s2;
+    int i = n;
+    while (i > 0 && (*p1 | *p2) && (*p1 == *p2))
+    {
+        i--;
+        p1++;
+        p2++;
+    }
+    return *p1 - *p2;
+}

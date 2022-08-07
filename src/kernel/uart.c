@@ -59,7 +59,7 @@ void uart_init()
     mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
 }
 
-uart_flags_t read_flags(void)
+uart_flags_t read_flags()
 {
     uart_flags_t flags;
     flags.as_int = mmio_read(UART0_FR);

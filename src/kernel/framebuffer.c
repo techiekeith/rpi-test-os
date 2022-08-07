@@ -9,7 +9,7 @@
 
 framebuffer_info_t fbinfo;
 
-int framebuffer_init(void)
+int framebuffer_init()
 {
     int rv;
 

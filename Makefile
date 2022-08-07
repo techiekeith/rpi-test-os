@@ -25,7 +25,7 @@ SRC_DIR=src
 BUILD_DIR=build/$(MACHINE)
 DIST_DIR=dist
 
-SUBDIRS=common kernel saa5050 $(SOFTWARE_MATH_LIB)
+SUBDIRS=common kernel saa5050 shell test $(SOFTWARE_MATH_LIB)
 
 C_FILES=$(wildcard $(SRC_DIR)/*.c $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.c))
 ASM_FILES=$(wildcard $(SRC_DIR)/*.S $(foreach subdir, $(SUBDIRS), $(SRC_DIR)/$(subdir)/*.S))

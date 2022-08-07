@@ -194,7 +194,7 @@ static void test_ldivmod()
     }
 }
 
-void test_all()
+void test_math()
 {
     unsigned long long quot, rem;
     long long values[18] = { 0, 1, 0x12345678, 0x89abcdef, 0x7fffffffLL, 0x80000000LL,

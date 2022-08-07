@@ -28,9 +28,9 @@ typedef struct page
 } page_t;
 
 
-void mem_init(atag_t *atags);
+uint64_t mem_init(atag_t *atags);
 
-void *alloc_page(void);
+void *alloc_page();
 void free_page(void *ptr);
 
 void *kmalloc(size_t bytes);
