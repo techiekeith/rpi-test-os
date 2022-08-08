@@ -5,7 +5,7 @@
 #include <common/stdint.h>
 #include <common/stdio.h>
 #include <common/string.h>
-#include <kernel/gpu.h>
+#include <kernel/graphics.h>
 
 void run_tests();
 
@@ -28,18 +28,56 @@ void cmd_clear()
     cursor_home();
 }
 
-void cmd_halt()
+void cmd_charset()
 {
-    set_output_channel(OUTPUT_CHANNEL_UART);
-    puts("System halted.\n");
-
-    __asm("\ncmd_halt_loop:\n\twfe\n\tb cmd_halt_loop");
+    puts("\r\nBasic Latin:");
+    for (int i = 0x20; i < 0x7f; i++) {
+        if (i % 32 == 0) puts("\r\n");
+        putc(i);
+    }
+    puts("\r\n\r\nLatin-1 Supplement:");
+    for (int i = 0xa0; i <= 0xff; i++) {
+        if (i % 32 == 0) puts("\r\n");
+        putc(i);
+    }
+    puts("\r\n\r\nCyrillic:");
+    for (int i = 0x410; i <= 0x44f; i++) {
+        if (i % 32 == 16) puts("\r\n");
+        putc(i);
+    }
+    puts("\r\n\r\nHebrew:\r\n");
+    for (int i = 0x5d0; i <= 0x5ea; i++) {
+        putc(i);
+    }
+    puts("\r\n\r\nGeneral Punctuation:\r\n");
+    for (int i = 0x2010; i <= 0x2027; i++) {
+        putc(i);
+    }
+    puts("\r\n\r\nArrows:\r\n");
+    for (int i = 0x2190; i <= 0x2193; i++) {
+        putc(i);
+    }
+    puts("\r\n\r\nGeometric Shapes:\r\n");
+    for (int i = 0x25a0; i <= 0x25a1; i++) {
+        putc(i);
+    }
+    puts("\r\n\r\nPUA U+F500..7F (SAA505x box graphics):");
+    for (int i = 0xf500; i <= 0xf57f; i++) {
+        if (i % 32 == 0) puts("\r\n");
+        putc(i);
+    }
+    puts("\r\n\r\nPUA U+F580..8B (deprecated SAA505x characters):\r\n");
+    for (int i = 0xf580; i <= 0xf58b; i++) {
+        putc(i);
+    }
+    puts("\r\n");
 }
 
 void cmd_help()
 {
     puts("Commands:\r\n");
     puts("\tclear - clear the screen\r\n");
+    puts("\tcharset - show character set\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
     puts("\tpalette - show colour palette\r\n");
@@ -52,11 +90,6 @@ void cmd_palette()
 {
     show_palette();
     cursor_home();
-}
-
-void cmd_reset()
-{
-    set_output_channel(OUTPUT_CHANNEL_GPU);
 }
 
 void cmd_test()
@@ -99,7 +132,7 @@ int getline(char *buf, int buflen)
     return i;
 }
 
-void shell(uint64_t mem_size)
+int shell(uint64_t mem_size)
 {
     cmd_clear();
     printf("\r\nRaspberry Pi %ldK\r\n\r\n", mem_size >> 10);
@@ -116,9 +149,9 @@ void shell(uint64_t mem_size)
         {
             cmd_clear();
         }
-        else if (!strcmp(command_buffer, "halt"))
+        else if (!strcmp(command_buffer, "charset"))
         {
-            cmd_halt();
+            cmd_charset();
         }
         else if (!strcmp(command_buffer, "help"))
         {
@@ -128,17 +161,14 @@ void shell(uint64_t mem_size)
         {
             cmd_palette();
         }
-        else if (!strcmp(command_buffer, "reset"))
-        {
-            cmd_reset();
-        }
         else if (!strcmp(command_buffer, "test"))
         {
             cmd_test();
         }
-        else
+        else if (strcmp(command_buffer, "") && strcmp(command_buffer, "halt") && strcmp(command_buffer, "reset"))
         {
             puts("Bad command\r\n");
         }
     }
+    return strcmp(command_buffer, "reset");
 }

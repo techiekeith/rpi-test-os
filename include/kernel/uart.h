@@ -48,6 +48,6 @@ typedef union uart_control
 
 void uart_init();
 uart_flags_t read_flags(void);
-void uart_putc(unsigned char c);
+void uart_putc(int c);
 unsigned char uart_getc();
 void uart_puts(const char* str);

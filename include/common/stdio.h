@@ -6,14 +6,8 @@
 
 #include <common/stdarg.h>
 
-#define OUTPUT_CHANNEL_UART     0
-#define OUTPUT_CHANNEL_GPU      1
-
-void set_input_channel(int channel);
-void set_output_channel(int channel);
-
 char getc();
-void putc(char c);
+void putc(int c);
 
 void puts(const char *s);
 

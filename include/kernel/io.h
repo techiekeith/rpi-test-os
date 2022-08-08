@@ -5,7 +5,7 @@
 #pragma once
 
 #define OUTPUT_CHANNEL_UART     0
-#define OUTPUT_CHANNEL_GPU      1
+#define OUTPUT_CHANNEL_GRAPHICS 1
 
 int get_input_channel();
 int get_output_channel();
