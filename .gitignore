@@ -6,6 +6,7 @@
 *.ko
 *.obj
 *.elf
+!boot/*.elf
 
 # Linker output
 *.ilk
