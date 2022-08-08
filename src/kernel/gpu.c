@@ -14,7 +14,7 @@
 
 int background_color = DEFAULT_BACKGROUND_COLOR;
 int foreground_color = DEFAULT_FOREGROUND_COLOR;
-uint32_t palette[PALETTE_COLORS + 1];
+uint32_t palette[PALETTE_COLORS];
 uint32_t colors[PALETTE_COLORS];
 
 void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
@@ -76,6 +76,12 @@ void clear_framebuffer()
     }
 }
 
+void cursor_home()
+{
+    fbinfo.chars_x = 0;
+    fbinfo.chars_y = 0;
+}
+
 void scroll_down()
 {
     uint32_t row_size = fbinfo.pitch * GLYPH_HEIGHT;
@@ -126,8 +132,7 @@ void gpu_putc(char c)
             break;
         case 12:
             clear_framebuffer();
-            fbinfo.chars_x = 0;
-            fbinfo.chars_y = 0;
+            cursor_home();
             break;
         case 13:
             fbinfo.chars_x = 0;
@@ -153,7 +158,7 @@ void gpu_putc(char c)
     }
 }
 
-void init_palette(void)
+void init_palette()
 {
     int red, green, blue, green_v, blue_v;
     for (int i = 0; i < PALETTE_COLORS; i++)
@@ -183,15 +188,23 @@ void init_palette(void)
     }
 }
 
-void show_palette(void)
+void show_palette()
 {
-    const int max_columns = 16;
     int count = 0;
+    int h, w;
+    int max_columns = 20;
     int max_rows = PALETTE_COLORS / max_columns + (PALETTE_COLORS % max_columns != 0);
-    int w = DISPLAY_WIDTH / max_columns;
-    int h = DISPLAY_HEIGHT / max_rows;
+    int normal_row_height = DISPLAY_HEIGHT / max_rows;
+    h = normal_row_height;
+    w = DISPLAY_WIDTH / max_columns;
     for (int row = 0; row < max_rows; row++)
     {
+        if (PALETTE_COLORS - count < max_columns)
+        {
+            max_columns = PALETTE_COLORS - count;
+            w = DISPLAY_WIDTH / max_columns;
+            h = DISPLAY_HEIGHT - row * normal_row_height;
+        }
         for (int column = 0; column < max_columns; column++)
         {
             if (count < PALETTE_COLORS)
@@ -200,7 +213,7 @@ void show_palette(void)
                 {
                     for (int x = 0; x < w; x++)
                     {
-                        write_pixel(x + column * w, y + row * h, colors[count]);
+                        write_pixel(x + column * w, y + row * normal_row_height, colors[count]);
                     }
                 }
                 count++;
@@ -209,7 +222,7 @@ void show_palette(void)
     }
 }
 
-void gpu_init(void)
+void gpu_init()
 {
     generate_saa5050_glyphs();
     init_palette();

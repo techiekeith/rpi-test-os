@@ -44,4 +44,4 @@ typedef struct atag
     };
 } atag_t;
 
-uint32_t get_mem_size(atag_t * atags);
+uint64_t get_mem_size(atag_t * atags);

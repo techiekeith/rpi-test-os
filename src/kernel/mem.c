@@ -50,13 +50,14 @@ page_list_t free_pages;
  * Use best fit algorithm to find an allocation
  */
 
-void mem_init(atag_t *atags)
+uint64_t mem_init(atag_t *atags)
 {
-    uint32_t mem_size, page_array_len, kernel_pages, page_array_end, i;
+    uint64_t mem_size;
+    uint32_t page_array_len, kernel_pages, page_array_end, i;
 
     /* Get the total number of pages */
     mem_size = get_mem_size(atags);
-    num_pages = mem_size / PAGE_SIZE;
+    num_pages = (uint32_t)(mem_size / PAGE_SIZE);
 
     /* Allocate space for all those pages' metadata.  Start this block just after the kernel image is finished */
     page_array_len = sizeof(page_t) * num_pages;
@@ -90,9 +91,11 @@ void mem_init(atag_t *atags)
     /* Initialize the heap */
     page_array_end = (uint32_t)&__end + page_array_len;
     heap_init(page_array_end);
+
+    return mem_size;
 }
 
-void *alloc_page(void)
+void *alloc_page()
 {
     page_t *page;
     void *page_mem;

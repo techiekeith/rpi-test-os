@@ -47,7 +47,7 @@ _start:
     cmp     r4, r9              /* have we reached the end yet? */
     blo     1b                  /* branch back to 1 */
 
-    ldr     r3, =kernel_main
+    ldr     r3, =main
     blx     r3                  /* start the kernel */
 
 halt:

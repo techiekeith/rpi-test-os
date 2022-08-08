@@ -13,7 +13,7 @@
 #define PALETTE_COLORS 256
 #define DEFAULT_BACKGROUND_COLOR 0
 #define DEFAULT_FOREGROUND_COLOR 239
-extern uint32_t palette[PALETTE_COLORS + 1];
+extern uint32_t palette[PALETTE_COLORS];
 
 typedef struct framebuffer_info
 {
@@ -30,4 +30,4 @@ typedef struct framebuffer_info
 
 extern framebuffer_info_t fbinfo;
 
-int framebuffer_init(void);
+int framebuffer_init();

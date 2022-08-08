@@ -12,7 +12,7 @@
 void set_input_channel(int channel);
 void set_output_channel(int channel);
 
-char getc(void);
+char getc();
 void putc(char c);
 
 void puts(const char *s);

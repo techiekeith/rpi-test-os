@@ -5,19 +5,22 @@
 #include <common/stdint.h>
 #include <kernel/atag.h>
 
-uint32_t get_mem_size(atag_t *tag)
+uint64_t get_mem_size(atag_t *tag)
 {
-    if (!tag)
+    if (tag)
     {
-        return 1024 * 1024 * 1024; /* 1GB defined in run.bat */
-    }
-    while (tag->tag != NONE)
-    {
-        if (tag->tag == MEM)
+        while (tag->tag != NONE)
         {
-            return tag->mem.size;
+            if (tag->tag == MEM)
+            {
+                return (uint64_t)(tag->mem.size);
+            }
+            tag = (atag_t *)(((uint32_t *)tag) + tag->tag_size);
         }
-        tag = (atag_t *)(((uint32_t *)tag) + tag->tag_size);
     }
-    return 0;
+#if (MACHINE == raspi1ap)
+    return 0x20000000ULL; /* 512MB defined in run.bat */
+#else
+    return 0x40000000ULL; /* 1GB defined in run.bat */
+#endif
 }
