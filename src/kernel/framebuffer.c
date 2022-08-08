@@ -5,7 +5,7 @@
 #include <common/stdio.h>
 #include <kernel/framebuffer.h>
 #include <kernel/mailbox.h>
-#include <saa5050/saa5050_glyphs.h>
+#include <saa505x/glyphs.h>
 
 framebuffer_info_t fbinfo;
 

@@ -1,16 +1,16 @@
 /*
- * gpu.c
+ * graphics.c
  */
 
 #include <common/stdio.h>
 #include <common/stdlib.h>
 #include <common/string.h>
 #include <kernel/framebuffer.h>
-#include <kernel/gpu.h>
+#include <kernel/graphics.h>
 #include <kernel/mailbox.h>
 #include <kernel/mem.h>
 #include <kernel/uart.h>
-#include <saa5050/saa5050_glyphs.h>
+#include <saa505x/glyphs.h>
 
 int background_color = DEFAULT_BACKGROUND_COLOR;
 int foreground_color = DEFAULT_FOREGROUND_COLOR;
@@ -23,14 +23,14 @@ void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
     memcpy(location, &color, BYTES_PER_PIXEL);
 }
 
-void write_char_at_cursor(char c)
+void write_char_at_cursor(int c)
 {
     if (fbinfo.chars_x < 0 || fbinfo.chars_x >= fbinfo.chars_width ||
         fbinfo.chars_y < 0 || fbinfo.chars_y >= fbinfo.chars_height)
     {
         return;
     }
-    const uint16_t *bitmap = get_saa5050_glyph(c, 0);
+    const uint16_t *bitmap = get_saa505x_glyph(c);
     uint8_t w, h;
     uint16_t mask;
     for (w = 0; w < GLYPH_WIDTH; w++)
@@ -98,7 +98,7 @@ void scroll_up()
     memset((uint8_t *)fbinfo.buf + all_but_one_rows, 0, row_size);
 }
 
-void gpu_putc(char c)
+void graphics_putc(int c)
 {
     int32_t num_rows = fbinfo.height / GLYPH_HEIGHT;
 
@@ -138,7 +138,7 @@ void gpu_putc(char c)
             fbinfo.chars_x = 0;
             break;
         default:
-            if (c >= 32 && c < 127)
+            if ((c >= 32 && c < 127) || (c >= 160))
             {
                 write_char_at_cursor(c);
                 move_cursor_forwards();
@@ -222,9 +222,9 @@ void show_palette()
     }
 }
 
-void gpu_init()
+void graphics_init()
 {
-    generate_saa5050_glyphs();
+    generate_saa505x_glyphs();
     init_palette();
     framebuffer_init();
     clear_framebuffer();

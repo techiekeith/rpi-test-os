@@ -6,8 +6,8 @@
 
 #include <common/stdint.h>
 
-#define DISPLAY_WIDTH 640
-#define DISPLAY_HEIGHT 384
+#define DISPLAY_WIDTH 1360
+#define DISPLAY_HEIGHT 768
 #define COLORDEPTH 8
 #define BYTES_PER_PIXEL COLORDEPTH/8
 #define PALETTE_COLORS 256

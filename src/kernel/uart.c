@@ -66,7 +66,7 @@ uart_flags_t read_flags()
     return flags;
 }
 
-void uart_putc(unsigned char c)
+void uart_putc(int c)
 {
     uart_flags_t flags;
     /* Wait for UART to become ready to transmit. */
@@ -74,7 +74,35 @@ void uart_putc(unsigned char c)
         flags = read_flags();
     }
     while (flags.transmit_queue_full);
-    mmio_write(UART0_DR, c);
+
+    // XXX TODO: Abstract this
+    if (c >= 0x11000)
+    {
+        uart_putc(0xfffd);
+        return;
+    }
+    else if (c >= 0x10000)
+    {
+        mmio_write(UART0_DR, 0xf0 | (c >> 18));
+        mmio_write(UART0_DR, 0x80 | ((c >> 12) & 0x3f));
+        mmio_write(UART0_DR, 0x80 | ((c >> 6) & 0x3f));
+        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
+    }
+    else if (c >= 0x800)
+    {
+        mmio_write(UART0_DR, 0xe0 | (c >> 12));
+        mmio_write(UART0_DR, 0x80 | ((c >> 6) & 0x3f));
+        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
+    }
+    else if (c >= 0x80)
+    {
+        mmio_write(UART0_DR, 0xc0 | (c >> 6));
+        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
+    }
+    else
+    {
+        mmio_write(UART0_DR, c);
+    }
 }
 
 unsigned char uart_getc()

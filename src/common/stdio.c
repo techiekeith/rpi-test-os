@@ -5,7 +5,7 @@
 #include <common/stdarg.h>
 #include <common/stdio.h>
 #include <common/stdlib.h>
-#include <kernel/gpu.h>
+#include <kernel/graphics.h>
 #include <kernel/io.h>
 #include <kernel/uart.h>
 
@@ -14,16 +14,16 @@ char getc()
     return uart_getc();
 }
 
-void putc(char c)
+void putc(int c)
 {
     int channel = get_output_channel();
     if (channel == OUTPUT_CHANNEL_UART)
     {
         uart_putc(c);
     }
-    else if (channel == OUTPUT_CHANNEL_GPU)
+    else if (channel == OUTPUT_CHANNEL_GRAPHICS)
     {
-        gpu_putc(c);
+        graphics_putc(c);
     }
 }
 
