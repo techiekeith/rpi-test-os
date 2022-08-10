@@ -10,7 +10,7 @@
 #include <kernel/list.h>
 
 #define PAGE_SIZE 4096
-#define KERNEL_HEAP_SIZE (1024*1024*32)
+#define KERNEL_HEAP_SIZE 1048576
 
 typedef struct
 {

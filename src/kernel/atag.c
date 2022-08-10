@@ -18,9 +18,9 @@ uint64_t get_mem_size(atag_t *tag)
             tag = (atag_t *)(((uint32_t *)tag) + tag->tag_size);
         }
     }
-#if (MACHINE == raspi1ap)
-    return 0x20000000ULL; /* 512MB defined in run.bat */
+#ifdef BCM2835
+    return 0x20000000ULL; /* 512MB defined in run configuration */
 #else
-    return 0x40000000ULL; /* 1GB defined in run.bat */
+    return 0x40000000ULL; /* 1GB defined in run configuration */
 #endif
 }

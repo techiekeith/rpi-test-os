@@ -62,7 +62,7 @@ uint64_t mem_init(atag_t *atags)
     /* Allocate space for all those pages' metadata.  Start this block just after the kernel image is finished */
     page_array_len = sizeof(page_t) * num_pages;
     all_pages_array = (page_t *)&__end;
-    memset(all_pages_array, 0, page_array_len);
+    memset(all_pages_array, 0, (size_t) page_array_len);
     INITIALIZE_LIST(free_pages);
 
     /* Iterate over all pages and mark them with the appropriate flags */

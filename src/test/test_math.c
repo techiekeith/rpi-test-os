@@ -2,6 +2,7 @@
  * test.c
  */
 
+#include <common/stdint.h>
 #include <common/stdio.h>
 
 #define VALUES_MAX 10
@@ -23,15 +24,17 @@ static long long lb_values[LVALUES_MAX] = { 7, -4, 9, -6, 0, 0,
                                             0x7fffffffLL, 0x80000000LL,
                                             1, 1, 1, 1, 1 };
 
-void printhex(unsigned long long number)
+static void printhex(unsigned long long number, int digits)
 {
-    unsigned long long digit = number & 15;
-    unsigned long long next = (number >> 4ULL) & 0xfffffffffffffffLL;
-    if (next) printhex(next);
-    putc(digit + (digit < 10 ? 48 : 87));
+    debug_printf("Number: %lx, digits: %d\n", number, digits);
+    for (int i = digits - 1; i >= 0; i--)
+    {
+        int digit = (number >> (4LL * i)) & 15;
+        putc(digit + (digit < 10 ? 48 : 87));
+    }
 }
 
-void divide64_eabi(unsigned long long numerator,
+static void divide64_eabi(unsigned long long numerator,
                    unsigned long long denominator,
                    unsigned long long *quotient,
                    unsigned long long *remainder)
@@ -42,7 +45,7 @@ void divide64_eabi(unsigned long long numerator,
     *remainder = rem;
 }
 
-void divide64(unsigned long long numerator,
+static void divide64(unsigned long long numerator,
               unsigned long long denominator,
               unsigned long long *quotient,
               unsigned long long *remainder)
@@ -58,7 +61,7 @@ void divide64(unsigned long long numerator,
 
     if (!(cmp_l | cmp_h))
     {
-        puts("Divide by zero\n");
+        puts("Divide by zero\r\n");
         return;
     }
 
@@ -116,38 +119,37 @@ void divide64(unsigned long long numerator,
     *remainder = rem;
 }
 
-
-int get_a()
+static int get_a()
 {
     if (a_count == VALUES_MAX) a_count = 0;
     return a_values[a_count++];
 }
 
-int get_b()
+static int get_b()
 {
     if (b_count == VALUES_MAX) b_count = 0;
     return b_values[b_count++];
 }
 
-long long lget_a()
+static long long lget_a()
 {
     if (la_count == LVALUES_MAX) la_count = 0;
     return (long long) la_values[la_count++];
 }
 
-long long lget_b()
+static long long lget_b()
 {
     if (lb_count == LVALUES_MAX) lb_count = 0;
     return (long long) lb_values[lb_count++];
 }
 
-void print_idiv_results(int a, int b, int c)
+static void print_idiv_results(int a, int b, int c)
 {
-    printf("test_idiv: %d / %d = %d (%s)\n", a, b, c,
+    printf("test_idiv: %d / %d = %d (%s)\r\n", a, b, c,
             (b * c + a % b == a) ? "PASS" : "FAIL");
 }
 
-void test_idiv()
+static void test_idiv()
 {
     signed int a, b, c;
     for (int i = 0; i < VALUES_MAX; i++)
@@ -158,9 +160,9 @@ void test_idiv()
     }
 }
 
-void print_idivmod_results(int a, int b, int c, int d)
+static void print_idivmod_results(int a, int b, int c, int d)
 {
-    printf("test_idivmod: %d / %d = %d r%d (%s)\n", a, b, c, d,
+    printf("test_idivmod: %d / %d = %d r%d (%s)\r\n", a, b, c, d,
            (b * c + d == a) ? "PASS" : "FAIL");
 }
 
@@ -176,9 +178,9 @@ static void test_idivmod()
     }
 }
 
-void print_ldivmod_results(long long a, long long b, long long c, long long d)
+static void print_ldivmod_results(long long a, long long b, long long c, long long d)
 {
-    printf("test_ldivmod: %ld / %ld = %ld r%ld (%s)\n", a, b, c, d,
+    printf("test_ldivmod: %ld / %ld = %ld r%ld (%s)\r\n", a, b, c, d,
            (b * c + d == a) ? "PASS" : "FAIL");
 }
 
@@ -194,32 +196,49 @@ static void test_ldivmod()
     }
 }
 
-void test_math()
+static long long div10_test_cases[18] = { 0, 1, 0x12345678, 0x89abcdef, 0x7fffffffLL, 0x80000000LL,
+                                          0xfffffffeLL, 0xffffffffLL, 0x100000000LL, 0x17fffffffLL,
+                                          0x180000000LL, 0x1fffffffeLL, 0x1ffffffffLL, 0x200000000LL,
+                                          0x7fffffffffffffffLL, 0x8000000000000000LL,
+                                          0xfffffffffffffffeLL, 0xffffffffffffffffLL };
+
+static void test_divide_by_ten()
 {
     unsigned long long quot, rem;
-    long long values[18] = { 0, 1, 0x12345678, 0x89abcdef, 0x7fffffffLL, 0x80000000LL,
-                             0xfffffffeLL, 0xffffffffLL, 0x100000000LL, 0x17fffffffLL,
-                             0x180000000LL, 0x1fffffffeLL, 0x1ffffffffLL, 0x200000000LL, 0x7fffffffffffffffLL,
-                             0x8000000000000000LL, 0xfffffffffffffffeLL, 0xffffffffffffffffLL };
+    debug_printf("In test_div10()\n");
     for (int i = 0; i < 18; i++) {
+        debug_printf("i: %d test_case: 0x%016lx\n", i, div10_test_cases[i]);
         puts("u32: ");
-        unsigned int value = values[i];
-        printhex((unsigned long long)value);
+        unsigned int test_case = div10_test_cases[i];
+        printhex((unsigned long long)test_case, 8);
         puts("\tu64: ");
-        printhex(values[i]);
-        divide64(values[i], 10LL, &quot, &rem);
+        printhex(div10_test_cases[i], 16);
+        divide64(div10_test_cases[i], 10LL, &quot, &rem);
         puts("\tdiv10 (C) : ");
-        printhex(quot);
+        printhex(quot, 16);
         putc(':');
-        printhex(rem);
-        divide64_eabi(values[i], 10LL, &quot, &rem);
+        printhex(rem, 16);
+        divide64_eabi(div10_test_cases[i], 10LL, &quot, &rem);
         puts("\tdiv10(ARM): ");
-        printhex(quot);
+        printhex(quot, 16);
         putc(':');
-        printhex(rem);
+        printhex(rem, 16);
+        putc('\r');
         putc('\n');
     }
+}
+
+uint32_t *__get_stack_pointer();
+
+void test_math()
+{
+    debug_printf("test_idiv SP: %p\n", __get_stack_pointer());
     test_idiv();
+    debug_printf("test_idivmod SP: %p\n", __get_stack_pointer());
     test_idivmod();
+    debug_printf("test_ldivmod SP: %p\n", __get_stack_pointer());
     test_ldivmod();
+    debug_printf("test_divide_by_ten SP: %p\n", __get_stack_pointer());
+    test_divide_by_ten();
+    debug_printf("~test_math SP: %p\n", __get_stack_pointer());
 }

@@ -29,7 +29,7 @@ static int latin1_supplement[0x60] = {
 };
 
 /*
- * Cyrillic (U+0410-044F)
+ * Cyrillic (U+0400-04FF) -- block starts at U+0410
  */
 static int cyrillic[0x40] = {
         0x0ac, 0x0ad, 0x0c2, 0x0b2, 0x0af, 0x0b0, 0x0c1, 0x0c5, 0x0b4, 0x0b5, 0x0b6, 0x0b7, 0x0b8, 0x0b9, 0x0ba, 0x0bb,
@@ -39,7 +39,7 @@ static int cyrillic[0x40] = {
 };
 
 /*
- * Hebrew (U+05D0-05EA)
+ * Hebrew (U+0590-05FF) -- block starts at U+05D0
  */
 static int hebrew[0x2b] = {
         0x08e, 0x08f, 0x090, 0x091, 0x092, 0x093, 0x094, 0x095, 0x096, 0x097, 0x098, 0x099, 0x09a, 0x09b, 0x09c, 0x09d,
@@ -47,11 +47,18 @@ static int hebrew[0x2b] = {
 };
 
 /*
- * General Punctuation (U+2000-206F)
+ * General Punctuation (U+2000-206F) -- block starts at U+2010
  */
 static int general_punctuation[0x18] = {
         0x00d, 0x00d, 0x00d, 0x00d, 0x040, 0x040, 0x05c, 0x12d, 0x089, 0x060, 0x12e, 0x12f, 0x130, 0x131, 0x132, 0x133,
         0x134, 0x135, 0x136, 0x137, 0x138, 0x139, 0x13a, 0x13b
+};
+
+/*
+ * Currency Symbols (U+20A0-20CF) -- block starts at U+20AC
+ */
+static int currency_symbols[1] = {
+        0x13f
 };
 
 /*
@@ -75,6 +82,13 @@ static int private_use[12] = {
         0x061, 0x062, 0x063, 0x064, 0x072, 0x073, 0x077, 0x078, 0x080, 0x083, 0x085, 0x0a9
 };
 
+/*
+ * Specials (U+FFF0-FFFF) -- block starts at U+FFFD
+ */
+static int specials[1] = {
+        0x13e
+};
+
 // Not in a block:
 // 0x061: SAA5051/2 U+002C COMMA
 // 0x062: SAA5051/2 U+002E FULL STOP
@@ -95,7 +109,7 @@ typedef struct {
     int *block;
 } unicode_block_idx_t;
 
-#define UNICODE_BLOCKS 8
+#define UNICODE_BLOCKS 10
 
 unicode_block_idx_t unicode_block_index[UNICODE_BLOCKS] = {
         { .start = 0x0020, .end = 0x007f, .block = basic_latin },
@@ -103,7 +117,9 @@ unicode_block_idx_t unicode_block_index[UNICODE_BLOCKS] = {
         { .start = 0x0410, .end = 0x044f, .block = cyrillic },
         { .start = 0x05d0, .end = 0x05ea, .block = hebrew },
         { .start = 0x2010, .end = 0x2027, .block = general_punctuation },
+        { .start = 0x20ac, .end = 0x20ac, .block = currency_symbols },
         { .start = 0x2190, .end = 0x2193, .block = arrows },
         { .start = 0x25a0, .end = 0x25a1, .block = geometric_shapes },
         { .start = 0xf580, .end = 0xf58b, .block = private_use },
+        { .start = 0xfffd, .end = 0xfffd, .block = specials },
 };
