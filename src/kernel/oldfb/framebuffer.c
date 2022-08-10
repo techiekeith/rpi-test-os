@@ -25,16 +25,16 @@ typedef struct
 
 fb_init_t fbinit __attribute__((aligned(16)));
 
-int framebuffer_init(void)
+int framebuffer_init(int width, int height, int depth)
 {
 	mail_message_t msg;
 
-	fbinit.width = DISPLAY_WIDTH;
-	fbinit.height = DISPLAY_HEIGHT;
+	fbinit.width = width;
+	fbinit.height = height;
 	fbinit.vwidth = fbinit.width;
 	fbinit.vheight = fbinit.height;
 	fbinit.bytes = 0;
-	fbinit.depth = COLORDEPTH;
+	fbinit.depth = depth;
 	fbinit.ignorex = 0;
 	fbinit.ignorey = 0;
 	fbinit.pointer = 0;
@@ -51,11 +51,13 @@ int framebuffer_init(void)
 
     fbinfo.width = fbinit.width;
 	fbinfo.height = fbinit.height;
-	fbinfo.chars_width = fbinfo.width / GLYPH_WIDTH; 
+    fbinfo.depth = fbinit.depth;
+    fbinfo.bpp = fbinit.depth >> 3;
+    fbinfo.pitch = fbinit.bytes;
+	fbinfo.chars_width = fbinfo.width / GLYPH_WIDTH;
     fbinfo.chars_height = fbinfo.height / GLYPH_HEIGHT;
     fbinfo.chars_x = 0;
     fbinfo.chars_y = 0;
-	fbinfo.pitch = fbinit.bytes;
 	fbinfo.buf = (void *)((uint32_t)fbinit.pointer & 0x3fffffff);
 	fbinfo.buf_size = fbinit.size;
 

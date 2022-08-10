@@ -78,6 +78,8 @@ static void generate_character_glyph(int c)
             }
         }
         saa505x_glyphs[glyph_number][row] = bits;
+
+        // Double-height glyphs
         if (row < 10)
         {
             saa505x_glyphs[high_glyph_number][row * 2] = bits;
@@ -113,8 +115,8 @@ static void generate_box_glyphs(int c) {
             pixels = bottom;
             pixels2 = pixels | pixels << 2;
         }
-        saa505x_glyphs[c][row] = pixels;
-        saa505x_glyphs[c + 64][row] = pixels2;
+        saa505x_glyphs[c][row] = pixels; // separated box graphics
+        saa505x_glyphs[c + 64][row] = pixels2; // contiguous box graphics
     }
 }
 
@@ -129,12 +131,18 @@ void generate_saa505x_glyphs() {
     }
 }
 
+/*
+ * Gets the pointer to a glyph for a given Unicode character.
+ * U+F500..U+F57F map to separated and contiguous box graphics
+ * U+F0000..U+FFFFF map to the top row of double-height characters in the BMP
+ * U+100000..U+10FFFF map to the bottom row of double-height characters in the BMP
+ */
 uint16_t *get_saa505x_glyph(int c) {
-    if ((c & 0x1ff80) == 0xf500)
+    if ((c & 0x1fff80) == 0xf500)
     {
         return saa505x_glyphs[c & 0x7f];
     }
-    int glyph_number = 0;
+    int glyph_number = SOURCE_GLYPHS - 1;
     int offset = 128;
     // High/low portions of double-height graphics
     if (c >= 0xf0000) {

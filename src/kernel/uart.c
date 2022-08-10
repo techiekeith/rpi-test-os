@@ -5,6 +5,7 @@
 #include <common/stddef.h>
 #include <common/stdlib.h>
 #include <common/string.h>
+#include <common/utf8.h>
 #include <kernel/delay.h>
 #include <kernel/gpio.h>
 #include <kernel/mmio.h>
@@ -75,33 +76,10 @@ void uart_putc(int c)
     }
     while (flags.transmit_queue_full);
 
-    // XXX TODO: Abstract this
-    if (c >= 0x11000)
-    {
-        uart_putc(0xfffd);
-        return;
-    }
-    else if (c >= 0x10000)
-    {
-        mmio_write(UART0_DR, 0xf0 | (c >> 18));
-        mmio_write(UART0_DR, 0x80 | ((c >> 12) & 0x3f));
-        mmio_write(UART0_DR, 0x80 | ((c >> 6) & 0x3f));
-        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
-    }
-    else if (c >= 0x800)
-    {
-        mmio_write(UART0_DR, 0xe0 | (c >> 12));
-        mmio_write(UART0_DR, 0x80 | ((c >> 6) & 0x3f));
-        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
-    }
-    else if (c >= 0x80)
-    {
-        mmio_write(UART0_DR, 0xc0 | (c >> 6));
-        mmio_write(UART0_DR, 0x80 | (c & 0x3f));
-    }
-    else
-    {
-        mmio_write(UART0_DR, c);
+    char buffer[5];
+    utf8_encode(c, buffer);
+    for (char *p = buffer; *p; p++) {
+        mmio_write(UART0_DR, *p);
     }
 }
 
@@ -116,7 +94,7 @@ unsigned char uart_getc()
     return mmio_read(UART0_DR);
 }
 
-void uart_puts(const char* str)
+void uart_puts(const char *str)
 {
     for (size_t i = 0; str[i] != '\0'; i ++)
         uart_putc((unsigned char)str[i]);

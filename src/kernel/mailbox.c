@@ -2,10 +2,11 @@
  * mailbox.c
  */
 
+#include <common/stddef.h>
+#include <common/stdint.h>
 #include <common/stdio.h>
 #include <common/stdlib.h>
 #include <common/string.h>
-#include <kernel/delay.h>
 #include <kernel/mailbox.h>
 #include <kernel/mem.h>
 #include <kernel/mmio.h>
@@ -79,7 +80,7 @@ int send_messages(property_message_tag_t *tags)
 {
     property_message_buffer_t *msg;
     mail_message_t mail;
-    uint32_t i, len, bufpos;
+    uint32_t i, bufpos, len;
     size_t bufsize = 0;
    
     // Calculate the sizes of each tag
@@ -120,7 +121,6 @@ int send_messages(property_message_tag_t *tags)
     mail.data = ((uint32_t)msg) >> 4;
     
     mailbox_send(mail, PROPERTY_CHANNEL);
-    delay(150);
     mail = mailbox_read(PROPERTY_CHANNEL);
 
 

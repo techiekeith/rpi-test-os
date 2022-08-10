@@ -43,56 +43,62 @@ static char *ntoa(unsigned long long number, unsigned long long radix, int sign,
     return buffer;
 }
 
-char *ultoa(unsigned long long number, int radix)
+int abs(int j)
 {
-    return ntoa(number, radix, 0, NULL);
+    return j < 0 ? -j : j;
 }
 
-char *ltoa(long long number, int radix)
+long labs(long j)
+{
+    return j < 0L ? -j : j;
+}
+
+long long llabs(long long j)
+{
+    return j < 0LL ? -j : j;
+}
+
+char *ultoa(unsigned long long number, int radix, char *buffer)
+{
+    return ntoa(number, radix, 0, buffer);
+}
+
+char *ltoa(long long number, int radix, char *buffer)
 {
     unsigned long long cast = number;
     int sign = cast >> 63ULL;
-    return ntoa(sign ? -cast : cast, radix, sign, NULL);
+    return ntoa(sign ? -cast : cast, radix, sign, buffer);
 }
 
-char *uitoa(unsigned int number, int radix)
+char *uitoa(unsigned int number, int radix, char *buffer)
 {
-    return ntoa((unsigned long long) number, radix, 0, NULL);
+    return ntoa((unsigned long long) number, radix, 0, buffer);
 }
 
-char *itoa(int number, int radix)
+char *itoa(int number, int radix, char *buffer)
 {
     unsigned long long cast = number;
     int sign = cast >> 63ULL;
-    return ntoa(sign ? -cast : cast, radix, sign, NULL);
+    return ntoa(sign ? -cast : cast, radix, sign, buffer);
 }
 
-int atoi(char *num)
+int atoi(char *str)
 {
-    int res = 0, power = 0, digit, i;
-    char * start = num;
+    int res = 0, sign = 0;
+    char *p = str;
 
-    // Find the end
-    while (*num >= '0' && *num <= '9')
+    if (*p == '-')
     {
-        num++;     
+        sign = 1;
+        p++;
+    }
+    while (*p >= '0' && *p <= '9')
+    {
+        res = res * 10 + *p - '0';
+        p++;
     }
 
-    num--;
-
-    while (num != start)
-    {
-        digit = *num - '0'; 
-        for (i = 0; i < power; i++)
-        {
-            digit *= 10;
-        }
-        res += digit;
-        power++;
-        num--;
-    }
-
-    return res;
+    return sign ? -res : res;
 }
 
 void *malloc(size_t bytes)

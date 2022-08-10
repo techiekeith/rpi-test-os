@@ -6,7 +6,7 @@
 
 #include <common/stdint.h>
 
-#define SOURCE_GLYPHS               318
+#define SOURCE_GLYPHS               321
 #define SOURCE_GLYPH_ROWS           9
 #define MAX_GRAPHICS                (SOURCE_GLYPHS * 3 + 128)
 

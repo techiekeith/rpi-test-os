@@ -5,7 +5,7 @@
 #include <common/strings.h>
 #include <common/string.h>
 
-inline void bzero(void *dest, int bytes)
+inline void bzero(void *dest, size_t bytes)
 {
     memset(dest, 0, bytes);
 }

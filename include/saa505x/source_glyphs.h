@@ -397,13 +397,13 @@ static uint8_t saa505x_source_glyphs[SOURCE_GLYPHS][SOURCE_GLYPH_ROWS] = {
   { 037, 000, 000, 000, 000, 000, 000, 000, 000 }, /* [0x00f6] U+00AF MACRON */
   { 000, 004, 004, 037, 004, 004, 037, 000, 000 }, /* [0x00f7] U+00B1 PLUS-MINUS SIGN */
   { 014, 002, 004, 010, 016, 000, 000, 000, 000 }, /* [0x00f8] U+00B2 SUPERSCRIPT TWO */
-  { 014, 002, 004, 002, 014, 000, 000, 000, 000 }, /* [0x00f9] U+00B3 SUPERSCRIPT THREE */
+  { 014, 002, 014, 002, 014, 000, 000, 000, 000 }, /* [0x00f9] U+00B3 SUPERSCRIPT THREE */
   { 002, 004, 000, 000, 000, 000, 000, 000, 000 }, /* [0x00fa] U+00B4 ACUTE ACCENT */
-  { 000, 000, 021, 021, 021, 021, 036, 020, 020 }, /* [0x00fb] U+00B5 MICRO SIGN */
+  { 000, 000, 022, 022, 022, 022, 035, 020, 020 }, /* [0x00fb] U+00B5 MICRO SIGN */
   { 017, 035, 035, 035, 015, 005, 005, 005, 005 }, /* [0x00fc] U+00B6 PILCROW SIGN */
   { 000, 000, 000, 004, 000, 000, 000, 000, 000 }, /* [0x00fd] U+00B7 MIDDLE DOT */
   { 000, 000, 000, 000, 000, 000, 000, 004, 014 }, /* [0x00fe] U+00B8 CEDILLA */
-  { 004, 014, 004, 004, 016, 000, 000, 000, 000 }, /* [0x00ff] U+00B9 SUPERSCRIPT ONE */
+  { 020, 020, 020, 020, 020, 000, 000, 000, 000 }, /* [0x00ff] U+00B9 SUPERSCRIPT ONE */
   { 006, 011, 011, 011, 006, 000, 017, 000, 000 }, /* [0x0100] U+00BA MASCULINE ORDINAL INDICATOR */
   { 000, 024, 012, 005, 012, 024, 000, 000, 000 }, /* [0x0101] U+00BB RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK */
   { 004, 000, 004, 004, 010, 021, 016, 000, 000 }, /* [0x0102] U+00BF INVERTED QUESTION MARK */
@@ -470,4 +470,13 @@ static uint8_t saa505x_source_glyphs[SOURCE_GLYPHS][SOURCE_GLYPH_ROWS] = {
 
   /* Geometric shapes not properly represented in SAA505x hardware */
   { 037, 021, 021, 021, 021, 021, 037, 000, 000 }, /* [0x013d] U+25A1 WHITE SQUARE */
+
+  /* Replacement character for invalid UTF-8 byte sequence */
+  { 016, 021, 035, 031, 037, 033, 016, 000, 000 }, /* [0x013e] U+FFFD REPLACEMENT CHARACTER */
+
+  /* Currency symbols */
+  { 007, 010, 036, 010, 036, 010, 007, 000, 000 }, /* [0x013f] U+20AC EURO SIGN */
+
+  /* Placeholder for undefined glyphs (this glyph must come last) */
+  { 000, 016, 002, 006, 000, 004, 000, 000, 000 }, /* [......] ...... undefined glyph */
 };
