@@ -5,12 +5,39 @@
  * void __memory_copy_backwards(void *dest, const void *src, uint32_t bytes);
  */
 
-.globl __memory_set
+.globl __memory_set_byte
+.globl __memory_set_short
+.globl __memory_set_int
+.globl __memory_set_int24
 .globl __memory_copy_forwards
 .globl __memory_copy_backwards
 
-__memory_set:
+int16_bit_mask:
+    .word   65535
+int24_bit_mask:
+    .word   16777215
+
+__memory_set_byte:
     push    { r0-r10, lr }
+    and     r1, #255
+    orr     r1, r1, lsl #8
+    orr     r1, r1, lsl #16
+    orr     r1, r1, lsl #24
+    b       set_source_words
+    .size	__memory_set_byte, .-__memory_set_byte
+
+__memory_set_short:
+    push    { r0-r10, lr }
+    adr     r3, int16_bit_mask
+    ldr     r4, [r3]
+    and     r1, r4
+    orr     r1, r1, lsl #16
+    b       set_source_words
+    .size	__memory_set_short, .-__memory_set_short
+
+__memory_set_int:
+    push    { r0-r10, lr }
+set_source_words:
     mov     r3, r1
     mov     r4, r1
     mov     r5, r1
@@ -39,12 +66,57 @@ ms_copy_bytes_check:
     beq     ms_ret
 ms_copy_bytes_loop:
     strb    r3, [r0]
+    mov     r3, r3, ror #8
     add     r0, #1
     add     r1, #1
     subs    r2, #1
     bne     ms_copy_bytes_loop
 ms_ret:
     pop     { r0-r10, pc }
+    .size	__memory_set_int, .-__memory_set_int
+
+__memory_set_int24:
+    push    { r0-r11, lr }
+    adr     r3, int24_bit_mask
+    ldr     r4, [r3]
+    and     r1, r4
+    orr     r3, r1, r1, lsl #24
+    mov     r4, r3, ror #8
+    mov     r5, r4, ror #8
+    mov     r6, r3
+    mov     r7, r4
+    mov     r8, r5
+    mov     r9, r3
+    mov     r10, r4
+    mov     r11, r5
+    cmp     r2, #36
+    bls     msi24_copy_words_check
+msi24_copy_chunks_loop:
+    stmia   r0!, { r3-r11 }
+    sub     r2, #36
+    cmp     r2, #36
+    bge     msi24_copy_chunks_loop
+msi24_copy_words_check:
+    cmp     r2, #12
+    bls     msi24_copy_bytes_check
+msi24_copy_words_loop:
+    stmia   r0!, { r3-r5 }
+    sub     r2, #12
+    cmp     r2, #12
+    bge     msi24_copy_words_loop
+msi24_copy_bytes_check:
+    cmp     r2, #0
+    beq     ms_ret
+msi24_copy_bytes_loop:
+    strb    r3, [r0]
+    mov     r3, r3, ror #8
+    add     r0, #1
+    add     r1, #1
+    subs    r2, #1
+    bne     msi24_copy_bytes_loop
+msi24_ret:
+    pop     { r0-r11, pc }
+    .size	__memory_set_int24, .-__memory_set_int24
 
 __memory_copy_forwards:
     push    { r1-r11, lr }
@@ -88,6 +160,7 @@ mcf_copy_bytes_loop:
 mcf_ret:
     mov     r0, r11                 // set information about copy methods used in return value
     pop     { r1-r11, pc }
+    .size	__memory_copy_forwards, .-__memory_copy_forwards
 
 // Memory copy backwards. dest should be greater than src
 // For efficient copying, dest should be at least 32 bytes (8 words) more than src
@@ -154,3 +227,4 @@ mcb_copy_chunks_loop:
 mcb_ret:
     mov     r0, r11                 // set information about copy methods used in return value
     pop     { r1-r11, pc }
+    .size	__memory_copy_backwards, .-__memory_copy_backwards

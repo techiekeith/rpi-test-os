@@ -4,13 +4,11 @@
 
 #pragma once
 
-#include <common/stddef.h>
-#include <common/stdint.h>
-#include <kernel/atag.h>
-#include <kernel/list.h>
+#include "../common/stddef.h"
+#include "../common/stdint.h"
+#include "list.h"
 
-#define PAGE_SIZE 4096
-#define KERNEL_HEAP_SIZE 1048576
+#define PAGE_SIZE           65536
 
 typedef struct
 {
@@ -27,11 +25,6 @@ typedef struct page
 	DEFINE_LINK(page);
 } page_t;
 
-
-uint64_t mem_init(atag_t *atags);
-
+void mem_init(uint64_t mem_size);
 void *alloc_page();
 void free_page(void *ptr);
-
-void *kmalloc(size_t bytes);
-void kfree(void *ptr);

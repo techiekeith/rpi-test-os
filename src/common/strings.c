@@ -2,8 +2,8 @@
  * strings.c
  */
 
-#include <common/strings.h>
-#include <common/string.h>
+#include "../../include/common/strings.h"
+#include "../../include/common/string.h"
 
 inline void bzero(void *dest, size_t bytes)
 {

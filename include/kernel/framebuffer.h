@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <common/stdint.h>
+#include "../common/stdint.h"
 
 #define PALETTE_COLORS 256
 extern uint32_t palette[PALETTE_COLORS];
@@ -16,15 +16,18 @@ typedef struct framebuffer_info
     uint32_t depth;
     uint32_t bpp;
     uint32_t pitch;
-    int32_t chars_width;
-    int32_t chars_height;
-    int32_t chars_x;
-    int32_t chars_y;
-    void *buf;
+    uint32_t char_width;
+    uint32_t char_height;
+    int32_t columns;
+    int32_t rows;
+    int32_t current_column;
+    int32_t current_row;
+    volatile uint8_t *buf;
     uint32_t buf_size;
 } framebuffer_info_t;
 
 extern framebuffer_info_t fbinfo;
 
 void framebuffer_init();
-int framebuffer_set(int width, int height, int depth);
+int init_palette();
+int set_display_dimensions(int width, int height, int depth, int char_width, int char_height);

@@ -2,10 +2,9 @@
  * framebuffer.c
  */
 
-#include <common/stdio.h>
-#include <kernel/framebuffer.h>
-#include <kernel/mailbox.h>
-#include <saa505x/glyphs.h>
+#include "../../../include/kernel/framebuffer.h"
+#include "../../../include/kernel/io.h"
+#include "../../../include/kernel/mailbox.h"
 
 framebuffer_info_t fbinfo;
 
@@ -25,7 +24,7 @@ typedef struct
 
 fb_init_t fbinit __attribute__((aligned(16)));
 
-int framebuffer_init(int width, int height, int depth)
+int bcm2835_set_display_dimensions(int width, int height, int depth, int char_width, int char_height)
 {
 	mail_message_t msg;
 
@@ -47,21 +46,23 @@ int framebuffer_init(int width, int height, int depth)
 	mailbox_send(msg, FRAMEBUFFER_CHANNEL);
 	msg = mailbox_read(FRAMEBUFFER_CHANNEL);
 
-    debug_printf("Init framebuffer returned %p\n", msg);
+    debug_printf("Init framebuffer returned %p\r\n", msg);
 
     fbinfo.width = fbinit.width;
 	fbinfo.height = fbinit.height;
     fbinfo.depth = fbinit.depth;
     fbinfo.bpp = fbinit.depth >> 3;
-    fbinfo.pitch = fbinit.bytes;
-	fbinfo.chars_width = fbinfo.width / GLYPH_WIDTH;
-    fbinfo.chars_height = fbinfo.height / GLYPH_HEIGHT;
-    fbinfo.chars_x = 0;
-    fbinfo.chars_y = 0;
+    fbinfo.pitch = fbinfo.width * fbinfo.bpp;
+    fbinfo.char_width = char_width;
+    fbinfo.char_height = char_height;
+	fbinfo.columns = fbinfo.width / char_width;
+    fbinfo.rows = fbinfo.height / char_height;
+    fbinfo.current_column = 0;
+    fbinfo.current_row = 0;
 	fbinfo.buf = (void *)((uint32_t)fbinit.pointer & 0x3fffffff);
 	fbinfo.buf_size = fbinit.size;
 
-    debug_printf("Framebuffer allocated, location %p, size %d\n", fbinfo.buf, fbinfo.buf_size);
+    debug_printf("Framebuffer allocated, location %p, size %d\r\n", fbinfo.buf, fbinfo.buf_size);
 
 	return 0;
 }

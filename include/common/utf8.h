@@ -2,8 +2,8 @@
  * utf8.h
  */
 
-#include <common/stddef.h>
-#include <common/stdint.h>
+#include "stddef.h"
+#include "stdint.h"
 
 char *utf8_encode(int c, char *buffer);
 int utf8_decode(const char *s, char **next);

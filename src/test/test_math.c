@@ -1,9 +1,12 @@
 /*
- * test.c
+ * test_math.c
  */
 
-#include <common/stdint.h>
-#include <common/stdio.h>
+#include "../../include/common/stdint.h"
+#include "../../include/common/stdio.h"
+#include "../../include/kernel/io.h"
+
+DEBUG_INIT("test_math");
 
 #define VALUES_MAX 10
 static int a_count = 0, b_count = 0;
@@ -26,7 +29,6 @@ static long long lb_values[LVALUES_MAX] = { 7, -4, 9, -6, 0, 0,
 
 static void printhex(unsigned long long number, int digits)
 {
-    debug_printf("Number: %lx, digits: %d\n", number, digits);
     for (int i = digits - 1; i >= 0; i--)
     {
         int digit = (number >> (4LL * i)) & 15;
@@ -204,10 +206,11 @@ static long long div10_test_cases[18] = { 0, 1, 0x12345678, 0x89abcdef, 0x7fffff
 
 static void test_divide_by_ten()
 {
+    DEBUG_START("test_divide_by_ten");
     unsigned long long quot, rem;
-    debug_printf("In test_div10()\n");
+    debug_printf("In test_div10()\r\n");
     for (int i = 0; i < 18; i++) {
-        debug_printf("i: %d test_case: 0x%016lx\n", i, div10_test_cases[i]);
+        debug_printf("i: %d test_case: 0x%016lx\r\n", i, div10_test_cases[i]);
         puts("u32: ");
         unsigned int test_case = div10_test_cases[i];
         printhex((unsigned long long)test_case, 8);
@@ -226,19 +229,17 @@ static void test_divide_by_ten()
         putc('\r');
         putc('\n');
     }
+    DEBUG_END();
 }
 
 uint32_t *__get_stack_pointer();
 
 void test_math()
 {
-    debug_printf("test_idiv SP: %p\n", __get_stack_pointer());
+    DEBUG_START("test_math");
     test_idiv();
-    debug_printf("test_idivmod SP: %p\n", __get_stack_pointer());
     test_idivmod();
-    debug_printf("test_ldivmod SP: %p\n", __get_stack_pointer());
     test_ldivmod();
-    debug_printf("test_divide_by_ten SP: %p\n", __get_stack_pointer());
     test_divide_by_ten();
-    debug_printf("~test_math SP: %p\n", __get_stack_pointer());
+    DEBUG_END();
 }

@@ -2,10 +2,10 @@
  * glyphs.c
  */
 
-#include <common/stdint.h>
-#include <saa505x/glyphs.h>
-#include <saa505x/source_glyphs.h>
-#include <saa505x/unicode_map.h>
+#include "../../include/common/stdint.h"
+#include "../../include/saa505x/glyphs.h"
+#include "../../include/saa505x/source_glyphs.h"
+#include "../../include/saa505x/unicode_map.h"
 
 static uint16_t saa505x_glyphs[MAX_GRAPHICS][GLYPH_HEIGHT];
 

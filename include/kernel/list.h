@@ -31,8 +31,8 @@
  * struct nodeType * next_nodeType_list(struct nodeType * node)
  *      gets the next node in the list, null if none left
  */
-#include <common/stddef.h>
-#include <common/stdint.h>
+#include "../common/stddef.h"
+#include "../common/stdint.h"
 
 #ifndef LIST_H
 #define LIST_H

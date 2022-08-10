@@ -2,19 +2,24 @@
  * mailbox.c
  */
 
-#include <common/stddef.h>
-#include <common/stdint.h>
-#include <common/stdio.h>
-#include <common/stdlib.h>
-#include <common/string.h>
-#include <kernel/mailbox.h>
-#include <kernel/mem.h>
-#include <kernel/mmio.h>
+#include "../../include/common/stddef.h"
+#include "../../include/common/stdint.h"
+#include "../../include/common/stdlib.h"
+#include "../../include/common/string.h"
+#include "../../include/kernel/barrier.h"
+#include "../../include/kernel/delay.h"
+#include "../../include/kernel/io.h"
+#include "../../include/kernel/mailbox.h"
+#include "../../include/kernel/mailbox_methods.h"
+#include "../../include/kernel/heap.h"
+#include "../../include/kernel/mmio.h"
+
+DEBUG_INIT("mailbox");
 
 mail_message_t mailbox_read(int channel)
 {
-    mail_status_t stat;
-    mail_message_t res;
+    volatile mail_status_t stat;
+    volatile mail_message_t res;
 
     // Make sure that the message is from the right channel
     do
@@ -28,52 +33,46 @@ mail_message_t mailbox_read(int channel)
         // Get the message
         res.as_int = mmio_read(MAIL0_READ);
     } while (res.channel != channel);
+    __dmb();
 
     return res;
 }
 
 void mailbox_send(mail_message_t msg, int channel)
 {
-    mail_status_t stat;
+    volatile mail_status_t stat;
     msg.channel = channel;
 
     // Make sure you can send mail
+    __dmb();
     do
     {
-        stat.as_int = mmio_read(MAIL0_STATUS);
-        if (stat.full)
-        {
-            mmio_read(MAIL0_READ);
-        }
+        stat.as_int = mmio_read(MAIL1_STATUS);
     } while (stat.full);
 
     // send the message
-    mmio_write(MAIL0_WRITE, msg.as_int);
+    mmio_write(MAIL1_WRITE, msg.as_int);
 }
 
-/**
- * returns the max of the size of the request and result buffer for each tag
- */
-static uint32_t get_value_buffer_len(property_message_tag_t * tag)
+mailbox_method_t *get_mailbox_method_by_name(char *method_name)
 {
-    switch(tag->proptag)
-    {
-        case FB_SET_PALETTE:
-            return 8 + 4 * tag->value_buffer.fb_palette.num_entries;
-        case FB_ALLOCATE_BUFFER:
-        case FB_GET_PHYSICAL_DIMENSIONS:
-        case FB_SET_PHYSICAL_DIMENSIONS:
-        case FB_GET_VIRTUAL_DIMENSIONS:
-        case FB_SET_VIRTUAL_DIMENSIONS:
-            return 8;
-        case FB_GET_BITS_PER_PIXEL:
-        case FB_SET_BITS_PER_PIXEL:
-        case FB_GET_BYTES_PER_ROW:
-            return 4;
-        case FB_RELEASE_BUFFER:
-        default:
-            return 0;
-    }
+    int i;
+    for (i = 0; mailbox_methods[i].tag != NULL_TAG && strcmp(mailbox_methods[i].method_name, method_name); i++);
+    return mailbox_methods[i].tag == NULL_TAG ? NULL : &mailbox_methods[i];
+}
+
+mailbox_method_t *get_mailbox_method_by_tag(property_tag_t tag)
+{
+    int i;
+    for (i = 0; mailbox_methods[i].tag != NULL_TAG && mailbox_methods[i].tag != tag; i++);
+    return mailbox_methods[i].tag == NULL_TAG ? NULL : &mailbox_methods[i];
+}
+
+static uint32_t get_value_buffer_size(property_tag_t tag)
+{
+    int i;
+    for (i = 0; mailbox_methods[i].tag != NULL_TAG && mailbox_methods[i].tag != tag; i++);
+    return mailbox_methods[i].tag == NULL_TAG ? 0 : MAX(mailbox_methods[i].request_size, mailbox_methods[i].response_size);
 }
 
 int send_messages(property_message_tag_t *tags)
@@ -82,20 +81,22 @@ int send_messages(property_message_tag_t *tags)
     mail_message_t mail;
     uint32_t i, bufpos, len;
     size_t bufsize = 0;
-   
+
+    DEBUG_START("send_messages");
+
     // Calculate the sizes of each tag
     for (i = 0; tags[i].proptag != NULL_TAG; i++)
     {
-        bufsize += get_value_buffer_len(&tags[i]) + 3 * sizeof(uint32_t);          
+        bufsize += get_value_buffer_size(tags[i].proptag) + 3 * sizeof(uint32_t);
     }
 
     // Add the buffer size, buffer request/response code and buffer end tag sizes
-    bufsize += 3 * sizeof(uint32_t); 
+    bufsize += 3 * sizeof(uint32_t);
 
     // buffer size must be 16 byte aligned
     bufsize += (bufsize % 16) ? 16 - (bufsize % 16) : 0;
 
-    msg = kmalloc(bufsize);
+    msg = heap_alloc("send_messages", bufsize);
     if (!msg)
     {
         return -1;
@@ -107,7 +108,7 @@ int send_messages(property_message_tag_t *tags)
     // Copy the messages into the buffer
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
-        len = get_value_buffer_len(&tags[i]);
+        len = get_value_buffer_size(tags[i].proptag);
         msg->tags[bufpos++] = tags[i].proptag;
         msg->tags[bufpos++] = len;
         msg->tags[bufpos++] = 0;
@@ -119,20 +120,23 @@ int send_messages(property_message_tag_t *tags)
 
     // Send the message
     mail.data = ((uint32_t)msg) >> 4;
-    
+
     mailbox_send(mail, PROPERTY_CHANNEL);
+    delay(150);
     mail = mailbox_read(PROPERTY_CHANNEL);
 
+    debug_printf("mailbox_read returned 0x%ux\r\n", mail);
 
     if (msg->req_res_code == REQUEST)
     {
-        kfree(msg);
+        debug_printf("msg still has req_res_code REQUEST\r\n");
+        heap_free(msg);
         return 1;
     }
     // Check the response code
     if (msg->req_res_code == RESPONSE_ERROR)
     {
-        kfree(msg);
+        heap_free(msg);
         return 2;
     }
 
@@ -140,12 +144,15 @@ int send_messages(property_message_tag_t *tags)
     // Copy the tags back into the array
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
-        len = get_value_buffer_len(&tags[i]);
+        debug_printf("mailbox_read returned tag 0x%ux\r\n", tags[i].proptag);
+        len = get_value_buffer_size(tags[i].proptag);
         bufpos += 3; // skip over the tag bookkeeping info
         memcpy(&tags[i].value_buffer, msg->tags+bufpos, len);
-        bufpos += len/4;
+        bufpos += len / 4;
     }
 
-    kfree(msg);
+    heap_free(msg);
+
+    DEBUG_END();
     return 0;
 }

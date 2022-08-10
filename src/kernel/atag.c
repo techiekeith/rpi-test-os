@@ -2,8 +2,8 @@
  * atag.c
  */
  
-#include <common/stdint.h>
-#include <kernel/atag.h>
+#include "../../include/common/stdint.h"
+#include "../../include/kernel/atag.h"
 
 uint64_t get_mem_size(atag_t *tag)
 {

@@ -4,7 +4,34 @@
 
 #pragma once
 
-#include <common/stdint.h>
+#include "../common/stdint.h"
+#include "peripheral.h"
+
+enum
+{
+    /* The base address for UART. */
+    UART0_BASE = PERIPHERAL_BASE + UART0_OFFSET,
+
+    /* The offsets for reach register for the UART. */
+    UART0_DR     = (UART0_BASE + 0x00),
+    UART0_RSRECR = (UART0_BASE + 0x04),
+    UART0_FR     = (UART0_BASE + 0x18),
+    UART0_ILPR   = (UART0_BASE + 0x20),
+    UART0_IBRD   = (UART0_BASE + 0x24),
+    UART0_FBRD   = (UART0_BASE + 0x28),
+    UART0_LCRH   = (UART0_BASE + 0x2C),
+    UART0_CR     = (UART0_BASE + 0x30),
+    UART0_IFLS   = (UART0_BASE + 0x34),
+    UART0_IMSC   = (UART0_BASE + 0x38),
+    UART0_RIS    = (UART0_BASE + 0x3C),
+    UART0_MIS    = (UART0_BASE + 0x40),
+    UART0_ICR    = (UART0_BASE + 0x44),
+    UART0_DMACR  = (UART0_BASE + 0x48),
+    UART0_ITCR   = (UART0_BASE + 0x80),
+    UART0_ITIP   = (UART0_BASE + 0x84),
+    UART0_ITOP   = (UART0_BASE + 0x88),
+    UART0_TDR    = (UART0_BASE + 0x8C),
+};
 
 typedef union uart_flags
 {
@@ -46,8 +73,23 @@ typedef union uart_control
     uint32_t as_int;
 } uart_control_t;
 
+#define INTEGER_BAUD_RATE(baud_rate) ((12000000/(baud_rate)) / 64)
+#define FRACTION_BAUD_RATE(baud_rate) ((12000000/(baud_rate)) % 64)
+#define BAUD_RATE 300
+
+#define UART_FIFO_BUFFER_SIZE 1024
+#define UART_RX_FIFO 0x3f0
+#define UART_RX_FIFO_BUFFER 0x400
+
+typedef struct {
+    int start;
+    int end;
+    short buffer_full;
+    short hw_fifo_full;
+    unsigned char *buffer;
+} uart_fifo_t;
+
 void uart_init();
-uart_flags_t read_flags(void);
+void uart_enable_interrupts();
 void uart_putc(int c);
 unsigned char uart_getc();
-void uart_puts(const char* str);

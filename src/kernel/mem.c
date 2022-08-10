@@ -2,72 +2,44 @@
  * mem.c
  */
 
-#include <common/stddef.h>
-#include <common/stdint.h>
-#include <common/stdlib.h>
-#include <common/string.h>
-#include <kernel/atag.h>
-#include <kernel/mem.h>
+#include "../../include/common/stddef.h"
+#include "../../include/common/stdint.h"
+#include "../../include/common/string.h"
+#include "../../include/kernel/io.h"
+#include "../../include/kernel/heap.h"
+#include "../../include/kernel/mem.h"
 
-/*
- * Heap Stuff
- */
-static void heap_init(uint32_t heap_start);
-
-/*
- * implement kmalloc as a linked list of allocated segments.
- * Segments should be 4 byte aligned.
- * Use best fit algorithm to find an allocation
- */
-typedef struct heap_segment
-{
-    struct heap_segment *next;
-    struct heap_segment *prev;
-    uint32_t is_allocated;
-    uint32_t segment_size;  /* Includes this header */
-} heap_segment_t;
-
-static heap_segment_t *heap_segment_list_head;
-
-/*
- * End Heap Stuff
- */
-
+DEBUG_INIT("mem");
 
 extern uint8_t __end;
-
-static uint32_t num_pages;
 
 DEFINE_LIST(page);
 IMPLEMENT_LIST(page);
 
-static page_t * all_pages_array;
+page_t *all_pages_array = NULL;
+uint32_t num_pages;
+uint32_t page_array_len;
 page_list_t free_pages;
 
-/*
- * implement kmalloc as a linked list of allocated segments.
- * Segments should be 4 byte aligned.
- * Use best fit algorithm to find an allocation
- */
-
-uint64_t mem_init(atag_t *atags)
+void mem_init(uint64_t mem_size)
 {
-    uint64_t mem_size;
-    uint32_t page_array_len, kernel_pages, page_array_end, i;
+    uint32_t kernel_pages, i;
+
+    DEBUG_START("mem_init");
 
     /* Get the total number of pages */
-    mem_size = get_mem_size(atags);
     num_pages = (uint32_t)(mem_size / PAGE_SIZE);
 
     /* Allocate space for all those pages' metadata.  Start this block just after the kernel image is finished */
     page_array_len = sizeof(page_t) * num_pages;
-    all_pages_array = (page_t *)&__end;
+    uint32_t endp = (uint32_t)&__end;
+    all_pages_array = (page_t *)(endp + KERNEL_HEAP_SIZE);
     memset(all_pages_array, 0, (size_t) page_array_len);
     INITIALIZE_LIST(free_pages);
 
     /* Iterate over all pages and mark them with the appropriate flags */
     /* Start with kernel pages */
-    kernel_pages = ((uint32_t)&__end) / PAGE_SIZE;
+    kernel_pages = endp / PAGE_SIZE;
     for (i = 0; i < kernel_pages; i++)
     {
         all_pages_array[i].vaddr_mapped = i * PAGE_SIZE;    /* Identity map the kernel pages */
@@ -88,11 +60,7 @@ uint64_t mem_init(atag_t *atags)
         append_page_list(&free_pages, &all_pages_array[i]);
     }
 
-    /* Initialize the heap */
-    page_array_end = (uint32_t)&__end + page_array_len;
-    heap_init(page_array_end);
-
-    return mem_size;
+    DEBUG_END();
 }
 
 void *alloc_page()
@@ -100,8 +68,13 @@ void *alloc_page()
     page_t *page;
     void *page_mem;
 
+    DEBUG_START("alloc_page");
+
     if (size_page_list(&free_pages) == 0)
+    {
+        DEBUG_END();
         return 0;
+    }
 
     /* Get a free page */
     page = pop_page_list(&free_pages);
@@ -114,6 +87,8 @@ void *alloc_page()
     /* Zero out the page, big security flaw to not do this :) */
     memset(page_mem, 0, PAGE_SIZE);
 
+    DEBUG_END();
+
     return page_mem;
 }
 
@@ -121,95 +96,16 @@ void free_page(void *ptr)
 {
     page_t *page;
 
+    DEBUG_START("free_page");
+
     /* Get page metadata from the physical address */
     page = all_pages_array + ((uint32_t)ptr / PAGE_SIZE);
 
     /* Mark the page as free */
     page->flags.allocated = 0;
     append_page_list(&free_pages, page);
+
+    DEBUG_END();
 }
 
 
-static void heap_init(uint32_t heap_start)
-{
-    heap_segment_list_head = (heap_segment_t *) heap_start;
-    memset(heap_segment_list_head, 0, sizeof(heap_segment_t));
-    heap_segment_list_head->segment_size = KERNEL_HEAP_SIZE;
-}
-
-
-void *kmalloc(size_t bytes)
-{
-    heap_segment_t *curr, *best = NULL;
-    int diff, best_diff = 0x7fffffff; /* Max signed int */
-
-    /* Add the header to the number of bytes we need and make the size 4 byte aligned */
-    size_t total_bytes = bytes + sizeof(heap_segment_t);
-    total_bytes += total_bytes % 16 ? 16 - (total_bytes % 16) : 0;
-
-    /* Find the allocation that is closest in size to this request */
-    for (curr = heap_segment_list_head; curr != NULL; curr = curr->next)
-    {
-        diff = curr->segment_size - total_bytes;
-        if (!curr->is_allocated && diff < best_diff && diff >= 0)
-        {
-            best = curr;
-            best_diff = diff;
-        }
-    }
-
-    /* There must be no free memory right now :( */
-    if (best == NULL)
-    {
-        return NULL;
-    }
-
-    /*
-     * If the best difference we could come up with was large, split up this segment into two.
-     * Since our segment headers are rather large, the criterion for splitting the segment is that
-     * when split, the segment not being requested should be twice a header size
-     */
-    if (best_diff > (int)(2 * sizeof(heap_segment_t)))
-    {
-        memset(((char *)(best)) + total_bytes, 0, sizeof(heap_segment_t));
-        curr = best->next;
-        best->next = (heap_segment_t *)(((char *)(best)) + total_bytes);
-        best->next->next = curr;
-        best->next->prev = best;
-        best->next->segment_size = best->segment_size - total_bytes;
-        best->segment_size = total_bytes;
-    }
-
-    best->is_allocated = 1;
-
-    return best + 1;
-}
-
-void kfree(void *ptr)
-{
-    heap_segment_t *seg;
-
-    if (!ptr)
-    {
-        return;
-    }
-
-    seg = ((heap_segment_t *)ptr) - 1;
-    seg->is_allocated = 0;
-
-    /* try to coalesce segements to the left */
-    while (seg->prev != NULL && !seg->prev->is_allocated)
-    {
-        seg->prev->next = seg->next;
-        seg->prev->segment_size += seg->segment_size;
-        seg->next->prev = seg->prev;
-        seg = seg->prev;
-    }
-    /* try to coalesce segments to the right */
-    while (seg->next != NULL && !seg->next->is_allocated)
-    {
-        seg->next->next->prev = seg;
-        seg->segment_size += seg->next->segment_size;
-        seg->next = seg->next->next;
-    }
-}

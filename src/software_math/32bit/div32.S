@@ -6,7 +6,6 @@
 .globl __aeabi_idivmod
 .globl __aeabi_uidiv
 .globl __aeabi_uidivmod
-.align 2
 
 /*
  * __aeabi_idiv
@@ -18,6 +17,7 @@ __aeabi_idiv:
     push    { r1, lr }          /* start function */
     bl      __aeabi_idivmod
     pop     { r1, pc }          /* end function */
+    .size	__aeabi_idiv, .-__aeabi_idiv
 
 /*
  * __aeabi_uidiv
@@ -29,6 +29,7 @@ __aeabi_uidiv:
     push    { r1, lr }          /* start function */
     bl      __aeabi_uidivmod
     pop     { r1, pc }          /* end function */
+    .size	__aeabi_uidiv, .-__aeabi_uidiv
 
 /*
  * __aeabi_idivmod
@@ -52,6 +53,7 @@ __aeabi_idivmod:
     tst     r4, #2              /* was numerator negative? */
     negne   r1, r1              /* if so, negate remainder */
     pop     { r4, pc }          /* end function */
+    .size	__aeabi_idivmod, .-__aeabi_idivmod
 
 /*
  * __aeabi_uidivmod
@@ -83,3 +85,4 @@ skip2:
     bne     loop2
 divzero:
     pop     { r4, r5, pc }      /* end function */
+    .size	__aeabi_uidivmod, .-__aeabi_uidivmod
