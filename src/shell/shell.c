@@ -2,177 +2,56 @@
  * shell.c
  */
 
-#include <common/stdint.h>
-#include <common/stdio.h>
-#include <common/stdlib.h>
-#include <common/string.h>
-#include <kernel/framebuffer.h>
-#include <kernel/graphics.h>
-#include <kernel/mailbox.h>
+#include "../../include/common/stdint.h"
+#include "../../include/common/stdio.h"
+#include "../../include/common/stdlib.h"
+#include "../../include/common/string.h"
+#include "../../include/kernel/io.h"
 
-// To get size of kernel
-void _start();
-extern uint8_t __end;
-
-void run_tests();
+DEBUG_INIT("shell");
 
 #define COMMAND_BUFFER_SIZE 1024
-char command_buffer[COMMAND_BUFFER_SIZE];
+#define MAX_ARGS 127
+static char command_buffer[COMMAND_BUFFER_SIZE];
+static char *args[MAX_ARGS + 1];
 
-void bad_command()
-{
-    puts("\r\nBad command\r\n");
-}
+const char *divider = "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+                      "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014";
 
-void escape()
-{
-    puts("\r\nEscape\r\n");
-}
-
-void cmd_clear()
-{
-    clear_framebuffer();
-    cursor_home();
-}
-
-void cmd_charset()
-{
-    puts("\r\nBasic Latin:");
-    for (int i = 0x20; i < 0x7f; i++) {
-        if (i % 32 == 0) puts("\r\n");
-        putc(i);
-    }
-    puts("\r\n\r\nLatin-1 Supplement:");
-    for (int i = 0xa0; i <= 0xff; i++) {
-        if (i % 32 == 0) puts("\r\n");
-        putc(i);
-    }
-    puts("\r\n\r\nCyrillic:");
-    for (int i = 0x410; i <= 0x44f; i++) {
-        if (i % 32 == 16) puts("\r\n");
-        putc(i);
-    }
-    puts("\r\n\r\nHebrew:\r\n");
-    for (int i = 0x5d0; i <= 0x5ea; i++) {
-        putc(i);
-    }
-    puts("\r\n\r\nGeneral Punctuation:\r\n");
-    for (int i = 0x2010; i <= 0x2027; i++) {
-        putc(i);
-    }
-    puts("\r\n\r\nEuro  Arrows  Shapes  Repl.\r\n");
-    for (int i = 0x20ac; i <= 0x20ac; i++) {
-        putc(i);
-    }
-    puts("     ");
-    for (int i = 0x2190; i <= 0x2193; i++) {
-        putc(i);
-    }
-    puts("    ");
-    for (int i = 0x25a0; i <= 0x25a1; i++) {
-        putc(i);
-    }
-    puts("      ");
-    for (int i = 0xfffd; i <= 0xfffe; i++) {
-        putc(i);
-    }
-    puts("\r\n\r\nPUA U+F500..7F (SAA505x box graphics):");
-    for (int i = 0xf500; i <= 0xf57f; i++) {
-        if (i % 32 == 0) puts("\r\n");
-        putc(i);
-    }
-    puts("\r\n\r\nPUA U+F580..8B (deprecated SAA505x characters):\r\n");
-    for (int i = 0xf580; i <= 0xf58b; i++) {
-        putc(i);
-    }
-    puts("\r\n");
-}
-
-void cmd_debug()
-{
-    puts("\r\n");
-    printf("%20s | %-8s | %-8s\r\n", "Memory Usage", "Start", "End");
-    printf("%20s-+-%-8s-+-%-9s\r\n", "--------------------", "--------", "---------");
-    printf("%20s | %08x | %08x\r\n", "kernel", &_start, &__end - 1);
-    printf("%20s | %08x | %08x\r\n", "framebuffer", fbinfo.buf, fbinfo.buf + fbinfo.buf_size - 1);
-    printf("%20s | %08x | %08x\r\n", "peripherals", PERIPHERAL_BASE, PERIPHERAL_BASE + PERIPHERAL_LENGTH - 1);
-    printf("%20s | %08x |\r\n", "(mailbox)", PERIPHERAL_BASE + MAILBOX_OFFSET);
-    printf("%20s | %08x |\r\n", "(GPIO)", PERIPHERAL_BASE + GPIO_OFFSET);
-    printf("%20s | %08x |\r\n", "(UART)", PERIPHERAL_BASE + UART0_OFFSET);
-}
-
-void cmd_help()
+static void show_help_text()
 {
     puts("\r\nCommands:\r\n");
     puts("\tclear - clear the screen\r\n");
     puts("\tcharset - show character set\r\n");
-    puts("\tdebug - show debug information\r\n");
+    puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
+    puts("\tmailbox (list|<method_name|method_id>) [...] - mailbox methods\r\n");
+    puts("\tmemory - show memory usage\r\n");
     puts("\tmode <width> <height> <depth> - set display mode\r\n");
     puts("\tpalette - show colour palette\r\n");
     puts("\treset - reset the shell\r\n");
     puts("\ttest - run tests\r\n");
+    puts("\ttime - get system clock time\r\n");
 }
 
-void mode_syntax()
+static void bad_command()
 {
-    puts("\r\nSyntax: mode <width> <height> <depth>\r\n");
+    puts("\r\nBad command\r\n");
 }
 
-void cmd_mode(char *args)
+static void escape()
 {
-    int width, height, depth;
-    char *arg1 = strchr(args, ' ');
-    if (arg1)
-    {
-        *arg1++ = '\0';
-        width = atoi(args);
-        char *arg2 = strchr(arg1, ' ');
-        if (arg2)
-        {
-            *arg2++ = '\0';
-            height = atoi(arg1);
-            depth = atoi(arg2);
-            if (width < 640 || width > 3840)
-            {
-                printf("\r\nInvalid width '%s'. Valid values are between 640 and 3840.\r\n", args);
-            }
-            else if (height < 400 || height > 2160)
-            {
-                printf("\r\nInvalid height '%s'. Valid values are between 400 and 2160.\r\n", arg1);
-            }
-            else if (depth % 8 || depth < 8 || depth > 32)
-            {
-                printf("\r\nInvalid depth '%s'. Valid values are 8, 16, 24 and 32.\r\n", arg2);
-            }
-            else
-            {
-                set_display_mode(width, height, depth);
-            }
-            return;
-        }
-    }
-    mode_syntax();
+    puts("\r\nEscape\r\n");
 }
 
-void cmd_palette()
-{
-    show_palette();
-    cursor_home();
-}
-
-void cmd_test()
-{
-    run_tests();
-}
-
-void prompt()
-{
-    putc('*');
-}
-
-int getline(char *buf, int buflen)
+static int getline(char *buf, int buflen)
 {
     int i = 0;
     char c;
@@ -202,55 +81,146 @@ int getline(char *buf, int buflen)
     return i;
 }
 
-int shell(uint64_t mem_size)
+static int split(char *str, int delim, int max_args, char **argp)
 {
-    cmd_clear();
-    printf("\r\nRaspberry Pi %ldK\r\n\r\n", mem_size >> 10);
-    command_buffer[0] = 0;
-    while (strcmp(command_buffer, "halt") && strcmp(command_buffer, "reset"))
+    int arg_count = 0;
+    char *next_arg;
+    while (*str == delim) str++;
+    while (arg_count < (max_args - 1) && ((next_arg = strchr(str, delim)) != NULL))
+    {
+        *next_arg++ = '\0';
+        while (*next_arg == delim) next_arg++;
+        argp[arg_count++] = str;
+        str = next_arg;
+    }
+    argp[arg_count++] = str;
+    argp[arg_count] = NULL;
+    return arg_count;
+}
+
+/*
+ * Shell commands follow here - switch off unused parameter warnings for these
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+static void cmd_clear(int argc, char **argv)
+{
+    putc(12);
+}
+
+void show_charset();
+static void cmd_charset(int argc, char **argv)
+{
+    show_charset();
+}
+
+void show_dump(int argc, char **argv);
+static void cmd_dump(int argc, char **argv)
+{
+    show_dump(argc, argv);
+}
+
+static void cmd_help(int argc, char **argv)
+{
+    show_help_text();
+}
+
+void mailbox_options(int argc, char **argv);
+static void cmd_mailbox(int argc, char **argv)
+{
+    mailbox_options(argc, argv);
+}
+
+void show_memory_usage();
+static void cmd_memory(int argc, char **argv)
+{
+    show_memory_usage();
+}
+
+void display_mode(int argc, char **argv);
+static void cmd_mode(int argc, char **argv)
+{
+    display_mode(argc, argv);
+}
+
+void show_palette();
+static void cmd_palette(int argc, char **argv)
+{
+    putc(12);
+    show_palette();
+}
+
+void run_tests();
+static void cmd_test(int argc, char **argv)
+{
+    run_tests();
+}
+
+void show_timers();
+static void cmd_time(int argc, char **argv)
+{
+    show_timers();
+}
+
+/*
+ * Shell commands end here - switch unused parameter warnings back on
+ */
+#pragma GCC diagnostic pop
+
+static void prompt()
+{
+    putc('*');
+}
+
+typedef struct {
+    char *name;
+    void (*function)(int, char **);
+} command_t;
+
+command_t commands[] = {
+        { .name = "help",    .function = &cmd_help },
+        { .name = "charset", .function = &cmd_charset },
+        { .name = "clear",   .function = &cmd_clear },
+        { .name = "dump",    .function = &cmd_dump },
+        { .name = "halt",    .function = NULL },
+        { .name = "mailbox", .function = &cmd_mailbox },
+        { .name = "memory",  .function = &cmd_memory },
+        { .name = "mode",    .function = &cmd_mode },
+        { .name = "palette", .function = &cmd_palette },
+        { .name = "reset",   .function = NULL },
+        { .name = "test",    .function = &cmd_test },
+        { .name = "time",    .function = &cmd_time },
+        { .name = NULL,      .function = NULL },
+};
+
+int shell()
+{
+    DEBUG_START("shell");
+    command_buffer[0] = '\0';
+    while (1)
     {
         prompt();
         int i = getline(command_buffer, COMMAND_BUFFER_SIZE);
+        int arg_count = split(command_buffer, ' ', MAX_ARGS, args);
         if (i < 0)
         {
             escape();
+            continue;
         }
-        else if (!strcmp(command_buffer, "clear"))
+        if (!strlen(command_buffer)) continue;
+        for (i = 0; commands[i].name != NULL && strcmp(commands[i].name, command_buffer); i++);
+        if (commands[i].function == NULL) break;
+        if (commands[i].name == NULL)
         {
-            cmd_clear();
-        }
-        else if (!strcmp(command_buffer, "charset"))
-        {
-            cmd_charset();
-        }
-        else if (!strcmp(command_buffer, "debug"))
-        {
-            cmd_debug();
-        }
-        else if (!strcmp(command_buffer, "help"))
-        {
-            cmd_help();
-        }
-        else if (!strcmp(command_buffer, "mode"))
-        {
-            mode_syntax();
-        }
-        else if (!strncmp(command_buffer, "mode ", 5))
-        {
-            cmd_mode(command_buffer + 5);
-        }
-        else if (!strcmp(command_buffer, "palette"))
-        {
-            cmd_palette();
-        }
-        else if (!strcmp(command_buffer, "test"))
-        {
-            cmd_test();
-        }
-        else if (strcmp(command_buffer, "") && strcmp(command_buffer, "halt") && strcmp(command_buffer, "reset"))
-        {
+            debug_printf("Bad command: %s\r\n", command_buffer);
             bad_command();
         }
+        else
+        {
+            debug_printf("Command: %s arg count: %d\r\n", command_buffer, arg_count);
+            (*(commands[i].function))(arg_count, args);
+        }
     }
+    DEBUG_END();
     return strcmp(command_buffer, "reset");
 }

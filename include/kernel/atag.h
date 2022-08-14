@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <common/stdint.h>
+#include "../common/stdint.h"
 
 typedef enum
 {

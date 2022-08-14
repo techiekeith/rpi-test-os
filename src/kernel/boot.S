@@ -5,8 +5,9 @@
 /* To keep this in the first portion of the binary. */
 .section ".text.boot"
 
-/* Make _start global. */
+/* Make _start and halt global. */
 .globl _start
+.globl halt
 
 /*
  * Entry point for the kernel.
@@ -17,8 +18,8 @@
  * preserve these registers as argument for kernel_main
  */
 _start:
-    /* shut down all cores except core 0 */
 #ifndef BCM2835
+    /* shut down all cores except core 0 */
     mrc     p15, #0, r1, c0, c0, #5
     and     r1, r1, #3          /* only interested in b0-1 of r1 */
     cmp     r1, #0              /* is this core 0? */
@@ -26,10 +27,20 @@ _start:
 #endif
 
     /*
+     * enable FPU (https://forums.raspberrypi.com/viewtopic.php?t=11183)
+     */
+    mrc     p15, #0, r0, c1, c0, #2
+    orr     r0, r0, #0x300000            /* single precision */
+    orr     r0, r0, #0xC00000            /* double precision */
+    mcr     p15, #0, r0, c1, c0, #2
+    mov     r0, #0x40000000
+    fmxr    fpexc, r0
+
+    /*
      * initialize stack pointer - this will grow downwards from 0x8000
      * kernel loads into memory at 0x8000 so this keeps the stack in a safe place
      */
-    mov     sp, #0x8000
+    ldr     sp, =_start
 
     /* initialize the BSS (uninitialized C global variables) to zero */
     ldr     r4, =__bss_start    /* start of uninitialized global variable page */
@@ -53,3 +64,5 @@ _start:
 halt:
     wfe                         /* wait for event */
     b       halt
+
+    .size	_start, .-_start

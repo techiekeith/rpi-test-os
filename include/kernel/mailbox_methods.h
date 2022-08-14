@@ -1,0 +1,83 @@
+/*
+ * mailbox.h
+ */
+
+#pragma once
+
+#include "mailbox.h"
+
+/**
+ * Information taken from https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
+ */
+mailbox_method_t mailbox_methods[] = {
+        { .method_name = "get_firmware_revision",            .tag = VC_GET_FIRMWARE_REVISION,             .request_size =0,    .response_size =4    },
+        { .method_name = "get_board_model",                  .tag = HW_GET_BOARD_MODEL,                   .request_size =0,    .response_size =4    },
+        { .method_name = "get_board_revision",               .tag = HW_GET_BOARD_REVISION,                .request_size =0,    .response_size =4    },
+        { .method_name = "get_board_mac_address",            .tag = HW_GET_BOARD_MAC_ADDRESS,             .request_size =0,    .response_size =6    },
+        { .method_name = "get_board_serial",                 .tag = HW_GET_BOARD_SERIAL,                  .request_size =0,    .response_size =8    },
+        { .method_name = "get_arm_memory",                   .tag = HW_GET_ARM_MEMORY,                    .request_size =0,    .response_size =8    },
+        { .method_name = "get_videocore_memory",             .tag = HW_GET_VIDEOCORE_MEMORY,              .request_size =0,    .response_size =8    },
+        { .method_name = "get_clocks",                       .tag = HW_GET_CLOCKS,                        .request_size =0,    .response_size =1024 }, // 8 bytes per clock, assume the worst
+        { .method_name = "get_command_line",                 .tag = CFG_GET_COMMAND_LINE,                 .request_size =0,    .response_size =1024 }, // up to size of cmd line
+        { .method_name = "get_dma_channels",                 .tag = DMA_GET_CHANNELS,                     .request_size =0,    .response_size =4    },
+        { .method_name = "get_power_state",                  .tag = PWR_GET_STATE,                        .request_size =4,    .response_size =8    },
+        { .method_name = "get_timing",                       .tag = PWR_GET_TIMING,                       .request_size =4,    .response_size =8    },
+        { .method_name = "set_power_state",                  .tag = PWR_SET_STATE,                        .request_size =8,    .response_size =8    },
+        { .method_name = "get_clock_state",                  .tag = CLK_GET_STATE,                        .request_size =4,    .response_size =8    },
+        { .method_name = "set_clock_state",                  .tag = CLK_SET_STATE,                        .request_size =8,    .response_size =8    },
+        { .method_name = "get_clock_rate",                   .tag = CLK_GET_RATE,                         .request_size =4,    .response_size =8    },
+        { .method_name = "set_clock_rate",                   .tag = CLK_SET_RATE,                         .request_size =12,   .response_size =8    },
+        { .method_name = "get_max_clock_rate",               .tag = CLK_GET_MAX_RATE,                     .request_size =4,    .response_size =8    },
+        { .method_name = "get_min_clock_rate",               .tag = CLK_GET_MIN_RATE,                     .request_size =4,    .response_size =8    },
+        { .method_name = "get_turbo",                        .tag = CLK_GET_TURBO,                        .request_size =4,    .response_size =8    },
+        { .method_name = "set_turbo",                        .tag = CLK_SET_TURBO,                        .request_size =8,    .response_size =8    },
+        { .method_name = "get_led_status",                   .tag = CLK_GET_LED_STATUS,                   .request_size =0,    .response_size =8    },
+        { .method_name = "test_led_status",                  .tag = CLK_TEST_LED_STATUS,                  .request_size =0,    .response_size =8    },
+        { .method_name = "set_led_status",                   .tag = CLK_SET_LED_STATUS,                   .request_size =8,    .response_size =8    },
+        { .method_name = "get_clock_rate_measured",          .tag = CLK_GET_RATE_MEASURED,                .request_size =4,    .response_size =8    },
+        { .method_name = "get_voltage",                      .tag = CLK_GET_VOLTAGE,                      .request_size =4,    .response_size =8    },
+        { .method_name = "set_voltage",                      .tag = CLK_SET_VOLTAGE,                      .request_size =8,    .response_size =8    },
+        { .method_name = "get_max_voltage",                  .tag = CLK_GET_MAX_VOLTAGE,                  .request_size =4,    .response_size =8    },
+        { .method_name = "get_min_voltage",                  .tag = CLK_GET_MIN_VOLTAGE,                  .request_size =4,    .response_size =8    },
+        { .method_name = "get_temperature",                  .tag = CLK_GET_TEMPERATURE,                  .request_size =4,    .response_size =8    },
+        { .method_name = "get_max_temperature",              .tag = CLK_GET_MAX_TEMPERATURE,              .request_size =4,    .response_size =8    },
+        { .method_name = "allocate_memory",                  .tag = CLK_ALLOCATE_MEMORY,                  .request_size =12,   .response_size =4    },
+        { .method_name = "lock_memory",                      .tag = CLK_LOCK_MEMORY,                      .request_size =4,    .response_size =4    },
+        { .method_name = "unlock_memory",                    .tag = CLK_UNLOCK_MEMORY,                    .request_size =4,    .response_size =4    },
+        { .method_name = "release_memory",                   .tag = CLK_RELEASE_MEMORY,                   .request_size =4,    .response_size =4    },
+        { .method_name = "execute_code",                     .tag = CLK_EXECUTE_CODE,                     .request_size =28,   .response_size =4    },
+        { .method_name = "get_dispmanx_resource_mem_handle", .tag = CLK_GET_DISPMANX_RESOURCE_MEM_HANDLE, .request_size =4,    .response_size =8    },
+        { .method_name = "get_edid_block",                   .tag = CLK_GET_EDID_BLOCK,                   .request_size =4,    .response_size =136  },
+        { .method_name = "allocate_buffer",                  .tag = FB_ALLOCATE_BUFFER,                   .request_size =4,    .response_size =8    },
+        { .method_name = "release_buffer",                   .tag = FB_RELEASE_BUFFER,                    .request_size =0,    .response_size =0    },
+        { .method_name = "blank_screen",                     .tag = FB_BLANK_SCREEN,                      .request_size =4,    .response_size =4    },
+        { .method_name = "get_physical_display_size",        .tag = FB_GET_PHYSICAL_DISPLAY_SIZE,         .request_size =0,    .response_size =8    },
+        { .method_name = "test_physical_display_size",       .tag = FB_TEST_PHYSICAL_DISPLAY_SIZE,        .request_size =8,    .response_size =8    },
+        { .method_name = "set_physical_display_size",        .tag = FB_SET_PHYSICAL_DISPLAY_SIZE,         .request_size =8,    .response_size =8    },
+        { .method_name = "get_virtual_display_size",         .tag = FB_GET_VIRTUAL_DISPLAY_SIZE,          .request_size =0,    .response_size =8    },
+        { .method_name = "test_virtual_display_size",        .tag = FB_TEST_VIRTUAL_DISPLAY_SIZE,         .request_size =8,    .response_size =8    },
+        { .method_name = "set_virtual_display_size",         .tag = FB_SET_VIRTUAL_DISPLAY_SIZE,          .request_size =8,    .response_size =8    },
+        { .method_name = "get_depth",                        .tag = FB_GET_DEPTH,                         .request_size =0,    .response_size =4    },
+        { .method_name = "test_depth",                       .tag = FB_TEST_DEPTH,                        .request_size =4,    .response_size =4    },
+        { .method_name = "set_depth",                        .tag = FB_SET_DEPTH,                         .request_size =4,    .response_size =4    },
+        { .method_name = "get_pixel_order",                  .tag = FB_GET_PIXEL_ORDER,                   .request_size =0,    .response_size =4    },
+        { .method_name = "test_pixel_order",                 .tag = FB_TEST_PIXEL_ORDER,                  .request_size =4,    .response_size =4    },
+        { .method_name = "set_pixel_order",                  .tag = FB_SET_PIXEL_ORDER,                   .request_size =4,    .response_size =4    },
+        { .method_name = "get_alpha_mode",                   .tag = FB_GET_ALPHA_MODE,                    .request_size =0,    .response_size =4    },
+        { .method_name = "test_alpha_mode",                  .tag = FB_TEST_ALPHA_MODE,                   .request_size =4,    .response_size =4    },
+        { .method_name = "set_alpha_mode",                   .tag = FB_SET_ALPHA_MODE,                    .request_size =4,    .response_size =4    },
+        { .method_name = "get_pitch",                        .tag = FB_GET_PITCH,                         .request_size =0,    .response_size =4    },
+        { .method_name = "get_virtual_offset",               .tag = FB_GET_VIRTUAL_OFFSET,                .request_size =0,    .response_size =8    },
+        { .method_name = "test_virtual_offset",              .tag = FB_TEST_VIRTUAL_OFFSET,               .request_size =8,    .response_size =8    },
+        { .method_name = "set_virtual_offset",               .tag = FB_SET_VIRTUAL_OFFSET,                .request_size =8,    .response_size =8    },
+        { .method_name = "get_overscan",                     .tag = FB_GET_OVERSCAN,                      .request_size =0,    .response_size =16   },
+        { .method_name = "test_overscan",                    .tag = FB_TEST_OVERSCAN,                     .request_size =16,   .response_size =16   },
+        { .method_name = "set_overscan",                     .tag = FB_SET_OVERSCAN,                      .request_size =16,   .response_size =16   },
+        { .method_name = "get_palette",                      .tag = FB_GET_PALETTE,                       .request_size =0,    .response_size =1024 },
+        { .method_name = "test_palette",                     .tag = FB_TEST_PALETTE,                      .request_size =1032, .response_size =4    },
+        { .method_name = "set_palette",                      .tag = FB_SET_PALETTE,                       .request_size =1032, .response_size =4    },
+        { .method_name = "set_cursor_info",                  .tag = FB_SET_CURSOR_INFO,                   .request_size =24,   .response_size =4    },
+        { .method_name = "set_cursor_state",                 .tag = FB_SET_CURSOR_STATE,                  .request_size =16,   .response_size =4    },
+        { .method_name = "set_screen_gamma_pi3",             .tag = VC_SET_SCREEN_GAMMA_PI3,              .request_size =8,    .response_size =4    },
+        { .method_name = "",                                 .tag = NULL_TAG,                             .request_size =0,    .response_size =0    },
+};

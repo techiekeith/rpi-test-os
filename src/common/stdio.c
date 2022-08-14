@@ -2,14 +2,14 @@
  * stdio.c
  */
 
-#include <common/stdarg.h>
-#include <common/stdio.h>
-#include <common/stdlib.h>
-#include <common/string.h>
-#include <common/utf8.h>
-#include <kernel/graphics.h>
-#include <kernel/io.h>
-#include <kernel/uart.h>
+#include "../../include/common/stdarg.h"
+#include "../../include/common/stdio.h"
+#include "../../include/common/stdlib.h"
+#include "../../include/common/string.h"
+#include "../../include/common/utf8.h"
+#include "../../include/kernel/graphics.h"
+#include "../../include/kernel/io.h"
+#include "../../include/kernel/uart.h"
 
 char getc()
 {
@@ -197,27 +197,10 @@ void vprintf(const char *fmt, va_list args)
     }
 }
 
-void printf(const char * fmt, ...)
+void printf(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     vprintf(fmt, args);
-    va_end(args);
-}
-
-void debug_printf(const char * fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    int channel = get_output_channel();
-    if (channel != OUTPUT_CHANNEL_UART)
-    {
-        set_output_channel(OUTPUT_CHANNEL_UART);
-    }
-    vprintf(fmt, args);
-    if (channel != OUTPUT_CHANNEL_UART)
-    {
-        set_output_channel(channel);
-    }
     va_end(args);
 }

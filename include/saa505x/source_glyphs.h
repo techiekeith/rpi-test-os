@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "../common/stdint.h"
+
 static uint8_t saa505x_source_glyphs[SOURCE_GLYPHS][SOURCE_GLYPH_ROWS] = {
   { 000, 000, 000, 000, 000, 000, 000, 000, 000 }, /* U+0020 SPACE */
   { 004, 004, 004, 004, 004, 000, 004, 000, 000 }, /* U+0021 EXCLAMATION MARK */

@@ -2,20 +2,64 @@
  * uart.c - routines for Mini-UART (on GPIO)
  */
 
-#include <common/stddef.h>
-#include <common/stdlib.h>
-#include <common/string.h>
-#include <common/utf8.h>
-#include <kernel/delay.h>
-#include <kernel/gpio.h>
-#include <kernel/mmio.h>
-#include <kernel/uart.h>
+#include "../../include/common/stddef.h"
+#include "../../include/common/string.h"
+#include "../../include/common/utf8.h"
+#include "../../include/kernel/barrier.h"
+#include "../../include/kernel/delay.h"
+#include "../../include/kernel/gpio.h"
+#include "../../include/kernel/interrupt.h"
+#include "../../include/kernel/mmio.h"
+#include "../../include/kernel/system_timer.h"
+#include "../../include/kernel/uart.h"
 
-void uart_init()
+static uart_control_t control;
+static uart_fifo_t *uart_rx_fifo;
+
+static void uart_read()
 {
-    uart_control_t control;
+    volatile uart_flags_t flags;
+    flags.as_int = mmio_read(UART0_FR);
+    if (flags.receive_queue_full) {
+        uart_rx_fifo->hw_fifo_full++;
+    }
+    while (!flags.receive_queue_empty)
+    {
+        if (uart_rx_fifo->buffer_full) break;
+        uart_rx_fifo->buffer[uart_rx_fifo->end++] = mmio_read(UART0_DR);
+        uart_rx_fifo->end %= UART_FIFO_BUFFER_SIZE;
+        if (uart_rx_fifo->end == uart_rx_fifo->start) uart_rx_fifo->buffer_full = 1;
+        flags.as_int = mmio_read(UART0_FR);
+    }
+}
 
+static void uart_interrupt_handler()
+{
+}
+
+static void uart_interrupt_clearer()
+{
+    __dmb();
+    mmio_write(UART0_ICR, (1 << 4)); // Clear interrupt
+    uart_read();
+    __dmb();
+}
+
+/*
+ * Set integer & fractional part of baud rate.
+ * Divider = UART_CLOCK/(16 * Baud)
+ * Fraction part register = (Fractional part * 64) + 0.5
+ * UART_CLOCK = 3000000.
+ */
+void uart_set_baud_rate(int baud_rate)
+{
+    mmio_write(UART0_IBRD, INTEGER_BAUD_RATE(baud_rate));
+    mmio_write(UART0_FBRD, FRACTION_BAUD_RATE(baud_rate));
+}
+
+void uart_init() {
     /* Disable UART0. */
+    __dmb();
     memset(&control, 0, 4);
     mmio_write(UART0_CR, 0x00000000);
     /* Setup the GPIO pin 14 && 15. */
@@ -34,50 +78,53 @@ void uart_init()
     /* Clear pending interrupts. */
     mmio_write(UART0_ICR, 0x7FF);
 
-    /*
-     * Set integer & fractional part of baud rate.
-     * Divider = UART_CLOCK/(16 * Baud)
-     * Fraction part register = (Fractional part * 64) + 0.5
-     * UART_CLOCK = 3000000; Baud = 115200.
-     */
+    /* Set baud rate. */
+    mmio_write(UART0_IBRD, INTEGER_BAUD_RATE(BAUD_RATE));
+    mmio_write(UART0_FBRD, FRACTION_BAUD_RATE(BAUD_RATE));
 
-    /* Divider = 3000000 / (16 * 115200) = 1.627 = ~1. */
-    mmio_write(UART0_IBRD, 1);
-    /* Fractional part register = (.627 * 64) + 0.5 = 40.6 = ~40. */
-    mmio_write(UART0_FBRD, 40);
-
-    /* Enable FIFO & 8 bit data transmissio (1 stop bit, no parity). */
+    /* Enable FIFO & 8 bit data transmission (1 stop bit, no parity). */
     mmio_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
 
     /* Mask all interrupts. */
-    mmio_write(UART0_IMSC, (1 << 1) | (1 << 4) | (1 << 5) | (1 << 6) |
-            (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10));
+    mmio_write(UART0_IMSC, 0);
 
     /* Enable UART0, receive & transfer part of UART. */
     control.uart_enabled = 1;
     control.transmit_enabled = 1;
     control.receive_enabled = 1;
     mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
+
+    /* Initialize RX FIFO. */
+    uart_rx_fifo = (uart_fifo_t *)UART_RX_FIFO;
+    memset(uart_rx_fifo, 0, sizeof(uart_fifo_t));
+    uart_rx_fifo->buffer = (unsigned char *)UART_RX_FIFO_BUFFER;
+    memset(uart_rx_fifo->buffer, 0, UART_FIFO_BUFFER_SIZE);
 }
 
-uart_flags_t read_flags()
+void uart_enable_interrupts()
 {
-    uart_flags_t flags;
-    flags.as_int = mmio_read(UART0_FR);
-    return flags;
+    /* Register UART interrupt handler. */
+    register_irq_handler(UART_INT, uart_interrupt_handler, uart_interrupt_clearer);
+
+    /* Set interrupt FIFO level. */
+    mmio_write(UART0_IFLS, 0);
+
+    /* Unmask RX DATA interrupts. */
+    mmio_write(UART0_IMSC, (1 << 4));
 }
 
 void uart_putc(int c)
 {
-    uart_flags_t flags;
+    volatile uart_flags_t flags;
     /* Wait for UART to become ready to transmit. */
     do {
-        flags = read_flags();
+        flags.as_int = mmio_read(UART0_FR);
     }
     while (flags.transmit_queue_full);
 
     char buffer[5];
     utf8_encode(c, buffer);
+    __dmb();
     for (char *p = buffer; *p; p++) {
         mmio_write(UART0_DR, *p);
     }
@@ -85,18 +132,17 @@ void uart_putc(int c)
 
 unsigned char uart_getc()
 {
-    uart_flags_t flags;
-    /* Wait for UART to have received something. */
-    do {
-        flags = read_flags();
+    unsigned char rx_char;
+    while (1)
+    {
+        if (uart_rx_fifo->start != uart_rx_fifo->end)
+        {
+            rx_char = uart_rx_fifo->buffer[uart_rx_fifo->start++];
+            uart_rx_fifo->buffer_full = 0;
+            uart_rx_fifo->start %= UART_FIFO_BUFFER_SIZE;
+            break;
+        }
+        asm("wfi");
     }
-    while (flags.receive_queue_empty);
-    return mmio_read(UART0_DR);
+    return rx_char;
 }
-
-void uart_puts(const char *str)
-{
-    for (size_t i = 0; str[i] != '\0'; i ++)
-        uart_putc((unsigned char)str[i]);
-}
-

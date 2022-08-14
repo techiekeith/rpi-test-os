@@ -2,8 +2,8 @@
  * utf8.c
  */
 
-#include <common/stddef.h>
-#include <common/stdint.h>
+#include "../../include/common/stddef.h"
+#include "../../include/common/stdint.h"
 
 static char default_utf8_buffer[5];
 
@@ -62,7 +62,7 @@ int utf8_decode(const char *s, char **next)
 {
     uint8_t *p = (uint8_t *)s;
     uint8_t c0 = *p++;
-    *next = p;
+    *next = (char *)p;
     if (!(c0 & 0x80))
         return (int)c0; // ASCII character
     if (c0 < 0xc2 || c0 > 0xf4)
@@ -72,7 +72,7 @@ int utf8_decode(const char *s, char **next)
         return REPLACEMENT_CHARACTER; // Not a continuation character
     if (c0 < 0xe0)
     {
-        *next = p;
+        *next = (char *)p;
         return ((c0 & 0x1f) << 6) | (c1 & 0x3f); // Valid 2-byte sequence
     }
     uint8_t c2 = *p++;
@@ -84,7 +84,7 @@ int utf8_decode(const char *s, char **next)
         return REPLACEMENT_CHARACTER; // U+D800..U+DFFF are not valid UTF-8
     if (c0 < 0xf0)
     {
-        *next = p;
+        *next = (char *)p;
         return ((c0 & 0xf) << 12) | ((c1 & 0x3f) << 6) | (c2 & 0x3f); // Valid 3-byte sequence
     }
     uint8_t c3 = *p++;
@@ -94,7 +94,7 @@ int utf8_decode(const char *s, char **next)
         return REPLACEMENT_CHARACTER; // overlong 4-byte sequence
     if ((c0 == 0xf4) && ((c1 & 0xf0) != 0x80))
         return REPLACEMENT_CHARACTER; // UTF-8 ends at U+10FFFF
-    *next = p;
+    *next = (char *)p;
     return ((c0 & 7) << 18) | ((c1 & 0x3f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f); // Valid 4-byte sequence
 }
 

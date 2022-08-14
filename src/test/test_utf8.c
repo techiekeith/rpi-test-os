@@ -2,8 +2,8 @@
  * test_utf8.c - entry point for tests.
  */
 
-#include <common/stdio.h>
-#include <common/utf8.h>
+#include "../../include/common/stdio.h"
+#include "../../include/common/utf8.h"
 
 void test_utf8()
 {

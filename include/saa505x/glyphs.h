@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <common/stdint.h>
+#include "../common/stdint.h"
 
 #define SOURCE_GLYPHS               321
 #define SOURCE_GLYPH_ROWS           9

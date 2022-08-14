@@ -2,10 +2,11 @@
  * stdlib.c
  */
 
-#include <common/stddef.h>
-#include <common/stdio.h>
-#include <common/stdlib.h>
-#include <kernel/mem.h>
+#include "../../include/common/limits.h"
+#include "../../include/common/stddef.h"
+#include "../../include/common/stdio.h"
+#include "../../include/common/stdlib.h"
+#include "../../include/kernel/heap.h"
 
 /* maximum size for 64-bit binary plus sign and terminating NUL. */
 #define BUFFER_SIZE 66
@@ -43,21 +44,6 @@ static char *ntoa(unsigned long long number, unsigned long long radix, int sign,
     return buffer;
 }
 
-int abs(int j)
-{
-    return j < 0 ? -j : j;
-}
-
-long labs(long j)
-{
-    return j < 0L ? -j : j;
-}
-
-long long llabs(long long j)
-{
-    return j < 0LL ? -j : j;
-}
-
 char *ultoa(unsigned long long number, int radix, char *buffer)
 {
     return ntoa(number, radix, 0, buffer);
@@ -82,31 +68,93 @@ char *itoa(int number, int radix, char *buffer)
     return ntoa(sign ? -cast : cast, radix, sign, buffer);
 }
 
-int atoi(char *str)
+long long strtoll(const char *str, char **endptr, int base)
 {
-    int res = 0, sign = 0;
-    char *p = str;
+    long long res = 0;
+    int sign = 1;
+    char *p = (char *)str;
+
+    if (base && (base < 2 || base > 36))
+    {
+        return 0;
+    }
 
     if (*p == '-')
     {
-        sign = 1;
+        sign = -1;
         p++;
     }
-    while (*p >= '0' && *p <= '9')
+    if (!base)
     {
-        res = res * 10 + *p - '0';
+        if (*p == '0')
+        {
+            p++;
+            base = 8;
+            if ((*p & 0x5f) == 'X')
+            {
+                base <<= 1;
+                p++;
+            }
+            if ((*p & 0x5f) == 'B')
+            {
+                base >>= 2;
+                p++;
+            }
+        }
+        else
+        {
+            base = 10;
+        }
+    }
+    while (((*p >= '0') && (*p <= ((base > 10) ? '9' : ('/' + base))))
+        || ((base > 10) && ((*p & 0x5f) >= 'A' && (*p & 0x5f) <= ('6' + base))))
+    {
+        long long next = res * base + sign * (*p - ((*p & 0x40) ? ((*p & 0x20) + '7') : '0'));
+        if (res < 0 && next > res) next = LLONG_MIN;
+        if (res > 0 && next < res) next = LLONG_MAX;
+        res = next;
         p++;
     }
+    if (endptr != NULL) *endptr = p;
+    return res;
+}
 
-    return sign ? -res : res;
+static long lclamp(long long a)
+{
+    return a < LONG_MIN ? LONG_MIN : a > LONG_MAX ? LONG_MAX : a;
+}
+
+long strtol(const char *str, char **endptr, int base)
+{
+    return lclamp(strtoll(str, endptr, base));
+}
+
+int atoi(const char *nptr)
+{
+    return (int) strtol(nptr, NULL, 10);
+}
+
+int abs(int j)
+{
+    return j < 0 ? -j : j;
+}
+
+long labs(long j)
+{
+    return j < 0L ? -j : j;
+}
+
+long long llabs(long long j)
+{
+    return j < 0LL ? -j : j;
 }
 
 void *malloc(size_t bytes)
 {
-    return bytes ? kmalloc(bytes) : NULL;
+    return bytes ? heap_alloc("malloc", bytes) : NULL;
 }
 
 void free(void *ptr)
 {
-    kfree(ptr);
+    heap_free(ptr);
 }

@@ -4,7 +4,6 @@
 
 .globl __aeabi_ldivmod
 .globl __aeabi_uldivmod
-.align 2
 
 /*
  * __aeabi_ldivmod
@@ -49,6 +48,7 @@ skip_neg_r0_r1:
     adc     r3, #0              /* make remainder a negative integer */
 skip_neg_r2_r3:
     pop     { r4, r5, pc }      /* end function */
+    .size	__aeabi_ldivmod, .-__aeabi_ldivmod
 
 /*
  * __aeabi_uldivmod
@@ -100,3 +100,4 @@ skip2:
     bcc     loop2               /* while there are still bits to process */
 divzero:
     pop     { r4-r7, pc }       /* end function */
+    .size	__aeabi_uldivmod, .-__aeabi_uldivmod
