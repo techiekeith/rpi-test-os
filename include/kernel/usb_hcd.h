@@ -32,6 +32,12 @@
 #define HCD_HOST_CONFIG                     (HOST_GLOBAL_OFFSET + 0x00)
 #define HCD_HOST_PORT                       (HOST_GLOBAL_OFFSET + 0x40)
 #define HCD_HOST_CHANNEL(x)                 (HOST_GLOBAL_OFFSET + 0x100 + 0x20 * (x))
+#define HCD_HOST_CHANNEL_CHARACTERISTIC(x)  (HCD_HOST_CHANNEL(x) + 0x00)
+#define HCD_HOST_CHANNEL_SPLIT_CONTROL(x)   (HCD_HOST_CHANNEL(x) + 0x04)
+#define HCD_HOST_CHANNEL_INTERRUPT(x)       (HCD_HOST_CHANNEL(x) + 0x08)
+#define HCD_HOST_CHANNEL_INTERRUPT_MASK(x)  (HCD_HOST_CHANNEL(x) + 0x0c)
+#define HCD_HOST_CHANNEL_TRANSFER_SIZE(x)   (HCD_HOST_CHANNEL(x) + 0x10)
+#define HCD_HOST_CHANNEL_DMA_ADDRESS(x)     (HCD_HOST_CHANNEL(x) + 0x14)
 
 #define HCD_POWER                           (POWER_CLOCK_OFFSET + 0x00)
 
@@ -96,6 +102,21 @@ typedef enum {
     CLOCK_48_MHZ,
     CLOCK_6_MHZ
 } host_clock_rate_t;
+
+typedef enum {
+    TRANSACTION_POSITION_MIDDLE = 0,
+    TRANSACTION_POSITION_END = 1,
+    TRANSACTION_POSITION_BEGIN = 2,
+    TRANSACTION_POSITION_ALL = 3,
+} transaction_position_t;
+
+typedef enum {
+    PACKET_ID_DATA0 = 0,
+    PACKET_ID_DATA1 = 2,
+    PACKET_ID_DATA2 = 1,
+    PACKET_ID_MDATA = 3,
+    PACKET_ID_SETUP = 3
+} packet_id_t;
 
 typedef struct {
     bool ses_req_scs: 1;
@@ -315,15 +336,37 @@ typedef struct {
 } __attribute__ ((__packed__)) hcd_host_channel_characteristic_t;
 
 typedef struct {
-    uint32_t value;
+    uint8_t port_address: 7;
+    uint8_t hub_address: 7;
+    transaction_position_t transaction_position: 2;
+    bool complete_split: 1;
+    uint16_t reserved_17_30: 14;
+    bool split_enable: 1;
 } __attribute__ ((__packed__)) hcd_host_channel_split_control_t;
 
 typedef struct {
-    uint32_t value;
+    bool transfer_complete: 1;
+    bool halt: 1;
+    bool abh_error: 1;
+    bool stall: 1;
+    bool negative_acknowledgement: 1;
+    bool acknowledgement: 1;
+    bool not_yet: 1;
+    bool transaction_error: 1;
+    bool babble_error: 1;
+    bool frame_overrun: 1;
+    bool data_toggle_error: 1;
+    bool buffer_not_available: 1;
+    bool excessive_transmission: 1;
+    bool frame_list_rollover: 1;
+    uint32_t reserved_14_31: 18;
 } __attribute__ ((__packed__)) hcd_host_channel_interrupt_t;
 
 typedef struct {
-    uint32_t value;
+    uint32_t transfer_size: 19;
+    uint16_t packet_count: 10;
+    packet_id_t packet_id: 2;
+    bool do_ping: 1;
 } __attribute__ ((__packed__)) hcd_host_channel_transfer_size_t;
 
 typedef struct {
@@ -341,7 +384,7 @@ typedef struct {
     hcd_host_channel_t channel[CHANNEL_COUNT];
 } __attribute__ ((__packed__)) hcd_host_channels_t;
 
-int hcd_submit_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer, uint32_t buffer_length,
-                               usb_device_request_t *request);
-int hcd_init();
-int hcd_start();
+usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
+                                             uint32_t buffer_length, usb_device_request_t *request);
+usb_call_result_t hcd_init();
+usb_call_result_t hcd_start();

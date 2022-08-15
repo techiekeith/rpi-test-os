@@ -4,6 +4,7 @@
 
 #include "../../include/common/stddef.h"
 #include "../../include/common/stdint.h"
+#include "../../include/common/string.h"
 
 static char default_utf8_buffer[5];
 
@@ -51,6 +52,68 @@ char *utf8_encode(int c, char *buffer)
 
     *p = '\0';
     return buffer;
+}
+
+/*
+ * Converts a UCS-16 string (such as is found in USB strings) into UTF-8, up to a maximum number of bytes
+ * including the terminating NUL character. The resulting string will always be NUL-terminated, and truncated
+ * a UTF-8 byte sequence boundary if necessary to fit within the specified target buffer size.
+ */
+void ucs16_to_utf8(char *utf8_buffer, const uint16_t *ucs16_string, size_t utf8_buffer_size, size_t ucs16_string_length)
+{
+    char *p = utf8_buffer;
+    int bytes_remaining = utf8_buffer_size;
+    uint16_t code_point, surrogate = 0;
+    for (int i = 0; i < ucs16_string_length; i++)
+    {
+        if (surrogate == 0)
+        {
+            if ((ucs16_string[i] & 0xfc00) == 0xd800)
+            {
+                surrogate = ucs16_string[i];
+                continue;
+            }
+            else if ((code_point & 0xfc00) == 0xdc00)
+            {
+                // Unpaired low surrogate, use placeholder
+                code_point = REPLACEMENT_CHARACTER;
+            }
+            else
+            {
+                code_point = ucs16_string[i];
+            }
+        }
+        else
+        {
+            if ((ucs16_string[i] & 0xfc00) == 0xdc00)
+            {
+                code_point = 0x10000 | ((surrogate & 0x3ff) << 10) | (ucs16_string[i] & 0x3ff);
+            }
+            else
+            {
+                // Unpaired high surrogate, use placeholder and rewind
+                code_point = REPLACEMENT_CHARACTER;
+                i--;
+            }
+            surrogate = 0;
+        }
+        int size;
+        if (bytes_remaining > 4)
+        {
+            utf8_encode(code_point, p);
+            size = strlen(p);
+        }
+        else
+        {
+            utf8_encode(code_point, default_utf8_buffer);
+            size = strlen(default_utf8_buffer);
+            if (size >= bytes_remaining) break;
+            strncpy(p, default_utf8_buffer, size);
+        }
+        p += size;
+        bytes_remaining -= size;
+    }
+    *p = '\0';
 }
 
 /**

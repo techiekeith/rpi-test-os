@@ -72,7 +72,8 @@ static uint32_t get_value_buffer_size(property_tag_t tag)
 {
     int i;
     for (i = 0; mailbox_methods[i].tag != NULL_TAG && mailbox_methods[i].tag != tag; i++);
-    return mailbox_methods[i].tag == NULL_TAG ? 0 : MAX(mailbox_methods[i].request_size, mailbox_methods[i].response_size);
+    return mailbox_methods[i].tag == NULL_TAG ? 0 :
+            MAX(mailbox_methods[i].request_size, mailbox_methods[i].response_size, uint32_t);
 }
 
 int send_messages(property_message_tag_t *tags)

@@ -15,6 +15,21 @@
 #define MAXIMUM_USB_DEVICES             32
 #define CONTROL_MESSAGE_TIMEOUT         10
 
+#define INTERFACE_CLASS_ATTACH_COUNT    16
+
+typedef enum {
+    OK = 0,
+    ERROR_GENERAL = -1,
+    ERROR_ARGUMENT = -2,
+    ERROR_RETRY = -3,
+    ERROR_DEVICE = -4,
+    ERROR_INCOMPATIBLE = -5,
+    ERROR_COMPILER = -6,
+    ERROR_MEMORY = -7,
+    ERROR_TIMEOUT = -8,
+    ERROR_DISCONNECTED = -9
+} usb_call_result_t;
+
 typedef enum {
     USB_TRANSFER_TYPE_CONTROL,
     USB_TRANSFER_TYPE_ISOCHRONOUS,
@@ -23,8 +38,10 @@ typedef enum {
 } usb_transfer_type_t;
 
 typedef enum {
-    HOST_TO_DEVICE = 0, // aka "Out"
-    DEVICE_TO_HOST = 1  // aka "In"
+    /* Host to device, sometimes "out". */
+    HOST_TO_DEVICE = 0,
+    /* Device to host, sometimes "in". */
+    DEVICE_TO_HOST = 1
 } usb_direction_t;
 
 typedef enum {
@@ -132,6 +149,12 @@ typedef struct {
     uint32_t device_driver;
     uint32_t data_size;
 } usb_driver_data_header_t;
+
+
+typedef struct {
+    uint8_t descriptor_length;
+    descriptor_type_t descriptor_type: 8;
+} __attribute__((packed)) usb_descriptor_header_t;
 
 typedef struct {
     uint8_t descriptor_length;
@@ -305,4 +328,5 @@ inline uint32_t packet_size_to_number(usb_packet_size_t size)
     return 64;
 }
 
-void usb_init();
+const char *usb_get_description(device);
+usb_call_result_t usb_init();

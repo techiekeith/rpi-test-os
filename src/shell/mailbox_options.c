@@ -97,7 +97,7 @@ void mailbox_options(int argc, char **argv)
         printf("Error code %d\r\n", rv);
         return;
     }
-    for (int i = 0; i < (int)(MIN((method->response_size + 3) / 4, 16)); i++)
+    for (int i = 0; i < (int)(MIN((method->response_size + 3) / 4, 16, uint32_t)); i++)
     {
         if (fbinfo.current_column + 9 >= fbinfo.columns)
         {
