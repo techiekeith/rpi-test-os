@@ -20,23 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/include/kernel/system_timer.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/kernel/usb.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kernel/arm_timer.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kernel/old_mailbox/usb_power.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kernel/usb.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/shell/timers.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/kernel/usb_hcd.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel/usb_hcd.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/mailbox.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/mailbox.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/mmio.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/mmio.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/kernel/peripheral.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/peripheral.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/timer.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/arm_timer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/graphics.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/graphics.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/oldfb/framebuffer.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/old_mailbox/framebuffer.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/timer.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/system_timer.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/uart.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/uart.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/usb/usbd.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/shell.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/shell.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_raspi1ap.bat" beforeDir="false" afterPath="$PROJECT_DIR$/run_raspi1ap.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_raspi2b.bat" beforeDir="false" afterPath="$PROJECT_DIR$/run_raspi2b.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/stdio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/stdio.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/mmio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mmio.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +48,16 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitRewordedCommitMessages">
+    <option name="commitMessagesMapping">
+      <RewordedCommitMessageMapping>
+        <option name="originalMessage" value="mailbox methods" />
+        <option name="rewordedMessage" value="mailbox, timers, tweaks" />
+      </RewordedCommitMessageMapping>
+    </option>
+    <option name="currentCommit" value="1" />
+    <option name="onto" value="94ddb25ab9b6e34ce29a83e173905977b91b3a56" />
   </component>
   <component name="MakefileLocalSettings">
     <option name="availableProjects">
@@ -102,27 +107,22 @@
     "WebServerToolWindowFactoryState": "false",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "last_opened_file_path": "C:/Users/keith/repos/rpi-test-os/include/kernel",
+    "last_opened_file_path": "C:/Users/keith/repos/rpi-test-os/src/kernel",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "CLionExternalConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel" />
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
+      <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel" />
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel\oldfb" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
     </key>
   </component>
-  <component name="RunManager" selected="Makefile Application.Build">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="Remote Debug.Raspberry Pi Model B">
     <configuration name="Build" type="CLionNativeAppRunConfigurationType" PROGRAM_PARAMS="-c echo" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-test-os" TARGET_NAME="Make (WSL)" CONFIG_NAME="Make (WSL)" version="1" RUN_PATH="/usr/bin/bash">
       <method v="2" />
     </configuration>
@@ -135,7 +135,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Raspberry Pi 2 (GDB)" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi2b -name raspi2b-debug -m 1G -serial stdio -kernel dist\raspi2b_g.elf" />
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi2b -name raspi2b-debug -m 1G -serial stdio -usb -usbdevice keyboard -kernel dist\raspi2b_g.elf" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -150,7 +150,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Raspberry Pi 2" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi2b -name raspi2b -m 1G -serial stdio -kernel dist\raspi2b.elf" />
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi2b -name raspi2b -m 1G -serial stdio -usb -usbdevice keyboard -kernel dist\raspi2b.elf" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -165,7 +165,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Raspberry Pi Model B (GDB)" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi1ap -name raspi1ap-debug -m 512M -serial stdio -kernel dist\raspi1ap_g.elf" />
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi1ap -name raspi1ap-debug -m 512M -serial stdio -usb -usbdevice keyboard -kernel dist\raspi1ap_g.elf" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -180,7 +180,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Raspberry Pi Model B" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi1ap -name raspi1ap -m 512M -serial stdio -kernel dist\raspi1ap.elf" />
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi1ap -name raspi1ap -m 512M -serial stdio -usb -usbdevice keyboard -kernel dist\raspi1ap.elf" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -203,11 +203,6 @@
       <item itemvalue="Shell Script.Raspberry Pi 2" />
       <item itemvalue="Shell Script.Raspberry Pi 2 (GDB)" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Makefile Target.clean" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -219,7 +214,9 @@
       <updated>1660324901590</updated>
       <workItem from="1660324906248" duration="27025000" />
       <workItem from="1660378529573" duration="26586000" />
-      <workItem from="1660411234755" duration="22803000" />
+      <workItem from="1660411234755" duration="23504000" />
+      <workItem from="1660460612701" duration="246000" />
+      <workItem from="1660476696831" duration="32686000" />
     </task>
     <servers />
   </component>
@@ -236,6 +233,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Exception handling, interrupts, timers, debugging, more refactoring" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
