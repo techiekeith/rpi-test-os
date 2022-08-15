@@ -31,10 +31,10 @@ typedef enum {
 } usb_call_result_t;
 
 typedef enum {
-    USB_TRANSFER_TYPE_CONTROL,
-    USB_TRANSFER_TYPE_ISOCHRONOUS,
-    USB_TRANSFER_TYPE_BULK,
-    USB_TRANSFER_TYPE_INTERRUPT
+    USB_TRANSFER_TYPE_CONTROL = 0,
+    USB_TRANSFER_TYPE_ISOCHRONOUS = 1,
+    USB_TRANSFER_TYPE_BULK = 2,
+    USB_TRANSFER_TYPE_INTERRUPT = 3
 } usb_transfer_type_t;
 
 typedef enum {
@@ -66,7 +66,7 @@ typedef enum {
 } usb_device_status_t;
 
 typedef enum {
-    USB_TRANSFER_ERROR_NONE = 0,
+    USB_TRANSFER_OK = 0,
     USB_TRANSFER_ERROR_STALL = 1 << 1,
     USB_TRANSFER_ERROR_BUFFER_ERROR = 1 << 2,
     USB_TRANSFER_ERROR_BABBLE = 1 << 3,
@@ -328,5 +328,5 @@ inline uint32_t packet_size_to_number(usb_packet_size_t size)
     return 64;
 }
 
-const char *usb_get_description(device);
+const char *usb_get_description(usb_device_t *device);
 usb_call_result_t usb_init();

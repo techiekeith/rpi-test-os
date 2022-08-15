@@ -15,7 +15,7 @@
 
 DEBUG_INIT("usb");
 
-const char *device_speeds[4] = { "480 Mb/s", "1.5 Mb/s", "12 Mb/s", "unknown speed" };
+static const char device_speeds[4][16] = { "480 Mb/s", "1.5 Mb/s", "12 Mb/s", "unknown speed" };
 
 static usb_device_t *devices[MAXIMUM_USB_DEVICES];
 static usb_call_result_t (*interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT])(usb_device_t *device, uint32_t interface_number);
@@ -145,7 +145,7 @@ static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_addr
 
     if (device->error & ~USB_TRANSFER_ERROR_PROCESSING)
     {
-        if (device->parent && device->parent->device_check_connection)
+        if ((device->parent != NULL) && (device->parent->device_check_connection != NULL))
         {
             debug_printf("USBD: Verifying %s is still connected.\r\n", usb_get_description(device));
             if (device->parent->device_check_connection(device->parent, device) != OK)
@@ -291,7 +291,7 @@ static usb_call_result_t usb_allocate_device(usb_device_t **devicep)
 {
     DEBUG_START("usb_allocate_device");
 
-    *devicep = heap_alloc("usb", sizeof(usb_device_t));
+    *devicep = heap_alloc("usb_allocate_device", sizeof(usb_device_t));
     if (!*devicep)
     {
         debug_printf("USBD: Failed to allocate memory for new device.\r\n");
@@ -313,7 +313,7 @@ static usb_call_result_t usb_allocate_device(usb_device_t **devicep)
     debug_printf("USBD: Allocating new device, address %d.\r\n", (*devicep)->number);
 
     (*devicep)->status = USB_DEVICE_STATUS_ATTACHED;
-    (*devicep)->error = USB_TRANSFER_ERROR_NONE;
+    (*devicep)->error = USB_TRANSFER_OK;
     (*devicep)->port_number = 0;
     (*devicep)->parent = NULL;
     (*devicep)->driver_data = NULL;
@@ -589,7 +589,7 @@ static usb_call_result_t usb_attach_device(usb_device_t *device)
     char *buffer;
     uint8_t address = device->number;
     device->number = 0;
-    debug_printf("USBD: Scanning %d. %s.\r\n", address, device_speeds[device->speed]);
+    debug_printf("USBD: Scanning %d. %s.\r\n", address, device_speeds[MIN(device->speed, 3, uint8_t)]);
 
     // Read device descriptor
     if ((result = usb_read_device_descriptor(device)) != OK)
@@ -638,7 +638,7 @@ static usb_call_result_t usb_attach_device(usb_device_t *device)
                  device->descriptor.configuration_count, device->configuration.interface_count);
 
     // Read and display product, manufacturer, serial number
-    buffer = heap_alloc("usb", 0x100);
+    buffer = heap_alloc("usb_attach_device", 0x100);
     if (buffer != NULL)
     {
         if (device->descriptor.product != 0)

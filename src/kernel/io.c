@@ -9,6 +9,7 @@
 #include "../../include/kernel/heap.h"
 
 static int input_channel, output_channel;
+int debug_counter;
 #define DEBUG_ENTRY_SIZE 64
 typedef struct debug_entry {
     char filename[DEBUG_ENTRY_SIZE];

@@ -11,6 +11,11 @@ void mmio_write(uint32_t reg, uint32_t data)
     *(volatile uint32_t *)reg = data;
 }
 
+void mmio_write_with_mask(uint32_t reg, volatile void *buffer, uint32_t mask)
+{
+    mmio_write(reg, *((uint32_t *)buffer) & mask);
+}
+
 void mmio_write_out(uint32_t reg, volatile void *buffer, size_t words)
 {
     volatile uint32_t *word_aligned_buffer = (uint32_t *)buffer;

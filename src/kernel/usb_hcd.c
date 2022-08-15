@@ -10,12 +10,11 @@
 #include "../../include/kernel/mailbox.h"
 #include "../../include/kernel/mmio.h"
 #include "../../include/kernel/usb_hcd.h"
+#include "../../include/kernel/usb_root_hub.h"
 
 DEBUG_INIT("usb_hcd");
 
 static bool phy_initialized = false;
-
-static uint32_t root_hub_device_number;
 
 static uint8_t data_buffer[1024];
 
@@ -81,7 +80,7 @@ usb_call_result_t hcd_init()
 
     // Check hardware capabilities
     debug_printf("vendor_id=%p, user_id=%p\r\n", vendor_id, user_id);
-    if ((vendor_id & 0xfffff000) == 0x4f542000) // 'OT2.x'
+    if ((vendor_id & OT2_VENDOR_ID_MASK) == OT2_VENDOR_ID_MATCH) // 'OT2.x'
     {
         debug_printf("Host Controller Device: %c%c%x.%x (BCM%05x)\r\n",
                      (vendor_id >> 24) & 0xff, (vendor_id >> 16) & 0xff,
@@ -164,7 +163,7 @@ static usb_call_result_t hcd_reset()
     timeout = 0;
     do {
         mmio_read_in(HCD_RESET, &reset, 1);
-        if (timeout++ >= 0x100000)
+        if (timeout++ >= DEVICE_RESET_TIMEOUT)
         {
             debug_printf("AHB Master Idle: %d\n", reset.ahb_master_idle);
             debug_printf("HCD: Device hang! (%p)\r\n", reset);
@@ -180,7 +179,7 @@ static usb_call_result_t hcd_reset()
     timeout = 0;
     do {
         mmio_read_in(HCD_RESET, &reset, 1);
-        if (timeout++ >= 0x100000)
+        if (timeout++ >= DEVICE_RESET_TIMEOUT)
         {
             debug_printf("AHB Core Soft: %d\n", reset.core_soft);
             debug_printf("AHB Master Idle: %d\n", reset.ahb_master_idle);
@@ -221,7 +220,7 @@ static usb_call_result_t hcd_transmit_fifo_flush(flush_number_t flush_number)
     uint32_t timeout = 0;
     do {
         mmio_read_in(HCD_RESET, &reset, 1);
-        if (timeout++ >= 0x100000)
+        if (timeout++ >= DEVICE_RESET_TIMEOUT)
         {
             debug_printf("Tx FIFO Flush: %d\n", reset.transmit_fifo_flush);
             debug_printf("HCD: Device hang! (%p)\r\n", reset);
@@ -249,7 +248,7 @@ static usb_call_result_t hcd_receive_fifo_flush()
     uint32_t timeout = 0;
     do {
         mmio_read_in(HCD_RESET, &reset, 1);
-        if (timeout++ >= 0x100000)
+        if (timeout++ >= DEVICE_RESET_TIMEOUT)
         {
             debug_printf("Tx FIFO Flush: %d\n", reset.receive_fifo_flush);
             debug_printf("HCD: Device hang! (%p)\r\n", reset);
@@ -482,7 +481,7 @@ usb_call_result_t hcd_start()
             do {
                 mmio_read_in(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);
                 __dmb();
-                if (timeout++ >= 0x100000)
+                if (timeout++ >= DEVICE_RESET_TIMEOUT)
                 {
                     debug_printf("HCD: Unable to clear halt on channel %d. (%p)\r\n", channel, characteristic);
                     break;
@@ -518,25 +517,53 @@ usb_call_result_t hcd_start()
     return OK;
 }
 
-static usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
-                                                      uint32_t buffer_length, usb_device_request_t *request)
-{
-    DEBUG_START("hcd_process_root_hub_message");
-
-    // TODO
-    debug_printf("TODO\r\n");
-
-    DEBUG_END();
-    return OK;
-}
-
 static usb_call_result_t hcd_prepare_channel(usb_device_t *device, uint8_t channel, uint32_t length, packet_id_t type,
                                              usb_pipe_address_t *pipe)
 {
     DEBUG_START("hcd_prepare_channel");
 
-    // TODO
-    debug_printf("TODO\r\n");
+    hcd_hardware_t hardware;
+    mmio_read_in(HCD_HARDWARE, &hardware, 4);
+    if (channel > hardware.host_channel_count)
+    {
+        debug_printf("HCD: Channel %d is not available on this host.\r\n", channel);
+        DEBUG_END();
+        return ERROR_ARGUMENT;
+    }
+
+    // Clear all existing interrupts.
+    mmio_write(HCD_HOST_CHANNEL_INTERRUPT(channel), ALL_BITS);
+
+    // Program the channel.
+    hcd_host_channel_characteristic_t characteristic = {
+        .device_address = pipe->device,
+        .endpoint_number = pipe->endpoint,
+        .endpoint_direction = pipe->direction,
+        .low_speed = (pipe->speed == USB_SPEED_LOW),
+        .type = pipe->type,
+        .maximum_packet_size = packet_size_to_number(pipe->max_size),
+        .enable = false,
+        .disable = false
+    };
+    mmio_write_out(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);
+
+    // Clear split control. (added '&& device->parent' here to prevent any unexpected NPE)
+    hcd_host_channel_split_control_t split_control = {};
+    if (pipe->speed != USB_SPEED_HIGH && device->parent) {
+        split_control.split_enable = true;
+        split_control.hub_address = device->parent->number;
+        split_control.port_address = device->port_number;
+    }
+    mmio_write_out(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
+
+    // Transfer size
+    int max_packet_size = (pipe->speed == USB_SPEED_LOW) ? 8 : characteristic.maximum_packet_size;
+    hcd_host_channel_transfer_size_t transfer_size = {
+        .transfer_size = length,
+        .packet_count = (length + max_packet_size - 1) / max_packet_size,
+        .packet_id = type
+    };
+    mmio_write_out(HCD_HOST_CHANNEL_TRANSFER_SIZE(channel), &transfer_size, 1);
 
     DEBUG_END();
     return OK;
@@ -546,8 +573,23 @@ void hcd_transmit_channel(uint8_t channel, void *buffer)
 {
     DEBUG_START("hcd_transmit_channel");
 
-    // TODO
-    debug_printf("TODO\r\n");
+    hcd_host_channel_split_control_t split_control;
+    mmio_read_in(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
+    split_control.complete_split = false;
+    mmio_write_out(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
+
+    if (((uint32_t)buffer & 3) != 0)
+    {
+        debug_printf("HCD: Transfer buffer %p is not DWORD aligned. Ignored, but dangerous.\r\n", buffer);
+    }
+    mmio_write(HCD_HOST_CHANNEL_DMA_ADDRESS(channel), (uint32_t)buffer);
+
+    hcd_host_channel_characteristic_t characteristic;
+    mmio_read_in(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);
+    characteristic.packets_per_frame = 1;
+    characteristic.enable = true;
+    characteristic.disable = false;
+    mmio_write_out(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);
 
     DEBUG_END();
 }
@@ -557,11 +599,68 @@ static usb_call_result_t hcd_channel_interrupt_to_error(usb_device_t *device, hc
 {
     DEBUG_START("hcd_channel_interrupt_to_error");
 
-    // TODO
-    debug_printf("TODO\r\n");
+    usb_call_result_t result = OK;
+
+    if (interrupts.ahb_error) {
+        device->error = USB_TRANSFER_ERROR_AHB_ERROR;
+        debug_printf("HCD: AHB error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.stall) {
+        device->error = USB_TRANSFER_ERROR_STALL;
+        debug_printf("HCD: Stall error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.negative_acknowledgement) {
+        device->error = USB_TRANSFER_ERROR_NO_ACKNOWLEDGE;
+        debug_printf("HCD: NAK error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (!interrupts.acknowledgement) {
+        debug_printf("HCD: Transfer was not acknowledged.\r\n");
+        result = ERROR_TIMEOUT;
+    }
+    if (interrupts.not_yet) {
+        device->error = USB_TRANSFER_ERROR_NOT_YET_ERROR;
+        debug_printf("HCD: Not yet error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.babble_error) {
+        device->error = USB_TRANSFER_ERROR_BABBLE;
+        debug_printf("HCD: Babble error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.frame_overrun) {
+        device->error = USB_TRANSFER_ERROR_BUFFER_ERROR;
+        debug_printf("HCD: Frame overrun in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.data_toggle_error) {
+        device->error = USB_TRANSFER_ERROR_BIT_ERROR;
+        debug_printf("HCD: Data toggle error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.transaction_error) {
+        device->error = USB_TRANSFER_ERROR_CONNECTION_ERROR;
+        debug_printf("HCD: Transaction error in transfer.\r\n");
+        DEBUG_END();
+        return ERROR_DEVICE;
+    }
+    if (interrupts.transfer_complete && is_complete) {
+        device->error = USB_TRANSFER_ERROR_CONNECTION_ERROR;
+        debug_printf("HCD: Transfer did not complete.\r\n");
+        result = ERROR_TIMEOUT;
+    }
 
     DEBUG_END();
-    return OK;
+    return result;
 }
 
 static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pipe_address_t *pipe, uint8_t channel,
@@ -579,7 +678,7 @@ static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pip
 
     for (global_tries = 0, actual_tries = 0; global_tries < 3 && actual_tries < 10; global_tries++, actual_tries++)
     {
-        mmio_write(HCD_HOST_CHANNEL_INTERRUPT(channel), 0xffffffff);
+        mmio_write(HCD_HOST_CHANNEL_INTERRUPT(channel), ALL_BITS);
         mmio_read_in(HCD_HOST_CHANNEL_TRANSFER_SIZE(channel), &transfer_size, 1);
         mmio_read_in(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
 
@@ -606,7 +705,7 @@ static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pip
             {
                 for (tries = 0; tries < 3; tries++)
                 {
-                    mmio_write(HCD_HOST_CHANNEL_INTERRUPT(channel), 0xffffffff);
+                    mmio_write(HCD_HOST_CHANNEL_INTERRUPT(channel), ALL_BITS);
                     mmio_read_in(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
                     split_control.complete_split = true;
                     mmio_write_out(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
@@ -765,7 +864,9 @@ usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_addr
     usb_pipe_address_t temp_pipe;
     if (pipe.device == root_hub_device_number)
     {
-        return hcd_process_root_hub_message(device, pipe, buffer, buffer_length, request);
+        usb_call_result_t result = hcd_process_root_hub_message(device, pipe, buffer, buffer_length, request);
+        DEBUG_END();
+        return result;
     }
 
     // Set device state
@@ -847,7 +948,7 @@ usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_addr
         debug_printf("HCD: Warning: non-zero status transfer! (%d).\r\n", transfer_size.transfer_size);
     }
 
-    device->error = USB_TRANSFER_ERROR_NONE;
+    device->error = USB_TRANSFER_OK;
 
     DEBUG_END();
     return OK;

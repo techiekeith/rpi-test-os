@@ -47,6 +47,15 @@
 #define CHANNEL_COUNT                       16
 #define REQUEST_TIMEOUT                     5000
 
+#define ALL_BITS                            0xffffffffU
+#define NO_BITS                             0x00000000U
+#define HCD_HOST_PORT_MASK                  0x1f140U
+
+#define OT2_VENDOR_ID_MASK                  0xfffff000U
+#define OT2_VENDOR_ID_MATCH                 0x4f542000U
+
+#define DEVICE_RESET_TIMEOUT                0x100000
+
 typedef enum {
     FLUSH_NON_PERIODIC,
     FLUSH_CHANNEL_1,
@@ -117,6 +126,22 @@ typedef enum {
     PACKET_ID_MDATA = 3,
     PACKET_ID_SETUP = 3
 } packet_id_t;
+
+typedef enum {
+    HUB_FEATURE_CONNECTION = 0,
+    HUB_FEATURE_ENABLE = 1,
+    HUB_FEATURE_SUSPEND = 2,
+    HUB_FEATURE_OVER_CURRENT = 3,
+    HUB_FEATURE_RESET = 4,
+    HUB_FEATURE_POWER = 8,
+    HUB_FEATURE_LOW_SPEED = 9,
+    HUB_FEATURE_HIGH_SPEED = 10,
+    HUB_FEATURE_CONNECTION_CHANGE = 16,
+    HUB_FEATURE_ENABLE_CHANGE = 17,
+    HUB_FEATURE_SUSPEND_CHANGE = 18,
+    HUB_FEATURE_OVER_CURRENT_CHANGE = 19,
+    HUB_FEATURE_RESET_CHANGE = 20
+} hcd_hub_port_feature_t;
 
 typedef struct {
     bool ses_req_scs: 1;
@@ -309,7 +334,7 @@ typedef struct {
     bool enable: 1;
     bool enable_changed: 1;
     bool over_current: 1;
-    bool over_current_charged: 1;
+    bool over_current_changed: 1;
     bool resume: 1;
     bool suspend: 1;
     bool reset: 1;
@@ -347,7 +372,7 @@ typedef struct {
 typedef struct {
     bool transfer_complete: 1;
     bool halt: 1;
-    bool abh_error: 1;
+    bool ahb_error: 1;
     bool stall: 1;
     bool negative_acknowledgement: 1;
     bool acknowledgement: 1;
@@ -383,6 +408,18 @@ typedef struct {
 typedef struct {
     hcd_host_channel_t channel[CHANNEL_COUNT];
 } __attribute__ ((__packed__)) hcd_host_channels_t;
+
+typedef struct {
+    bool stop_p_clock: 1;
+    bool gate_h_clock: 1;
+    bool power_clamp: 1;
+    bool power_down_modules: 1;
+    bool phy_suspended: 1;
+    bool enable_sleep_clock_gating: 1;
+    bool phy_sleeping: 1;
+    bool deep_sleep: 1;
+    uint32_t reserved_8_31: 24;
+} __attribute__ ((__packed__)) hcd_power_t;
 
 usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
                                              uint32_t buffer_length, usb_device_request_t *request);

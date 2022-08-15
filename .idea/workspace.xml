@@ -19,7 +19,20 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="" />
+    <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/include/kernel/usb_root_hub.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel/usb_root_hub.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/io.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/io.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/mmio.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/mmio.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb_hcd.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb_hcd.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/io.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/io.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/mmio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mmio.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb_hcd.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb_hcd.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/shell.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/shell.c" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -86,20 +99,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "last_opened_file_path": "C:/Users/keith/repos/rpi-test-os/src/kernel",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CLionExternalConfigurable",
-    "structure.view.defaults.are.configured": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/keith/repos/rpi-test-os/src/kernel&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CLionExternalConfigurable&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
@@ -207,6 +220,8 @@
       <workItem from="1660476696831" duration="32686000" />
       <workItem from="1660549757199" duration="722000" />
       <workItem from="1660554790739" duration="18374000" />
+      <workItem from="1660595383247" duration="10222000" />
+      <workItem from="1660605772926" duration="8000" />
     </task>
     <servers />
   </component>
@@ -229,6 +244,18 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/kernel/usb.c</url>
+          <line>640</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/kernel/usb.c</url>
+          <line>591</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
       </default-breakpoints>

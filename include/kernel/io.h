@@ -15,6 +15,11 @@ void debug_push(const char *filename, const char *function);
 void debug_printf(const char *fmt, ...);
 void debug_pop();
 
+extern int debug_counter;
 #define DEBUG_INIT(__filename__) static char *__debug_filename = __filename__
-#define DEBUG_START(__function__) debug_push(__debug_filename, __function__)
-#define DEBUG_END debug_pop
+#define DEBUG_START(__function__) \
+    debug_push(__debug_filename, __function__); \
+    int __debug_counter = debug_counter++
+#define DEBUG_END \
+    if (__debug_counter != --debug_counter) debug_printf("Warning: counter debug mismatch\r\n"); \
+    debug_pop
