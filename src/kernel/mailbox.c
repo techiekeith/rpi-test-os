@@ -120,7 +120,7 @@ int send_messages(property_message_tag_t *tags)
     msg->tags[bufpos] = 0;
 
     // Send the message
-    mail.data = ((uint32_t)msg) >> 4;
+    mail.data = ((size_t)msg) >> 4;
 
     mailbox_send(mail, PROPERTY_CHANNEL);
     delay(150);

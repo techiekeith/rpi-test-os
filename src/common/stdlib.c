@@ -4,7 +4,6 @@
 
 #include "../../include/common/limits.h"
 #include "../../include/common/stddef.h"
-#include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/kernel/heap.h"
 
@@ -119,14 +118,23 @@ long long strtoll(const char *str, char **endptr, int base)
     return res;
 }
 
-static long lclamp(long long a)
-{
-    return a < LONG_MIN ? LONG_MIN : a > LONG_MAX ? LONG_MAX : a;
-}
-
 long strtol(const char *str, char **endptr, int base)
 {
-    return lclamp(strtoll(str, endptr, base));
+#if (__WORD_SIZE == 64)
+    return strtoll(str, endptr, base);
+#else
+    return CLAMP(strtoll(str, endptr, base), INT_MIN, INT_MAX, int);
+#endif
+}
+
+long long atoll(const char *nptr)
+{
+    return strtoll(nptr, NULL, 10);
+}
+
+long atol(const char *nptr)
+{
+    return strtol(nptr, NULL, 10);
 }
 
 int atoi(const char *nptr)

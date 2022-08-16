@@ -6,7 +6,6 @@
 #include "../../include/common/stdbool.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
-#include "../../include/common/string.h"
 #include "../../include/common/utf8.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/io.h"
@@ -154,9 +153,10 @@ void vprintf(const char *fmt, va_list args)
                 case 'p': /* pointer */
                     *p++ = '0';
                     *p++ = 'x';
-                    long_number = false; // assume 32-bit for now
+                    long_number = (__WORD_SIZE == 64);
                     /* fall through */
                 case 'x': /* hexadecimal */
+                case 'X': /* hexadecimal, but with upper case letters */
                     radix += 6;
                     /* fall through */
                 case 'd': /* decimal */
@@ -166,6 +166,7 @@ void vprintf(const char *fmt, va_list args)
                     radix += 6;
                     /* fall through */
                 case 'b': /* binary */
+                    // all bases except decimal are treated as unsigned
                     if (modifier != 'd') unsigned_number = true;
                     long_number ? (
                             unsigned_number ? ultoa(va_arg(args, unsigned long long), radix, p)
@@ -173,6 +174,13 @@ void vprintf(const char *fmt, va_list args)
                     : (
                             unsigned_number ? uitoa(va_arg(args, unsigned int), radix, p)
                             : itoa(va_arg(args, int), radix, p));
+                    if (modifier == 'X')
+                    {
+                        for (p = str; *p; p++)
+                        {
+                            if ((*p >= 'a') && (*p <= 'f')) *p &= 0x5f;
+                        }
+                    }
                     break;
                 case 's': /* string */
                     str = va_arg(args, char *);

@@ -2,9 +2,9 @@
  * usb_hcd.h - definitions for the Host Controller Device
  */
 
-#include "../common/stdbool.h"
-#include "../common/stdint.h"
-#include "peripheral.h"
+#include "../../common/stdbool.h"
+#include "../../common/stdint.h"
+#include "../peripheral.h"
 #include "usb.h"
 
 #pragma once

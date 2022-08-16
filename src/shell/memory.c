@@ -15,7 +15,7 @@
 extern const char *divider;
 
 // To get size of kernel
-uint32_t *__get_stack_pointer();
+void *__get_stack_pointer();
 void _start();
 extern uint8_t __end;
 extern page_t *all_pages_array;
@@ -81,7 +81,7 @@ void show_memory_usage()
     set_foreground_color(239); // White
 }
 
-static void memory_dump(uint32_t start, uint32_t end)
+static void memory_dump(size_t start, size_t end)
 {
     char text[129];
     int i = 0;
@@ -89,9 +89,9 @@ static void memory_dump(uint32_t start, uint32_t end)
     if (fbinfo.columns >= 75) columns = 16;
     if (fbinfo.columns >= 139) columns = 32;
     text[columns] = '\0';
-    uint32_t real_start = start - (start & 3);
-    for (uint32_t p = real_start; p < end; p += 4) {
-        uint32_t word = *((uint32_t *)p);
+    size_t real_start = start - (start & 3);
+    for (size_t p = real_start; p < end; p += 4) {
+        size_t word = *((size_t *)p);
         for (int j = 0; j < 4; j++)
         {
             if (p + j >= end) break;
@@ -117,7 +117,7 @@ static void memory_dump(uint32_t start, uint32_t end)
 
 void stack_dump()
 {
-    memory_dump((uint32_t) __get_stack_pointer(), (uint32_t) _start);
+    memory_dump((size_t) __get_stack_pointer(), (size_t) _start);
 }
 
 static void dump_syntax()

@@ -19,13 +19,13 @@
 #define INT_MAX     2147483647L
 #define INT_MIN     (-INT_MAX - 1L)
 #define UINT_MAX    4294967295UL
-#if __WORDSIZE == 64
+#if __WORD_SIZE == 64
 #define LONG_MAX    9223372036854775807L
 #else
 #define LONG_MAX    2147483647L
 #endif
 #define LONG_MIN    (-LONG_MAX - 1L)
-#if __WORDSIZE == 64
+#if __WORD_SIZE == 64
 #define ULONG_MAX   18446744073709551615UL
 #else
 #define ULONG_MAX   4294967295UL

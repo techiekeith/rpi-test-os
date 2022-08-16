@@ -133,9 +133,9 @@ void generate_saa505x_glyphs() {
 
 /*
  * Gets the pointer to a glyph for a given Unicode character.
- * U+F500..U+F57F map to separated and contiguous box graphics
- * U+F0000..U+FFFFF map to the top row of double-height characters in the BMP
- * U+100000..U+10FFFF map to the bottom row of double-height characters in the BMP
+ * U+F500 to U+F57F map to separated and contiguous box graphics
+ * U+F0000 to U+FFFFF map to the top row of double-height characters in the BMP
+ * U+100000 to U+10FFFF map to the bottom row of double-height characters in the BMP
  */
 uint16_t *get_saa505x_glyph(int c) {
     if ((c & 0x1fff80) == 0xf500)

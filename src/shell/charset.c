@@ -15,7 +15,7 @@ static void show_chars(int start, int end)
 void show_charset()
 {
     puts("\r\nBasic Latin:\r\n");
-    show_chars(0x20, 0x7f);
+    show_chars(0x20, 0x7e);
     puts("\r\n\r\nLatin-1 Supplement:\r\n");
     show_chars(0xa0, 0xff);
     puts("\r\n\r\nCyrillic:\r\n");

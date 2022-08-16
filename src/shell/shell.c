@@ -2,7 +2,6 @@
  * shell.c
  */
 
-#include "../../include/common/stdint.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
@@ -27,8 +26,10 @@ const char *divider = "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
 static void show_help_text()
 {
     puts("\r\nCommands:\r\n");
+    puts("\tbgcolor <#> - set background color\r\n");
     puts("\tclear - clear the screen\r\n");
     puts("\tcharset - show character set\r\n");
+    puts("\tcolor <#> - set foreground color\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
@@ -103,15 +104,27 @@ static int split(char *str, int delim, int max_args, char **argp)
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-static void cmd_clear(int argc, char **argv)
+void background_color(int argc, char **argv);
+static void cmd_bgcolor(int argc, char **argv)
 {
-    putc(12);
+    background_color(argc, argv);
 }
 
 void show_charset();
 static void cmd_charset(int argc, char **argv)
 {
     show_charset();
+}
+
+static void cmd_clear(int argc, char **argv)
+{
+    putc(12);
+}
+
+void foreground_color(int argc, char **argv);
+static void cmd_color(int argc, char **argv)
+{
+    foreground_color(argc, argv);
 }
 
 void show_dump(int argc, char **argv);
@@ -179,8 +192,10 @@ typedef struct {
 
 command_t commands[] = {
         { .name = "help",    .function = &cmd_help },
+        { .name = "bgcolor", .function = &cmd_bgcolor },
         { .name = "charset", .function = &cmd_charset },
         { .name = "clear",   .function = &cmd_clear },
+        { .name = "color",   .function = &cmd_color },
         { .name = "dump",    .function = &cmd_dump },
         { .name = "halt",    .function = NULL },
         { .name = "mailbox", .function = &cmd_mailbox },

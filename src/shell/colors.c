@@ -1,8 +1,30 @@
 /*
- * show_palette.c
+ * colors.c
  */
 
 #include "../../include/kernel/graphics.h"
+
+void background_color(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        printf("Syntax: bgcolor <#>\r\n");
+        return;
+    }
+    int color = atoi(argv[1]);
+    set_background_color(color);
+}
+
+void foreground_color(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        printf("Syntax: bgcolor <#>\r\n");
+        return;
+    }
+    int color = atoi(argv[1]);
+    set_foreground_color(color);
+}
 
 void show_palette()
 {

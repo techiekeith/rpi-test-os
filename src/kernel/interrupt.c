@@ -29,7 +29,7 @@ __inline__ void DISABLE_INTERRUPTS(void) {
 }
 
 void move_exception_tables(); /* exception.S */
-#define HALT asm("b halt");
+#define HALT asm("b halt")
 
 void interrupts_init() {
     interrupt_registers = (interrupt_registers_t *)INTERRUPTS_PENDING;

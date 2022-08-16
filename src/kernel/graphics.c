@@ -2,12 +2,12 @@
  * graphics.c
  */
 
-#include "../../include/common/stddef.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/string.h"
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/io.h"
+#include "../../include/kernel/mem_internal.h"
 #include "../../include/saa505x/glyphs.h"
 
 static int background_color = DEFAULT_BACKGROUND_COLOR;
@@ -77,15 +77,28 @@ static void move_cursor_forwards()
     }
 }
 
+static void clear_framebuffer_area(void *buffer, size_t size)
+{
+    uint32_t color = colors[background_color];
+    switch(fbinfo.depth)
+    {
+        case 8:
+            __memory_set_byte(buffer, color, size);
+            break;
+        case 16:
+            __memory_set_short(buffer, color, size);
+            break;
+        case 24:
+            __memory_set_int24(buffer, color, size);
+            break;
+        case 32:
+            __memory_set_int(buffer, color, size);
+    }
+}
+
 static void clear_framebuffer()
 {
-    for (uint32_t y = 0; y < fbinfo.height; y++)
-    {
-        for (uint32_t x = 0; x < fbinfo.width; x++)
-        {
-            write_pixel(x, y, colors[background_color]);
-        }
-    }
+    clear_framebuffer_area((void *)fbinfo.buf, fbinfo.buf_size);
 }
 
 static void cursor_home()
@@ -99,7 +112,7 @@ static void scroll_down()
     uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
     size_t all_but_one_rows = fbinfo.buf_size - row_size;
     memmove((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
-    memset((void *)fbinfo.buf, 0, row_size);
+    clear_framebuffer_area((void *)fbinfo.buf, row_size);
 }
 
 static void scroll_up()
@@ -107,7 +120,7 @@ static void scroll_up()
     uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
     size_t all_but_one_rows = fbinfo.buf_size - row_size;
     memmove((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
-    memset((void *)(fbinfo.buf + all_but_one_rows), 0, row_size);
+    clear_framebuffer_area((void *)(fbinfo.buf + all_but_one_rows), row_size);
 }
 
 void graphics_putc(int c)

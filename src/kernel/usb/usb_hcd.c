@@ -3,14 +3,14 @@
  * Cribbed shamelessly from Alex Chadwick's work at https://github.com/Chadderz121/csud
  */
 
-#include "../../include/common/string.h"
-#include "../../include/kernel/io.h"
-#include "../../include/kernel/barrier.h"
-#include "../../include/kernel/delay.h"
-#include "../../include/kernel/mailbox.h"
-#include "../../include/kernel/mmio.h"
-#include "../../include/kernel/usb_hcd.h"
-#include "../../include/kernel/usb_root_hub.h"
+#include "../../../include/common/string.h"
+#include "../../../include/kernel/io.h"
+#include "../../../include/kernel/barrier.h"
+#include "../../../include/kernel/delay.h"
+#include "../../../include/kernel/mailbox.h"
+#include "../../../include/kernel/mmio.h"
+#include "../../../include/kernel/usb/usb_hcd.h"
+#include "../../../include/kernel/usb/usb_root_hub.h"
 
 DEBUG_INIT("usb_hcd");
 
@@ -578,11 +578,11 @@ void hcd_transmit_channel(uint8_t channel, void *buffer)
     split_control.complete_split = false;
     mmio_write_out(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
 
-    if (((uint32_t)buffer & 3) != 0)
+    if (((size_t)buffer & 3) != 0)
     {
         debug_printf("HCD: Transfer buffer %p is not DWORD aligned. Ignored, but dangerous.\r\n", buffer);
     }
-    mmio_write(HCD_HOST_CHANNEL_DMA_ADDRESS(channel), (uint32_t)buffer);
+    mmio_write(HCD_HOST_CHANNEL_DMA_ADDRESS(channel), (size_t)buffer);
 
     hcd_host_channel_characteristic_t characteristic;
     mmio_read_in(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);

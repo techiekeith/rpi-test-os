@@ -39,7 +39,8 @@ typedef struct
     uint32_t free_running_counter;      /* read only */
 } arm_timer_registers_t;
 
-void arm_timer_set(uint32_t usec);
+void arm_timer_set(uint32_t usecs);
+void arm_timer_delay(uint32_t usecs);
 uint32_t get_arm_timer_free_running_counter();
 uint32_t get_arm_timer_value();
 void arm_timer_init();

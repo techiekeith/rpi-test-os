@@ -2,9 +2,9 @@
  * usb.h - USB device related definitions
  */
 
-#include "../common/stdbool.h"
-#include "../common/stdint.h"
-#include "peripheral.h"
+#include "../../common/stdbool.h"
+#include "../../common/stdint.h"
+#include "../peripheral.h"
 
 #pragma once
 

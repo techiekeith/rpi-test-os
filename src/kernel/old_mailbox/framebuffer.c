@@ -39,7 +39,7 @@ int bcm2835_set_display_dimensions(int width, int height, int depth, int char_wi
 	fbinit.pointer = 0;
 	fbinit.size = 0;
 
-	uint32_t data = ((uint32_t)&fbinit | 0x40000000) >> 4;
+	uint32_t data = ((size_t)&fbinit | 0x40000000) >> 4;
 	msg.data = data;
 	msg.channel = FRAMEBUFFER_CHANNEL;
 
@@ -59,7 +59,7 @@ int bcm2835_set_display_dimensions(int width, int height, int depth, int char_wi
     fbinfo.rows = fbinfo.height / char_height;
     fbinfo.current_column = 0;
     fbinfo.current_row = 0;
-	fbinfo.buf = (void *)((uint32_t)fbinit.pointer & 0x3fffffff);
+	fbinfo.buf = (void *)((size_t)fbinit.pointer & 0x3fffffff);
 	fbinfo.buf_size = fbinit.size;
 
     debug_printf("Framebuffer allocated, location %p, size %d\r\n", fbinfo.buf, fbinfo.buf_size);

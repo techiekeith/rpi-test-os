@@ -2,13 +2,13 @@
  * usb_root_hub.c
  */
 
-#include "../../include/common/stdlib.h"
-#include "../../include/common/string.h"
-#include "../../include/kernel/delay.h"
-#include "../../include/kernel/io.h"
-#include "../../include/kernel/mmio.h"
-#include "../../include/kernel/usb_hcd.h"
-#include "../../include/kernel/usb_root_hub.h"
+#include "../../../include/common/stdlib.h"
+#include "../../../include/common/string.h"
+#include "../../../include/kernel/delay.h"
+#include "../../../include/kernel/io.h"
+#include "../../../include/kernel/mmio.h"
+#include "../../../include/kernel/usb/usb_hcd.h"
+#include "../../../include/kernel/usb/usb_root_hub.h"
 
 DEBUG_INIT("usb_root_hub");
 

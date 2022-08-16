@@ -34,7 +34,7 @@ void *heap_alloc(const char *consumer, size_t bytes)
     size_t total_bytes = bytes + sizeof(heap_segment_t);
     total_bytes += total_bytes % 16 ? 16 - (total_bytes % 16) : 0;
 
-    /* Find the allocation that is closest in size to this request */
+    /* Find a segment that best matches the requested size */
     for (curr = heap_segment_list_head; curr != NULL; curr = curr->next)
     {
         diff = curr->segment_size - total_bytes;
