@@ -2,7 +2,7 @@
  * usb_root_hub.h
  */
 
-#include "../common/stdint.h"
+#include "../../common/stdint.h"
 #include "usb.h"
 
 typedef struct {

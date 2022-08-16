@@ -3,15 +3,15 @@
  * Cribbed shamelessly from Alex Chadwick's work at https://github.com/Chadderz121/csud
  */
 
-#include "../../include/common/stddef.h"
-#include "../../include/common/stdlib.h"
-#include "../../include/common/string.h"
-#include "../../include/common/utf8.h"
-#include "../../include/kernel/delay.h"
-#include "../../include/kernel/heap.h"
-#include "../../include/kernel/io.h"
-#include "../../include/kernel/usb.h"
-#include "../../include/kernel/usb_hcd.h"
+#include "../../../include/common/stddef.h"
+#include "../../../include/common/stdlib.h"
+#include "../../../include/common/string.h"
+#include "../../../include/common/utf8.h"
+#include "../../../include/kernel/delay.h"
+#include "../../../include/kernel/heap.h"
+#include "../../../include/kernel/io.h"
+#include "../../../include/kernel/usb/usb.h"
+#include "../../../include/kernel/usb/usb_hcd.h"
 
 DEBUG_INIT("usb");
 

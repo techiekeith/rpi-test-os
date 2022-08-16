@@ -12,7 +12,7 @@
 #include "../../include/kernel/heap.h"
 #include "../../include/kernel/system_timer.h"
 #include "../../include/kernel/uart.h"
-#include "../../include/kernel/usb.h"
+#include "../../include/kernel/usb/usb.h"
 
 void copy_exception_table();
 int shell();

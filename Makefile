@@ -24,7 +24,7 @@ OBJCOPY=$(COMPILER_PREFIX)objcopy
 SRC_DIR=src
 DIST_DIR=dist
 
-SUBDIRS=common kernel saa505x shell test $(SOFTWARE_MATH_LIB)
+SUBDIRS=common kernel saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
 
 ifeq ($(DEBUG),1)
 	DEBUG_FLAGS=-ggdb

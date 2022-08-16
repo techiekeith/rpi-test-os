@@ -8,6 +8,7 @@
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/io.h"
+#include "../../include/kernel/mem_internal.h"
 #include "../../include/saa505x/glyphs.h"
 
 static int background_color = DEFAULT_BACKGROUND_COLOR;
@@ -79,12 +80,19 @@ static void move_cursor_forwards()
 
 static void clear_framebuffer()
 {
-    for (uint32_t y = 0; y < fbinfo.height; y++)
+    switch(fbinfo.depth)
     {
-        for (uint32_t x = 0; x < fbinfo.width; x++)
-        {
-            write_pixel(x, y, colors[background_color]);
-        }
+        case 8:
+            __memory_set_byte(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            break;
+        case 16:
+            __memory_set_short(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            break;
+        case 24:
+            __memory_set_int24(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            break;
+        case 32:
+            __memory_set_int(fbinfo.buf, colors[background_color], fbinfo.buf_size);
     }
 }
 

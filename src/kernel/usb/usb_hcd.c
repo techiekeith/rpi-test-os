@@ -3,14 +3,14 @@
  * Cribbed shamelessly from Alex Chadwick's work at https://github.com/Chadderz121/csud
  */
 
-#include "../../include/common/string.h"
-#include "../../include/kernel/io.h"
-#include "../../include/kernel/barrier.h"
-#include "../../include/kernel/delay.h"
-#include "../../include/kernel/mailbox.h"
-#include "../../include/kernel/mmio.h"
-#include "../../include/kernel/usb_hcd.h"
-#include "../../include/kernel/usb_root_hub.h"
+#include "../../../include/common/string.h"
+#include "../../../include/kernel/io.h"
+#include "../../../include/kernel/barrier.h"
+#include "../../../include/kernel/delay.h"
+#include "../../../include/kernel/mailbox.h"
+#include "../../../include/kernel/mmio.h"
+#include "../../../include/kernel/usb/usb_hcd.h"
+#include "../../../include/kernel/usb/usb_root_hub.h"
 
 DEBUG_INIT("usb_hcd");
 
