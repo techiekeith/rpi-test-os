@@ -190,7 +190,7 @@ command_t commands[] = {
         { .name = "reset",   .function = NULL },
         { .name = "test",    .function = &cmd_test },
         { .name = "time",    .function = &cmd_time },
-        { .name = NULL,      .function = NULL },
+        { .name = NULL,      .function = &bad_command }, /* this one goes last */
 };
 
 int shell()
@@ -210,16 +210,8 @@ int shell()
         if (!strlen(command_buffer)) continue;
         for (i = 0; commands[i].name != NULL && strcmp(commands[i].name, command_buffer); i++);
         if (commands[i].function == NULL) break;
-        if (commands[i].name == NULL)
-        {
-            debug_printf("Bad command: %s\r\n", command_buffer);
-            bad_command();
-        }
-        else
-        {
-            debug_printf("Command: %s arg count: %d\r\n", command_buffer, arg_count);
-            (*(commands[i].function))(arg_count, args);
-        }
+        debug_printf("Command: %s arg count: %d\r\n", command_buffer, arg_count);
+        (*(commands[i].function))(arg_count, args);
     }
     DEBUG_END();
     return strcmp(command_buffer, "reset");

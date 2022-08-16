@@ -5,6 +5,10 @@
 .globl delay
 
 delay:
+    ldr     r1, =#700
+delay_inner_loop:
+    subs    r1, r1, #1
+    bne     delay_inner_loop
     subs    r0, r0, #1
     bne     delay
     bx      lr

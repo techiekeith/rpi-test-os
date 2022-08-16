@@ -3,6 +3,7 @@
  */
 
 #include "../../include/common/stdarg.h"
+#include "../../include/common/stdbool.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
@@ -80,8 +81,8 @@ void vprintf(const char *fmt, va_list args)
             int pad_char = ' ';
             size_t min_width = 0;
             size_t max_width = 0;
-            int unsigned_number = 0;
-            int long_number = 0;
+            bool unsigned_number = false;
+            bool long_number = false;
             int radix = 2;
             int suppress = 0;
             if (modifier == '^') /* top row for double-height characters */
@@ -153,7 +154,7 @@ void vprintf(const char *fmt, va_list args)
                 case 'p': /* pointer */
                     *p++ = '0';
                     *p++ = 'x';
-                    // check for 32- or 64-bit and set long_number accordingly?
+                    long_number = false; // assume 32-bit for now
                     /* fall through */
                 case 'x': /* hexadecimal */
                     radix += 6;
@@ -165,6 +166,7 @@ void vprintf(const char *fmt, va_list args)
                     radix += 6;
                     /* fall through */
                 case 'b': /* binary */
+                    if (modifier != 'd') unsigned_number = true;
                     long_number ? (
                             unsigned_number ? ultoa(va_arg(args, unsigned long long), radix, p)
                             : ltoa(va_arg(args, long long), radix, p))

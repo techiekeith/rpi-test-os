@@ -52,11 +52,11 @@ You'll also need a custom build configuration, because reasons:
 
 On Windows, the script text will be something like this for a Pi Model B
 ```pwsh
-& 'C:\Program Files\qemu\qemu-system-arm.exe' -serial stdio -M raspi1ap -name raspi1ap -m 512M -kernel dist\raspi1ap.elf
+& 'C:\Program Files\qemu\qemu-system-arm.exe' -serial stdio -usb -usbdevice keyboard -M raspi1ap -name raspi1ap -m 512M -kernel dist\raspi1ap.elf
 ```
 or for a Pi 2
 ```pwsh
-& 'C:\Program Files\qemu\qemu-system-arm.exe' -serial stdio -M raspi2b -name raspi2b -m 1G -kernel dist\raspi2b.elf
+& 'C:\Program Files\qemu\qemu-system-arm.exe' -serial stdio -usb -usbdevice keyboard -M raspi2b -name raspi2b -m 1G -kernel dist\raspi2b.elf
 ```
 
 ### Running the debug kernel

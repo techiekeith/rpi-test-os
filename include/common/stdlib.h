@@ -23,5 +23,5 @@ void *malloc(size_t size);
 void free(void *ptr);
 
 /* Normally these would live in sys/param.h */
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a, b, __type)   ({ __type compare1 = (a); __type compare2 = (b); compare1 < compare2 ? compare1 : compare2; })
+#define MAX(a, b, __type)   ({ __type compare1 = (a); __type compare2 = (b); compare1 > compare2 ? compare1 : compare2; })
