@@ -155,7 +155,6 @@ void vprintf(const char *fmt, va_list args)
                     *p++ = '0';
                     *p++ = 'x';
                     long_number = false; // assume 32-bit for now
-                    unsigned_number = true;
                     /* fall through */
                 case 'x': /* hexadecimal */
                     radix += 6;
@@ -167,6 +166,7 @@ void vprintf(const char *fmt, va_list args)
                     radix += 6;
                     /* fall through */
                 case 'b': /* binary */
+                    if (modifier != 'd') unsigned_number = true;
                     long_number ? (
                             unsigned_number ? ultoa(va_arg(args, unsigned long long), radix, p)
                             : ltoa(va_arg(args, long long), radix, p))

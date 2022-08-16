@@ -20,18 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/include/kernel/usb_root_hub.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kernel/usb_root_hub.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/io.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/io.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/mmio.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/mmio.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/usb.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/usb_hcd.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb_hcd.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/io.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/io.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/mmio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mmio.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/common/utf8.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/common/utf8.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/stdio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/stdio.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/string.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/string.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/utf8.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/utf8.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/delay.S" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/delay.S" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/mem_internal.S" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kernel/usb.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kernel/usb_hcd.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb_hcd.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/shell.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/shell.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb_root_hub.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb_root_hub.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/test_utf8.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/test_utf8.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,6 +123,11 @@
     </key>
   </component>
   <component name="RunManager" selected="Makefile Application.Build">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Build" type="CLionNativeAppRunConfigurationType" PROGRAM_PARAMS="-c echo" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-test-os" TARGET_NAME="Make (WSL)" CONFIG_NAME="Make (WSL)" version="1" RUN_PATH="/usr/bin/bash">
       <method v="2" />
     </configuration>
@@ -222,11 +226,16 @@
       <workItem from="1660554790739" duration="18374000" />
       <workItem from="1660595383247" duration="10222000" />
       <workItem from="1660605772926" duration="8000" />
+      <workItem from="1660638195124" duration="7473000" />
+      <workItem from="1660647402266" duration="1015000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.s" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -244,18 +253,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/kernel/usb.c</url>
-          <line>640</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/kernel/usb.c</url>
-          <line>591</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
       </default-breakpoints>

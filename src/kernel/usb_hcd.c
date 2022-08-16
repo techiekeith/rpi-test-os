@@ -506,7 +506,7 @@ usb_call_result_t hcd_start()
     __dmb();
     host_port.reset = true;
     mmio_write_out(HCD_HOST_PORT, &host_port, 1);
-    delay(50000000); // Hopefully this is long enough...
+    delay(50000); // Hopefully this is long enough...
     host_port.reset = false;
     mmio_write_out(HCD_HOST_PORT, &host_port, 1);
     mmio_read_in(HCD_HOST_PORT, &host_port, 1);
@@ -695,7 +695,7 @@ static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pip
             }
             mmio_read_in(HCD_HOST_CHANNEL_INTERRUPT(channel), &interrupt, 1);
             if (interrupt.halt) break;
-            delay(10000);
+            delay(10);
         }
         mmio_read_in(HCD_HOST_CHANNEL_TRANSFER_SIZE(channel), &transfer_size, 1);
 
@@ -726,14 +726,14 @@ static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pip
                         }
                         mmio_read_in(HCD_HOST_CHANNEL_INTERRUPT(channel), &interrupt, 1);
                         if (interrupt.halt) break;
-                        delay(100000);
+                        delay(100);
                     }
                     if (interrupt.not_yet) break;
                 } // end for (tries = 0; tries < 3; tries++)
 
                 if (tries == 3 || interrupt.negative_acknowledgement || interrupt.transaction_error)
                 {
-                    delay(25000000);
+                    delay(25000);
                     continue;
                 }
 
@@ -749,7 +749,7 @@ static usb_call_result_t hcd_channel_send_wait_one(usb_device_t *device, usb_pip
             else if (interrupt.negative_acknowledgement || interrupt.transaction_error)
             {
                 global_tries--;
-                delay(25000000);
+                delay(25000);
                 continue;
             }
         } // end if (split_control.split_enable)

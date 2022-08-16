@@ -59,7 +59,7 @@ char *utf8_encode(int c, char *buffer)
  * including the terminating NUL character. The resulting string will always be NUL-terminated, and truncated
  * a UTF-8 byte sequence boundary if necessary to fit within the specified target buffer size.
  */
-void ucs16_to_utf8(char *utf8_buffer, const uint16_t *ucs16_string, size_t utf8_buffer_size, size_t ucs16_string_length)
+void ucs16_to_utf8(char *utf8_buffer, uint16_t *ucs16_string, size_t utf8_buffer_size, size_t ucs16_string_length)
 {
     char *p = utf8_buffer;
     int bytes_remaining = utf8_buffer_size;
@@ -110,6 +110,7 @@ void ucs16_to_utf8(char *utf8_buffer, const uint16_t *ucs16_string, size_t utf8_
             if (size >= bytes_remaining) break;
             strncpy(p, default_utf8_buffer, size);
         }
+        if (!size) size++;
         p += size;
         bytes_remaining -= size;
     }

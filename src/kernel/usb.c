@@ -134,7 +134,7 @@ static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_addr
 
     while (timeout-- > 0 && device->error & USB_TRANSFER_ERROR_PROCESSING)
     {
-        delay(1000000);
+        delay(1000);
     }
     if (device->error & USB_TRANSFER_ERROR_PROCESSING)
     {
@@ -240,7 +240,7 @@ static usb_call_result_t usb_set_address(usb_device_t *device, uint8_t address)
         return result;
     }
 
-    delay(10000000); // Hopefully this is long enough...
+    delay(10000); // Hopefully this is long enough...
     device->number = address;
     device->status = USB_DEVICE_STATUS_ADDRESSED;
 
@@ -248,7 +248,7 @@ static usb_call_result_t usb_set_address(usb_device_t *device, uint8_t address)
     return OK;
 }
 
-static usb_call_result_t usb_deallocate_device(usb_device_t *device)
+static void usb_deallocate_device(usb_device_t *device)
 {
     DEBUG_START("usb_deallocate_device");
 
@@ -385,18 +385,21 @@ static usb_call_result_t usb_read_string(usb_device_t *device, uint8_t string_in
     }
 
     usb_string_descriptor_t *descriptor = (usb_string_descriptor_t *)buffer;
-    if (descriptor == NULL)
-    {
-        DEBUG_END();
-        return ERROR_MEMORY;
-    }
     if ((result = usb_read_string_lang(device, string_index, lang_ids[1], descriptor, length)) != OK)
     {
         DEBUG_END();
         return result;
     }
 
-    ucs16_to_utf8(buffer, descriptor->data, 0x100, descriptor->descriptor_length);
+    char *temp_buffer = heap_alloc("usb_read_string", 0x100);
+    if (temp_buffer == NULL)
+    {
+        DEBUG_END();
+        return ERROR_MEMORY;
+    }
+    ucs16_to_utf8(temp_buffer, descriptor->data, 0x100, descriptor->descriptor_length);
+    memcpy(buffer, temp_buffer, 0x100);
+    heap_free(temp_buffer);
 
     DEBUG_END();
     return result;
@@ -663,7 +666,7 @@ static usb_call_result_t usb_attach_device(usb_device_t *device)
                  device->descriptor.version >> 8, device->descriptor.version & 0xff);
 
     // Configure device - we only support devices with one configuration for now
-    if ((result == usb_configure(device, 0)) != OK)
+    if ((result = usb_configure(device, 0)) != OK)
     {
         debug_printf("USBD: Failed to configure device %x.\n", address);
         DEBUG_END();
@@ -686,6 +689,10 @@ static usb_call_result_t usb_attach_device(usb_device_t *device)
         {
             debug_printf("USBD: Could not start the driver for %s.\r\n", usb_get_description(device));
         }
+    }
+    else
+    {
+        debug_printf("USBD: No driver registered for %s.\r\n", usb_get_description(device));
     }
 
     DEBUG_END();

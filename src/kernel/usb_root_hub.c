@@ -81,9 +81,9 @@ usb_string_descriptor_t root_hub_string_0_descriptor = {
 };
 
 usb_string_descriptor_t root_hub_string_1_descriptor = {
-    .descriptor_length = sizeof(L"USB 2.0 Root Hub") + 2,
+    .descriptor_length = sizeof(u"USB 2.0 Root Hub") + 2,
     .descriptor_type = DESCRIPTOR_TYPE_STRING,
-    .data = { L'U', L'S', L'B', L' ', L'2', L'.', L'0', L' ', L'R', L'o', L'o', L't', L' ', L'H', L'u', L'b', L'\0' }
+    .data = u"USB 2.0 Root Hub"
 };
 
 usb_hub_descriptor_t root_hub_descriptor = {
@@ -159,11 +159,11 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             break;
                         case HUB_FEATURE_SUSPEND:
                             mmio_write(HCD_POWER, NO_BITS);
-                            delay(5000000);
+                            delay(5000);
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.resume = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x40); // XXX MAGIC
-                            delay(100000000);
+                            delay(100000);
                             host_port.resume = false;
                             host_port.suspend = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0xc0); // XXX MAGIC
@@ -216,7 +216,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             host_port.reset = true;
                             host_port.power = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1180); // XXX MAGIC
-                            delay(6000000); // XXX
+                            delay(6000);
                             host_port.reset = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1000); // XXX MAGIC
                             break;
@@ -253,12 +253,12 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                         case DESCRIPTOR_TYPE_STRING:
                             switch(request->value & 0xff) {
                                 case 0x0:
-                                    reply_length = MIN(sizeof(root_hub_string_0_descriptor.descriptor_length),
+                                    reply_length = MIN(root_hub_string_0_descriptor.descriptor_length,
                                                        buffer_length, uint32_t);
                                     memcpy(buffer, &root_hub_string_0_descriptor, reply_length);
                                     break;
                                 case 0x1:
-                                    reply_length = MIN(sizeof(root_hub_string_1_descriptor.descriptor_length),
+                                    reply_length = MIN(root_hub_string_1_descriptor.descriptor_length,
                                                        buffer_length, uint32_t);
                                     memcpy(buffer, &root_hub_string_1_descriptor, reply_length);
                                     break;

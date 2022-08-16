@@ -7,10 +7,10 @@
 
 void test_utf8()
 {
-    char buffer[5];
+    char buffer[15];
     utf8_encode(0x20ac, buffer);
     printf("U+20AC (EURO SIGN) -> UTF-8: %x %x %x\r\n", (int)buffer[0], (int)buffer[1], (int)buffer[2]);
-    ucs16_to_utf8(buffer, L"\u20ac", 5, 2);
+    ucs16_to_utf8(buffer, u"\u20ac\u20ac\u20ac", 15, 4);
     printf("Converted from UCS-16: %s\r\n", buffer);
     printf("Euro symbol: as_escaped_hex=\xe2\x82\xac as_escaped_unicode=\u20ac in_string_arg=%s in_char_arg=%c\r\n",
            "\xe2\x82\xac", 0x20ac);
