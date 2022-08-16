@@ -20,7 +20,7 @@ int shell();
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
 #endif
-void main(uint32_t r0, uint32_t r1, uint32_t atags)
+void kernel_main(size_t r0, size_t r1, size_t atags)
 {
     /* Declare as unused */
     (void) r0;

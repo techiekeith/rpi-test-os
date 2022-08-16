@@ -10,7 +10,7 @@
 
 void memset(void *dest, int value, size_t bytes)
 {
-    while (((uint32_t)dest & 3) != 0 && bytes > 0)
+    while (((size_t)dest & 3) != 0 && bytes > 0)
     {
         *((uint8_t *)dest++) = value;
         bytes--;
@@ -29,7 +29,7 @@ void memset(void *dest, int value, size_t bytes)
 static void memcpy_rev(void *dest, const void *src, size_t bytes)
 {
     // Fast copy if regions are word-aligned
-    if (((uint32_t)dest & 3) == 0 && ((uint32_t)src & 3) == 0)
+    if (((size_t)dest & 3) == 0 && ((size_t)src & 3) == 0)
     {
         int rv;
         dest += bytes;
@@ -64,7 +64,7 @@ static void memcpy_rev(void *dest, const void *src, size_t bytes)
 static void memcpy_fwd(void *dest, const void *src, size_t bytes)
 {
     // Fast copy if regions are word-aligned
-    if (((uint32_t)dest & 3) == 0 && ((uint32_t)src & 3) == 0)
+    if (((size_t)dest & 3) == 0 && ((size_t)src & 3) == 0)
     {
         int rv;
         uint32_t partial = bytes % MAX_BLOCK_COPY;

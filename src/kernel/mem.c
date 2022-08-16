@@ -32,7 +32,7 @@ void mem_init(uint64_t mem_size)
 
     /* Allocate space for all those pages' metadata.  Start this block just after the kernel image is finished */
     page_array_len = sizeof(page_t) * num_pages;
-    uint32_t endp = (uint32_t)&__end;
+    size_t endp = (size_t)&__end;
     all_pages_array = (page_t *)(endp + KERNEL_HEAP_SIZE);
     memset(all_pages_array, 0, (size_t) page_array_len);
     INITIALIZE_LIST(free_pages);
@@ -99,7 +99,7 @@ void free_page(void *ptr)
     DEBUG_START("free_page");
 
     /* Get page metadata from the physical address */
-    page = all_pages_array + ((uint32_t)ptr / PAGE_SIZE);
+    page = all_pages_array + ((size_t)ptr / PAGE_SIZE);
 
     /* Mark the page as free */
     page->flags.allocated = 0;

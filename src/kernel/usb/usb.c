@@ -119,7 +119,7 @@ static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_addr
 {
     DEBUG_START("usb_control_message");
 
-    if ((uint32_t)buffer & 3)
+    if ((size_t)buffer & 3)
     {
         debug_printf("USBD: Warning: buffer is not word aligned.\r\n");
     }
@@ -526,7 +526,7 @@ static usb_call_result_t usb_configure(usb_device_t *device, uint8_t configurati
     is_alternate = false;
 
     for (header = (usb_descriptor_header_t *)((uint8_t *)header + header->descriptor_length);
-         (uint32_t) header - (uint32_t) full_descriptor < device->configuration.total_length;
+         (size_t) header - (size_t) full_descriptor < device->configuration.total_length;
          header = (usb_descriptor_header_t *)((uint8_t *)header + header->descriptor_length))
     {
         bool header_loop_break = false;

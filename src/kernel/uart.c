@@ -2,7 +2,6 @@
  * uart.c - routines for Mini-UART (on GPIO)
  */
 
-#include "../../include/common/stddef.h"
 #include "../../include/common/string.h"
 #include "../../include/common/utf8.h"
 #include "../../include/kernel/barrier.h"
@@ -62,7 +61,7 @@ void uart_init() {
     __dmb();
     memset(&control, 0, 4);
     mmio_write(UART0_CR, 0x00000000);
-    /* Setup the GPIO pin 14 && 15. */
+    /* Set up the GPIO pin 14 && 15. */
 
     /* Disable pull up/down for all GPIO pins & delay for 150 cycles. */
     mmio_write(GPPUD, 0x00000000);

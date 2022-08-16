@@ -578,11 +578,11 @@ void hcd_transmit_channel(uint8_t channel, void *buffer)
     split_control.complete_split = false;
     mmio_write_out(HCD_HOST_CHANNEL_SPLIT_CONTROL(channel), &split_control, 1);
 
-    if (((uint32_t)buffer & 3) != 0)
+    if (((size_t)buffer & 3) != 0)
     {
         debug_printf("HCD: Transfer buffer %p is not DWORD aligned. Ignored, but dangerous.\r\n", buffer);
     }
-    mmio_write(HCD_HOST_CHANNEL_DMA_ADDRESS(channel), (uint32_t)buffer);
+    mmio_write(HCD_HOST_CHANNEL_DMA_ADDRESS(channel), (size_t)buffer);
 
     hcd_host_channel_characteristic_t characteristic;
     mmio_read_in(HCD_HOST_CHANNEL_CHARACTERISTIC(channel), &characteristic, 1);

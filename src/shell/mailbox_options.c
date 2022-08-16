@@ -25,7 +25,6 @@ void mailbox_options(int argc, char **argv)
     }
     if (!strcmp(argv[1], "list"))
     {
-        int filter = -1;
         if (argc == 2)
         {
             puts("\r\nSyntax: mailbox list <ID>\r\n\r\n");
@@ -40,7 +39,7 @@ void mailbox_options(int argc, char **argv)
             printf(" %2d | %s\r\n", 6, "DMA");
             return;
         }
-        filter = atoi(argv[2]);
+        int filter = atoi(argv[2]);
         // list all methods
         printf(" %2s | %33s | %|8s | %4s | %4s\r\n", "ID", "Method Name", "Tag Id", "RqLn", "RsLn");
         printf("%.4s+%.35s+%.10s+%.6s+%.6s\r\n", divider, divider, divider, divider, divider);

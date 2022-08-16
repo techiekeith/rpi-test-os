@@ -2,7 +2,6 @@
  * graphics.c
  */
 
-#include "../../include/common/stddef.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/string.h"
 #include "../../include/kernel/framebuffer.h"
@@ -78,22 +77,28 @@ static void move_cursor_forwards()
     }
 }
 
-static void clear_framebuffer()
+static void clear_framebuffer_area(void *buffer, size_t size)
 {
+    uint32_t color = colors[background_color];
     switch(fbinfo.depth)
     {
         case 8:
-            __memory_set_byte(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            __memory_set_byte(buffer, color, size);
             break;
         case 16:
-            __memory_set_short(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            __memory_set_short(buffer, color, size);
             break;
         case 24:
-            __memory_set_int24(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            __memory_set_int24(buffer, color, size);
             break;
         case 32:
-            __memory_set_int(fbinfo.buf, colors[background_color], fbinfo.buf_size);
+            __memory_set_int(buffer, color, size);
     }
+}
+
+static void clear_framebuffer()
+{
+    clear_framebuffer_area((void *)fbinfo.buf, fbinfo.buf_size);
 }
 
 static void cursor_home()
@@ -107,7 +112,7 @@ static void scroll_down()
     uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
     size_t all_but_one_rows = fbinfo.buf_size - row_size;
     memmove((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
-    memset((void *)fbinfo.buf, 0, row_size);
+    clear_framebuffer_area((void *)fbinfo.buf, row_size);
 }
 
 static void scroll_up()
@@ -115,7 +120,7 @@ static void scroll_up()
     uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
     size_t all_but_one_rows = fbinfo.buf_size - row_size;
     memmove((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
-    memset((void *)(fbinfo.buf + all_but_one_rows), 0, row_size);
+    clear_framebuffer_area((void *)(fbinfo.buf + all_but_one_rows), row_size);
 }
 
 void graphics_putc(int c)

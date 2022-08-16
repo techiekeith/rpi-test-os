@@ -2,7 +2,6 @@
  * shell.c
  */
 
-#include "../../include/common/stdint.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"

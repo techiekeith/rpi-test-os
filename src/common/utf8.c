@@ -2,7 +2,6 @@
  * utf8.c
  */
 
-#include "../../include/common/stddef.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/string.h"
 
@@ -63,8 +62,9 @@ void ucs16_to_utf8(char *utf8_buffer, uint16_t *ucs16_string, size_t utf8_buffer
 {
     char *p = utf8_buffer;
     int bytes_remaining = utf8_buffer_size;
-    uint16_t code_point, surrogate = 0;
-    for (int i = 0; i < ucs16_string_length; i++)
+    uint16_t code_point = 0;
+    uint16_t surrogate = 0;
+    for (size_t i = 0; i < ucs16_string_length; i++)
     {
         if (surrogate == 0)
         {
