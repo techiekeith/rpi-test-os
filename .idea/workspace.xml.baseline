@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/usb/device/keyboard.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb/device/keyboard.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +99,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/keith/repos/rpi-test-os/include/kernel/usb/device&quot;,
+    &quot;last_opened_file_path&quot;: &quot;&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
@@ -110,19 +109,15 @@
   }
 }</component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel\usb\device" />
-      <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
-      <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel" />
-      <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel\oldfb" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Keith.Jones\repos\playground\rpi-test-os\src\kernel\usb" />
-      <recent name="C:\Users\Keith.Jones\repos\playground\rpi-test-os\include\kernel\usb" />
-      <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
-    </key>
+    <key name="CopyFile.RECENT_KEYS"/>
+    <key name="MoveFile.RECENT_KEYS"/>
   </component>
   <component name="RunManager" selected="Remote Debug.Raspberry Pi 2">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Build" type="CLionNativeAppRunConfigurationType" PROGRAM_PARAMS="-c echo" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-test-os" TARGET_NAME="Make (WSL)" CONFIG_NAME="Make (WSL)" version="1" RUN_PATH="/usr/bin/bash">
       <method v="2" />
     </configuration>
@@ -212,21 +207,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1660324901590</updated>
-      <workItem from="1660324906248" duration="27025000" />
-      <workItem from="1660378529573" duration="26586000" />
-      <workItem from="1660411234755" duration="23504000" />
-      <workItem from="1660460612701" duration="246000" />
-      <workItem from="1660476696831" duration="32686000" />
-      <workItem from="1660549757199" duration="722000" />
-      <workItem from="1660554790739" duration="18374000" />
-      <workItem from="1660595383247" duration="10222000" />
-      <workItem from="1660605772926" duration="8000" />
-      <workItem from="1660638195124" duration="7473000" />
-      <workItem from="1660647402266" duration="1015000" />
-      <workItem from="1660650402841" duration="5485000" />
-      <workItem from="1660658835618" duration="9732000" />
-      <workItem from="1660671694727" duration="25057000" />
-      <workItem from="1660721441816" duration="1112000" />
     </task>
     <servers />
   </component>
