@@ -7,6 +7,7 @@
 #include "../../../include/kernel/delay.h"
 #include "../../../include/kernel/io.h"
 #include "../../../include/kernel/mmio.h"
+#include "../../../include/kernel/usb/device/hub.h"
 #include "../../../include/kernel/usb/usb_hcd.h"
 #include "../../../include/kernel/usb/usb_root_hub.h"
 
@@ -31,7 +32,7 @@ static usb_device_descriptor_t root_hub_device_descriptor = {
     .configuration_count = 1,
 };
 
-static configuration_descriptor_t root_hub_configuration_descriptor = {
+static hub_configuration_descriptor_t root_hub_configuration_descriptor = {
     .configuration = {
         .descriptor_length = 9,
         .descriptor_type = DESCRIPTOR_TYPE_CONFIGURATION,
@@ -106,7 +107,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                                                uint32_t buffer_length, usb_device_request_t *request) {
     DEBUG_START("hcd_process_root_hub_message");
 
-    device->error = USB_TRANSFER_ERROR_PROCESSING;
+    device->error = USB_TRANSFER_PROCESSING;
 
     if (pipe.type == USB_TRANSFER_TYPE_INTERRUPT) {
         debug_printf("HCD.Hub: RootHub does not support IRQ pipes.\r\n");
@@ -139,6 +140,23 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                     break;
                 case 0xa3:
                     mmio_read_in(HCD_HOST_PORT, &host_port, 1);
+                    *(uint32_t *)buffer = 0;
+                    ((hub_port_full_status_t *)buffer)->status.connected = host_port.connect;
+                    ((hub_port_full_status_t *)buffer)->status.enabled = host_port.enable;
+                    ((hub_port_full_status_t *)buffer)->status.suspended = host_port.suspend;
+                    ((hub_port_full_status_t *)buffer)->status.over_current = host_port.over_current;
+                    ((hub_port_full_status_t *)buffer)->status.reset = host_port.reset;
+                    ((hub_port_full_status_t *)buffer)->status.power = host_port.power;
+                    if (host_port.speed == USB_SPEED_HIGH)
+                        ((hub_port_full_status_t *)buffer)->status.high_speed_attached = true;
+                    if (host_port.speed == USB_SPEED_LOW)
+                        ((hub_port_full_status_t *)buffer)->status.low_speed_attached = true;
+                    ((hub_port_full_status_t *)buffer)->status.test_mode = host_port.test_control;
+                    ((hub_port_full_status_t *)buffer)->change.connected_changed = host_port.connect_detected;
+                    ((hub_port_full_status_t *)buffer)->change.enabled_changed = host_port.enable_changed;
+                    ((hub_port_full_status_t *)buffer)->change.over_current_changed = host_port.over_current_changed;
+                    ((hub_port_full_status_t *)buffer)->change.reset_changed = true;
+                    reply_length = 4;
                     break;
                 default:
                     device->error = USB_TRANSFER_ERROR_STALL;
@@ -152,12 +170,12 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                     break;
                 case 0x23:
                     switch ((hcd_hub_port_feature_t) request->value) {
-                        case HUB_FEATURE_ENABLE:
+                        case HUB_PORT_FEATURE_ENABLE:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.enable = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x4); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_SUSPEND:
+                        case HUB_PORT_FEATURE_SUSPEND:
                             mmio_write(HCD_POWER, NO_BITS);
                             delay(5000);
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
@@ -168,22 +186,22 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             host_port.suspend = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0xc0); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_POWER:
+                        case HUB_PORT_FEATURE_POWER:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.power = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1000); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_CONNECTION_CHANGE:
+                        case HUB_PORT_FEATURE_CONNECTION_CHANGE:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.connect_detected = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x2); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_ENABLE_CHANGE:
+                        case HUB_PORT_FEATURE_ENABLE_CHANGE:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.enable_changed = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x8); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_OVER_CURRENT_CHANGE:
+                        case HUB_PORT_FEATURE_OVER_CURRENT_CHANGE:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.over_current_changed = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x20); // XXX MAGIC
@@ -204,7 +222,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                     break;
                 case 0x23:
                     switch ((hcd_hub_port_feature_t) request->value) {
-                        case HUB_FEATURE_RESET:
+                        case HUB_PORT_FEATURE_RESET:
                             mmio_read_in(HCD_POWER, &power, 1);
                             power.enable_sleep_clock_gating = false;
                             power.stop_p_clock = false;
@@ -220,7 +238,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             host_port.reset = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1000); // XXX MAGIC
                             break;
-                        case HUB_FEATURE_POWER:
+                        case HUB_PORT_FEATURE_POWER:
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.power = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1000); // XXX MAGIC
@@ -290,7 +308,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
     }
 
     if (result == ERROR_ARGUMENT) device->error |= USB_TRANSFER_ERROR_STALL;
-    device->error &= ~USB_TRANSFER_ERROR_PROCESSING;
+    device->error &= ~USB_TRANSFER_PROCESSING;
     device->last_transfer = reply_length;
 
     DEBUG_END();

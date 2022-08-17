@@ -18,7 +18,15 @@ DEBUG_INIT("usb");
 static const char device_speeds[4][16] = { "480 Mb/s", "1.5 Mb/s", "12 Mb/s", "unknown speed" };
 
 static usb_device_t *devices[MAXIMUM_USB_DEVICES];
-static usb_call_result_t (*interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT])(usb_device_t *device, uint32_t interface_number);
+
+#define INTERFACE_CLASS_ATTACH_COUNT    16
+static usb_attach_f interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT];
+//static usb_call_result_t (*interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT])(usb_device_t *device, uint32_t interface_number);
+
+void attach_driver_for_class(interface_class_t interface_class, usb_attach_f function)
+{
+    interface_class_attach[interface_class] = function;
+}
 
 const char *usb_get_description(usb_device_t *device)
 {
@@ -114,8 +122,8 @@ const char *usb_get_description(usb_device_t *device)
     }
 }
 
-static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
-                                             uint32_t buffer_length, usb_device_request_t *request, uint32_t timeout)
+usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
+                                      uint32_t buffer_length, usb_device_request_t *request, uint32_t timeout)
 {
     DEBUG_START("usb_control_message");
 
@@ -132,18 +140,18 @@ static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_addr
         return result;
     }
 
-    while (timeout-- > 0 && device->error & USB_TRANSFER_ERROR_PROCESSING)
+    while (timeout-- > 0 && device->error & USB_TRANSFER_PROCESSING)
     {
         delay(1000);
     }
-    if (device->error & USB_TRANSFER_ERROR_PROCESSING)
+    if (device->error & USB_TRANSFER_PROCESSING)
     {
         debug_printf("USBD: Message to %s timeout reached.\r\n", usb_get_description(device));
         DEBUG_END();
         return ERROR_TIMEOUT;
     }
 
-    if (device->error & ~USB_TRANSFER_ERROR_PROCESSING)
+    if (device->error & ~USB_TRANSFER_PROCESSING)
     {
         if ((device->parent != NULL) && (device->parent->device_check_connection != NULL))
         {
@@ -166,9 +174,9 @@ static usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_addr
     return OK;
 }
 
-static usb_call_result_t usb_get_descriptor(usb_device_t *device, descriptor_type_t descriptor_type, uint8_t index,
-                                            uint16_t lang_id, void *buffer, uint32_t length, uint32_t minimum_length,
-                                            uint8_t recipient)
+usb_call_result_t usb_get_descriptor(usb_device_t *device, descriptor_type_t descriptor_type, uint8_t index,
+                                     uint16_t lang_id, void *buffer, uint32_t length, uint32_t minimum_length,
+                                     uint8_t recipient)
 {
     DEBUG_START("usb_get_descriptor");
 
@@ -248,7 +256,7 @@ static usb_call_result_t usb_set_address(usb_device_t *device, uint8_t address)
     return OK;
 }
 
-static void usb_deallocate_device(usb_device_t *device)
+void usb_deallocate_device(usb_device_t *device)
 {
     DEBUG_START("usb_deallocate_device");
 
@@ -287,7 +295,7 @@ static void usb_deallocate_device(usb_device_t *device)
     DEBUG_END();
 }
 
-static usb_call_result_t usb_allocate_device(usb_device_t **devicep)
+usb_call_result_t usb_allocate_device(usb_device_t **devicep)
 {
     DEBUG_START("usb_allocate_device");
 
@@ -584,7 +592,7 @@ static usb_call_result_t usb_configure(usb_device_t *device, uint8_t configurati
     return OK;
 }
 
-static usb_call_result_t usb_attach_device(usb_device_t *device)
+usb_call_result_t usb_attach_device(usb_device_t *device)
 {
     DEBUG_START("usb_attach_device");
 
@@ -731,11 +739,20 @@ static void usb_load()
         interface_class_attach[i] = NULL;
 }
 
+void hcd_load();
+void hid_load();
+void hub_load();
+void keyboard_load();
+
 usb_call_result_t usb_init()
 {
     DEBUG_START("usb_init");
 
     usb_load();
+    hcd_load();
+    hid_load();
+    hub_load();
+    keyboard_load();
 
     usb_call_result_t result;
     if ((result = hcd_init()) != OK)
@@ -758,4 +775,26 @@ usb_call_result_t usb_init()
     }
     DEBUG_END();
     return OK;
+}
+
+usb_device_t *usb_get_root_hub()
+{
+    DEBUG_START("usb_get_root_hub");
+
+    usb_device_t *root_hub = devices[0];
+
+    DEBUG_END();
+    return root_hub;
+}
+
+void usb_check_for_change()
+{
+    DEBUG_START("usb_check_for_change");
+
+    if (devices[0] != NULL && devices[0]->device_check_for_change != NULL)
+    {
+        devices[0]->device_check_for_change(devices[0]);
+    }
+
+    DEBUG_END();
 }

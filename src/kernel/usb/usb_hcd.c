@@ -14,6 +14,11 @@
 
 DEBUG_INIT("usb_hcd");
 
+/**
+	\brief Indicates if the Phy has been initialised.
+
+	Indicaes if the Phy has been initialised, as this can only be done once.
+*/
 static bool phy_initialized = false;
 
 static uint8_t data_buffer[1024];
@@ -49,6 +54,14 @@ static char *full_speed_physical_capabilities[4] = {
         "PHYSICAL_1"
         "PHYSICAL_2"
 };
+
+void hcd_load()
+{
+    DEBUG_START("hcd_load");
+    debug_printf("DWC: DesignWare Hi-Speed USB 2.0 On-The-Go (HS OTG) Controller driver version 0.1"
+                 " (derived from CSUD).\r\n");
+    DEBUG_END();
+}
 
 static int hcd_power_on()
 {
@@ -870,7 +883,7 @@ usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_addr
     }
 
     // Set device state
-    device->error = USB_TRANSFER_ERROR_PROCESSING;
+    device->error = USB_TRANSFER_PROCESSING;
     device->last_transfer = 0;
 
     // Setup

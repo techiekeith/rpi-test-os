@@ -10,6 +10,6 @@ delay_inner_loop:
     subs    r1, r1, #1
     bne     delay_inner_loop
     subs    r0, r0, #1
-    bne     delay
+    bpl     delay
     bx      lr
     .size   delay, .-delay

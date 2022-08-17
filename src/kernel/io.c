@@ -50,8 +50,9 @@ void debug_push(const char *filename, const char *function)
     }
 }
 
-void debug_pop()
+void debug_pop(bool correctly)
 {
+    if (!correctly) debug_printf("exited without calling DEBUG_END().\r\n");
     if (debug_stack != NULL)
     {
         struct debug_entry *old_entry = debug_stack;

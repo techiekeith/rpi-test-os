@@ -2,6 +2,8 @@
  * colors.c
  */
 
+#include "../../include/common/stdio.h"
+#include "../../include/common/stdlib.h"
 #include "../../include/kernel/graphics.h"
 
 void background_color(int argc, char **argv)
