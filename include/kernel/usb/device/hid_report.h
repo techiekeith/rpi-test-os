@@ -329,7 +329,7 @@ typedef struct {
     /** Each report descriptor has an application collection with a usage */
     hid_full_usage_t application;
     /** There can be multiple reports */
-    uint8_t reportCount;
+    uint8_t report_count;
     /** The interface number that HID is available on. */
     uint8_t interface;
     /** Store a pointer to each report. */

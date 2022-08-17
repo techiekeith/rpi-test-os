@@ -713,7 +713,7 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
 
 void hub_load()
 {
-    DEBUG_START("hub_attach");
+    DEBUG_START("hub_load");
 
     debug_printf("HUB: Hub driver version 0.1 (derived from CSUD).\r\n");
     attach_driver_for_class(INTERFACE_CLASS_HUB, hub_attach);

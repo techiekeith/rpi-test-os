@@ -34,24 +34,23 @@ void kernel_main(size_t r0, size_t r1, size_t atags)
 //    puts("Initializing Memory Module.\n");
 //    uint64_t mem_size = mem_init(mem_size);
 
-    puts("Initializing interrupts\r\n");
+    puts("Initializing interrupts.\r\n");
     interrupts_init();
     uart_enable_interrupts();
 
-    puts("Initializing system timer\r\n");
+    puts("Initializing timers.\r\n");
     system_timer_init();
-
-    puts("Initializing ARM timer\r\n");
     arm_timer_init();
 
-    puts("Initializing kernel heap\r\n");
+    puts("Initializing kernel heap.\r\n");
     heap_init();
 
-    puts("Initializing graphics\r\n");
+    puts("Initializing graphics.\r\n");
     graphics_init();
 
-    puts("Initializing USB host controller\r\n");
+    puts("Initializing USB host controller.\r\n");
     usb_init();
+    usb_check_for_change();
 
     int halted = 0;
     while (!halted)

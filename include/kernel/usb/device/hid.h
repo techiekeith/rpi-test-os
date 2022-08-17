@@ -125,7 +125,7 @@ usb_call_result_t hid_set_report(usb_device_t *device, hid_report_type_t report_
 	Writes back the current values of a report in memory to the device.
 	Implemented using HidSetReport, not interrupts.
 */
-usb_call_result_t hid_write_device(usb_device_t *device, uint8_t report);
+usb_call_result_t hid_write_device(usb_device_t *device, uint8_t report_number);
 
 /**
 	\brief Updates a report with the values from the device.
@@ -133,7 +133,7 @@ usb_call_result_t hid_write_device(usb_device_t *device, uint8_t report);
 	Reads the current values of a report from the device into memory. Implemented
 	using HidGetReport not interrupts.
 */
-usb_call_result_t hid_read_device(usb_device_t *device, uint8_t report);
+usb_call_result_t hid_read_device(usb_device_t *device, uint8_t report_number);
 
 /**
 	\brief Enumerates a device as a HID device.

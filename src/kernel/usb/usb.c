@@ -25,7 +25,10 @@ static usb_attach_f interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT];
 
 void attach_driver_for_class(interface_class_t interface_class, usb_attach_f function)
 {
+    DEBUG_START("attach_driver_for_class");
+    debug_printf("Attaching driver for class %d: %p.\r\n", interface_class, function);
     interface_class_attach[interface_class] = function;
+    DEBUG_END();
 }
 
 const char *usb_get_description(usb_device_t *device)
@@ -793,7 +796,12 @@ void usb_check_for_change()
 
     if (devices[0] != NULL && devices[0]->device_check_for_change != NULL)
     {
+        debug_printf("Checking root hub for changes.\r\n");
         devices[0]->device_check_for_change(devices[0]);
+    }
+    else
+    {
+        debug_printf("Root hub not present.\r\n");
     }
 
     DEBUG_END();

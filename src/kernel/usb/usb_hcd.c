@@ -92,10 +92,10 @@ usb_call_result_t hcd_init()
     __dmb();
 
     // Check hardware capabilities
-    debug_printf("vendor_id=%p, user_id=%p\r\n", vendor_id, user_id);
+    debug_printf("vendor_id=%p, user_id=%p.\r\n", vendor_id, user_id);
     if ((vendor_id & OT2_VENDOR_ID_MASK) == OT2_VENDOR_ID_MATCH) // 'OT2.x'
     {
-        debug_printf("Host Controller Device: %c%c%x.%x (BCM%05x)\r\n",
+        debug_printf("Host Controller Device: %c%c%x.%x (BCM%05x).\r\n",
                      (vendor_id >> 24) & 0xff, (vendor_id >> 16) & 0xff,
                      (vendor_id >> 12) & 0xf, vendor_id & 0xfff,
                      (user_id >> 12) & 0xfffff);
