@@ -20,34 +20,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8fc1d4cc-5f92-416b-ab3b-c357ba6c1c3e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/include/kernel/usb/device/hid.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/kernel/usb/device/hid_report.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/kernel/usb/device/keyboard.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel/usb/device/hid.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel/usb/device/hub.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel/usb/device/keyboard.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/common/arch.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/common/arch.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/common/limits.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/common/limits.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/common/stddef.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/common/stddef.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/common/stdlib.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/common/stdlib.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/kernel/arm_timer.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/arm_timer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/stdio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/stdio.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/stdlib.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/stdlib.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/string.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/string.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/utf8.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/utf8.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/boot.S" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/boot.S" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/graphics.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/graphics.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/heap.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/heap.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/interrupt.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/interrupt.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/mailbox.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mailbox.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/mem.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mem.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/mmio.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/mmio.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/old_mailbox/framebuffer.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/old_mailbox/framebuffer.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/panic.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/panic.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kernel/uart.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/uart.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/io.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/io.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb/device/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb/device/hub.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb/usb.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb/usb.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb/usb_hcd.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb/usb_hcd.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/kernel/usb/usb_root_hub.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/kernel/usb/usb_root_hub.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/delay.S" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/delay.S" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/io.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/io.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb/device/todo.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kernel/usb/usb.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb/usb.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kernel/usb/usb_hcd.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb/usb_hcd.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/saa505x/glyphs.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/saa505x/glyphs.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/charset.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/charset.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/mailbox_options.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/mailbox_options.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/memory.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/shell.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/shell.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kernel/usb/usb_root_hub.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/kernel/usb/usb_root_hub.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/colors.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/colors.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,7 +117,7 @@
     "WebServerToolWindowFactoryState": "false",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "last_opened_file_path": "C:/Users/keith/repos/rpi-test-os/src/kernel",
+    "last_opened_file_path": "C:/Users/keith/repos/rpi-test-os/include/kernel/usb/device",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
@@ -137,6 +128,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel\usb\device" />
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel" />
       <recent name="C:\Users\keith\repos\rpi-test-os\include\kernel" />
       <recent name="C:\Users\keith\repos\rpi-test-os\src\kernel\oldfb" />
@@ -148,11 +140,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Remote Debug.Raspberry Pi 2">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Build" type="CLionNativeAppRunConfigurationType" PROGRAM_PARAMS="-c echo" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-test-os" TARGET_NAME="Make (WSL)" CONFIG_NAME="Make (WSL)" version="1" RUN_PATH="/usr/bin/bash">
       <method v="2" />
     </configuration>
@@ -163,6 +150,11 @@
     <configuration name="Raspberry Pi Model B" type="CLion_Remote" version="1" remoteCommand="localhost:1234" symbolFile="$PROJECT_DIR$/dist/raspi1ap_g.elf" sysroot="$PROJECT_DIR$/dist">
       <debugger kind="GDB" isBundled="true" />
       <method v="2" />
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
     </configuration>
     <configuration name="Raspberry Pi 2 (GDB)" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi2b -name raspi2b-debug -m 1G -serial stdio -usb -usbdevice keyboard -kernel dist\raspi2b_g.elf" />
@@ -255,6 +247,7 @@
       <workItem from="1660647402266" duration="1015000" />
       <workItem from="1660650402841" duration="5485000" />
       <workItem from="1660658835618" duration="9732000" />
+      <workItem from="1660671694727" duration="25057000" />
     </task>
     <servers />
   </component>
@@ -280,6 +273,18 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/kernel/usb/usb.c</url>
+          <line>131</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/kernel/usb/device/hub.c</url>
+          <line>120</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
       </default-breakpoints>

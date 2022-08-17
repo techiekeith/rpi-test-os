@@ -2,12 +2,12 @@
  * usb_hcd.h - definitions for the Host Controller Device
  */
 
+#pragma once
+
 #include "../../common/stdbool.h"
 #include "../../common/stdint.h"
 #include "../peripheral.h"
 #include "usb.h"
-
-#pragma once
 
 #define HOST_CONTROLLER_BASE                (PERIPHERAL_BASE + HOST_CONTROLLER_OFFSET)
 
@@ -15,6 +15,12 @@
 #define HOST_GLOBAL_OFFSET                  (HOST_CONTROLLER_BASE + 0x0400)
 #define POWER_CLOCK_OFFSET                  (HOST_CONTROLLER_BASE + 0x0e00)
 
+/**
+	\brief The addresses of all core registers used by the HCD.
+
+	The address offsets of all core registers used by the DesignWare® Hi-Speed
+	USB 2.0 On-The-Go (HS OTG) Controller. Used in write and read throughs.
+*/
 #define HCD_CORE_OTG_CONTROL                (CORE_GLOBAL_OFFSET + 0x00)
 #define HCD_USB_GAHBCFG                     (CORE_GLOBAL_OFFSET + 0x08)
 #define HCD_USB                             (CORE_GLOBAL_OFFSET + 0x0c)
@@ -29,6 +35,12 @@
 
 #define HCD_CORE_PERIODIC_HOST_FIFO_SIZE    (CORE_GLOBAL_OFFSET + 0x100)
 
+/**
+	\brief Contains the host mode global registers structure that control the HCD.
+
+	Contains the host mode global registers structure that controls the DesignWare®
+	Hi-Speed USB 2.0 On-The-Go (HS OTG) Controller.
+*/
 #define HCD_HOST_CONFIG                     (HOST_GLOBAL_OFFSET + 0x00)
 #define HCD_HOST_PORT                       (HOST_GLOBAL_OFFSET + 0x40)
 #define HCD_HOST_CHANNEL(x)                 (HOST_GLOBAL_OFFSET + 0x100 + 0x20 * (x))
@@ -128,19 +140,19 @@ typedef enum {
 } packet_id_t;
 
 typedef enum {
-    HUB_FEATURE_CONNECTION = 0,
-    HUB_FEATURE_ENABLE = 1,
-    HUB_FEATURE_SUSPEND = 2,
-    HUB_FEATURE_OVER_CURRENT = 3,
-    HUB_FEATURE_RESET = 4,
-    HUB_FEATURE_POWER = 8,
-    HUB_FEATURE_LOW_SPEED = 9,
-    HUB_FEATURE_HIGH_SPEED = 10,
-    HUB_FEATURE_CONNECTION_CHANGE = 16,
-    HUB_FEATURE_ENABLE_CHANGE = 17,
-    HUB_FEATURE_SUSPEND_CHANGE = 18,
-    HUB_FEATURE_OVER_CURRENT_CHANGE = 19,
-    HUB_FEATURE_RESET_CHANGE = 20
+    HUB_PORT_FEATURE_CONNECTION = 0,
+    HUB_PORT_FEATURE_ENABLE = 1,
+    HUB_PORT_FEATURE_SUSPEND = 2,
+    HUB_PORT_FEATURE_OVER_CURRENT = 3,
+    HUB_PORT_FEATURE_RESET = 4,
+    HUB_PORT_FEATURE_POWER = 8,
+    HUB_PORT_FEATURE_LOW_SPEED = 9,
+    HUB_PORT_FEATURE_HIGH_SPEED = 10,
+    HUB_PORT_FEATURE_CONNECTION_CHANGE = 16,
+    HUB_PORT_FEATURE_ENABLE_CHANGE = 17,
+    HUB_PORT_FEATURE_SUSPEND_CHANGE = 18,
+    HUB_PORT_FEATURE_OVER_CURRENT_CHANGE = 19,
+    HUB_PORT_FEATURE_RESET_CHANGE = 20
 } hcd_hub_port_feature_t;
 
 typedef struct {
@@ -409,6 +421,12 @@ typedef struct {
     hcd_host_channel_t channel[CHANNEL_COUNT];
 } __attribute__ ((__packed__)) hcd_host_channels_t;
 
+/**
+	\brief Contains the dwc power and clock gating controls.
+
+	Contains the dwc power and clock gating structure that controls the DesignWare®
+	Hi-Speed USB 2.0 On-The-Go (HS OTG) Controller.
+*/
 typedef struct {
     bool stop_p_clock: 1;
     bool gate_h_clock: 1;
@@ -421,7 +439,32 @@ typedef struct {
     uint32_t reserved_8_31: 24;
 } __attribute__ ((__packed__)) hcd_power_t;
 
+/**
+	\brief Sends a control message to a device.
+
+	Sends a control message to a device. Handles all necessary channel creation
+	and other processing. The sequence of a control transfer is defined in the
+	USB 2.0 manual section 5.5. The host sends a setup packet (request) then
+	zero or more data packets are sent or received (to buffer, max length
+	bufferLength) and finally a status message is sent to conclude the
+	transaction. Packets larger than pipe.MaxSize are split. For low speed
+	devices pipe.MaxSize must be Bits8, and Bits64 for high speed. Low and full
+	speed transactions are always split.
+*/
 usb_call_result_t hcd_submit_control_message(usb_device_t *device, usb_pipe_address_t pipe, void *buffer,
                                              uint32_t buffer_length, usb_device_request_t *request);
+
+/**
+	\brief Initialises the host controller driver for this hardware.
+
+	Initialises the core on whatever hardware is in use.
+*/
 usb_call_result_t hcd_init();
+
+/**
+	\brief Starts the host controller driver working.
+
+	Starts the host controller driver working. It should start processing
+	communications and be ready for commands.
+*/
 usb_call_result_t hcd_start();
