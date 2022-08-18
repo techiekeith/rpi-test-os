@@ -551,7 +551,8 @@ static usb_call_result_t usb_configure(usb_device_t *device, uint8_t configurati
                 }
                 else
                 {
-                    memcpy((void *)&device->interfaces[last_interface = interface->number], (void *)interface,
+                    last_interface = interface->number;
+                    memcpy((void *)&device->interfaces[last_interface], (void *)interface,
                            sizeof(usb_interface_descriptor_t));
                     last_endpoint = 0;
                     is_alternate = false;
@@ -600,7 +601,6 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
     DEBUG_START("usb_attach_device");
 
     usb_call_result_t result;
-    char *buffer;
     uint8_t address = device->number;
     device->number = 0;
     debug_printf("USBD: Scanning %d. %s.\r\n", address, device_speeds[MIN(device->speed, 3, uint8_t)]);
@@ -645,14 +645,26 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
         return result;
     }
 
+    // Configure device - we only support devices with one configuration for now
+    if (usb_configure(device, 0) != OK)
+    {
+        debug_printf("USBD: Failed to configure device %x.\n", address);
+        DEBUG_END();
+        return OK;
+    }
+
     debug_printf("USBD: Attach device %s. Address: %d Class: %d Subclass: %d"
                  " USB: %x.%x. %d configurations, %d interfaces.\r\n",
                  usb_get_description(device), address, device->descriptor.device_class, device->descriptor.sub_class,
                  device->descriptor.usb_version >> 8, (device->descriptor.usb_version >> 4) & 0xf,
                  device->descriptor.configuration_count, device->configuration.interface_count);
 
+    debug_printf("USBD:  -VID:PID:       %x:%x v%d.%x.\r\n",
+                 device->descriptor.vendor_id, device->descriptor.product_id,
+                 device->descriptor.version >> 8, device->descriptor.version & 0xff);
+
     // Read and display product, manufacturer, serial number
-    buffer = heap_alloc("usb_attach_device", 0x100);
+    char *buffer = heap_alloc("usb_attach_device", 0x100);
     if (buffer != NULL)
     {
         if (device->descriptor.product != 0)
@@ -670,27 +682,13 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
             result = usb_read_string(device, device->descriptor.serial_number, buffer, 0x100);
             if (result == OK) debug_printf("USBD:  -SerialNumber:  %s.\r\n", buffer);
         }
+        if (device->configuration.string_index != 0)
+        {
+            result = usb_read_string(device, device->configuration.string_index, buffer, 0x100);
+            if (result == OK) debug_printf("USBD:  -Configuration: %s.\r\n", buffer);
+        }
+        heap_free(buffer);
     }
-
-    debug_printf("USBD:  -VID:PID:       %x:%x v%d.%x.\r\n",
-                 device->descriptor.vendor_id, device->descriptor.product_id,
-                 device->descriptor.version >> 8, device->descriptor.version & 0xff);
-
-    // Configure device - we only support devices with one configuration for now
-    if ((result = usb_configure(device, 0)) != OK)
-    {
-        debug_printf("USBD: Failed to configure device %x.\n", address);
-        DEBUG_END();
-        if (buffer != NULL) heap_free(buffer);
-        return OK;
-    }
-
-    if (buffer != NULL && device->configuration.string_index != 0)
-    {
-        result = usb_read_string(device, device->configuration.string_index, buffer, 0x100);
-        if (result == OK) debug_printf("USBD:  -Configuration: %s.\r\n", buffer);
-    }
-    if (buffer != NULL) heap_free(buffer);
 
     // Start driver
     if (device->interfaces[0].interface_class < INTERFACE_CLASS_ATTACH_COUNT

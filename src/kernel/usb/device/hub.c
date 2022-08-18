@@ -277,7 +277,7 @@ static usb_call_result_t hub_port_connection_changed(usb_device_t *device, uint8
     debug_printf("HUB: %s.Port%d Status %x:%x.\r\n", usb_get_description(device), port + 1,
                  *(uint16_t *)&port_status->status, *(uint16_t *)&port_status->change);
 
-    if ((result = hub_change_port_feature(device, HUB_PORT_FEATURE_CONNECTION_CHANGE, port, false)) != OK)
+    if (hub_change_port_feature(device, HUB_PORT_FEATURE_CONNECTION_CHANGE, port, false) != OK)
     {
         debug_printf("HUB: Failed to clear change on %s.Port%d.\r\n", usb_get_description(device), port + 1);
     }
@@ -500,7 +500,8 @@ usb_call_result_t hub_check_connection(usb_device_t *device, uint8_t port)
     }
     port_status = &data->port_status[port];
 
-    if (port_status->change.connected_changed)
+    // XXX Change from AC's code, experimental.
+    if (port_status->change.connected_changed || (port_status->status.connected && data->children[port] == NULL))
     {
         hub_port_connection_changed(device, port);
     }

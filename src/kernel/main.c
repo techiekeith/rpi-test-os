@@ -50,7 +50,6 @@ void kernel_main(size_t r0, size_t r1, size_t atags)
 
     puts("Initializing USB host controller.\r\n");
     usb_init();
-    usb_check_for_change();
 
     int halted = 0;
     while (!halted)

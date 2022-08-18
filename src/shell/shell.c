@@ -175,6 +175,12 @@ static void cmd_time(int argc, char **argv)
     show_timers();
 }
 
+void usb_info(int argc, char **argv);
+static void cmd_usb(int argc, char **argv)
+{
+    usb_info(argc, argv);
+}
+
 /*
  * Shell commands end here - switch unused parameter warnings back on
  */
@@ -205,6 +211,7 @@ command_t commands[] = {
         { .name = "reset",   .function = NULL },
         { .name = "test",    .function = &cmd_test },
         { .name = "time",    .function = &cmd_time },
+        { .name = "usb",    .function = &cmd_usb },
         { .name = NULL,      .function = &bad_command }, /* this one goes last */
 };
 

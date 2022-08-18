@@ -60,6 +60,7 @@
 #define REQUEST_TIMEOUT                     5000
 
 #define ALL_BITS                            0xffffffffU
+#define ALL_INTERRUPT_BITS                  0x3fffU
 #define NO_BITS                             0x00000000U
 #define HCD_HOST_PORT_MASK                  0x1f140U
 
