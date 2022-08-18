@@ -194,7 +194,7 @@ typedef struct {
     bool rem_mem_supp: 1;
     bool noti_all_dma_writ: 1;
     bool dma_remainder_mode: 1;
-    bool reserved_31: 1;
+    bool reserved_24_31: 8;
 } __attribute__ ((__packed__)) hcd_ahb_t;
 
 typedef struct {
@@ -224,12 +224,8 @@ typedef struct {
     bool tx_end_delay: 1;
     bool force_host_mode: 1;
     bool force_dev_mode: 1;
+    bool reserved_31: 1;
 } __attribute__ ((__packed__)) hcd_usb_register_t;
-
-typedef struct {
-    uint16_t start_address: 16;
-    uint16_t depth: 16;
-} __attribute__ ((__packed__)) hcd_fifo_size_t;
 
 typedef struct {
     bool core_soft: 1;
@@ -263,7 +259,7 @@ typedef struct {
            uint8_t direction13: 2;
            uint8_t direction14: 2;
            uint8_t direction15: 2;
-       };
+       } __attribute__ ((__packed__));
        uint32_t word0; /* bits 0-31 */
     };
     union {
@@ -283,7 +279,7 @@ typedef struct {
             uint8_t host_periodic_queue_depth: 2;
             uint8_t device_token_queue_depth: 2;
             bool enable_ic_usb: 1;
-        };
+        } __attribute__ ((__packed__));
         uint32_t word1; /* bits 32-63 */
     };
     union {
@@ -300,7 +296,7 @@ typedef struct {
             bool bc_support: 1;
             bool low_power_mode_enabled: 1;
             uint16_t fifo_depth: 16;
-        };
+        } __attribute__ ((__packed__));
         uint32_t word2; /* bits 64-95 */
     };
     union {
@@ -321,10 +317,51 @@ typedef struct {
             uint8_t in_endpoint_count: 4;
             bool dma_description: 1;
             bool dma_dynamic_description: 1;
-        };
+        } __attribute__ ((__packed__));
         uint32_t word3; /* bits 96-127 */
     };
 } __attribute__ ((__packed__)) hcd_hardware_t;
+
+typedef struct {
+    uint16_t start_address: 16;
+    uint16_t depth: 16;
+} __attribute__ ((__packed__)) hcd_fifo_size_t;
+
+/**
+	\brief Contains the core global registers structure that control the HCD.
+
+	Contains the core global registers structure that controls the DesignWare®
+	Hi-Speed USB 2.0 On-The-Go (HS OTG) Controller.
+*/
+typedef struct {
+    hcd_otg_control_t otg_control;              /* 0x000 */
+    uint32_t otg_interrupt;                     /* 0x004 = hcd_otg_interrupt_t */
+    hcd_ahb_t ahb;                              /* 0x008 */
+    hcd_usb_register_t usb;                     /* 0x00c */
+    hcd_reset_t reset;                          /* 0x010 */
+    uint32_t interrupt;                         /* 0x014 = hcd_core_interrupt_t */
+    uint32_t interrupt_mask;                    /* 0x018 = hcd_core_interrupt_t */
+    uint32_t receive_peek;                      /* 0x01c = hcd_core_receive_status_t */
+    uint32_t receive_pop;                       /* 0x020 = hcd_core_receive_status_t */
+    uint32_t receive_size;                      /* 0x024 */
+    uint32_t non_periodic_fifo_size;            /* 0x028 = hcd_non_periodic_fifo_size_t */
+    uint32_t non_periodic_fifo_status;          /* 0x02c = hcd_non_periodic_fifo_status_t */
+    uint32_t i2c_control;                       /* 0x030 = hcd_i2c_control_t */
+    uint32_t phy_vendor_control;                /* 0x034 */
+    uint32_t gpio;                              /* 0x038 */
+    uint32_t user_id;                           /* 0x03c */
+    uint32_t vendor_id;                         /* 0x040 */
+    hcd_hardware_t hardware;                    /* 0x044 - 0x050 */
+    uint32_t low_power_mode_configuration;      /* 0x054 */
+    uint32_t reserved_0x58_0x7c[10];            /* 0x058 - 0x07c */
+    uint32_t mdio_control;                      /* 0x080 (BCM2835) */
+    uint32_t mdio_data;                         /* 0x084 (BCM2835) */
+    uint32_t vbus;                              /* 0x088 (BCM2835) */
+    uint32_t reserved_0x8c_0xfc[29];            /* 0x08c - 0x0fc */
+    hcd_fifo_size_t host_size;                  /* 0x100 */
+    hcd_fifo_size_t data_size[15];              /* 0x104 - 0x13c */
+    uint32_t reserved_0x140_0x3fc[176];         /* 0x140 - 0x3fc */
+} __attribute__ ((__packed__)) hcd_core_global_registers_t;
 
 typedef struct {
     host_clock_rate_t clock_rate: 2;
@@ -418,9 +455,27 @@ typedef struct {
     uint32_t reserved_0x1c;
 } __attribute__ ((__packed__)) hcd_host_channel_t;
 
+/**
+	\brief Contains the host mode global registers structure that control the HCD.
+
+	Contains the host mode global registers structure that controls the DesignWare®
+	Hi-Speed USB 2.0 On-The-Go (HS OTG) Controller.
+*/
 typedef struct {
-    hcd_host_channel_t channel[CHANNEL_COUNT];
-} __attribute__ ((__packed__)) hcd_host_channels_t;
+    hcd_host_configuration_t configuration;     /* 0x400 */
+    uint32_t frame_interval;                    /* 0x404 */
+    uint32_t frame_number;                      /* 0x408 */
+    uint32_t reserved_0x40c;                    /* 0x40c */
+    uint32_t fifo_status;                       /* 0x410 */
+    uint32_t interrupt;                         /* 0x414 */
+    uint32_t interrupt_mask;                    /* 0x418 */
+    uint32_t frame_list;                        /* 0x41c */
+    uint32_t reserved_0x420_0x43c[8];           /* 0x420 - 0x43c */
+    hcd_host_port_t port;                       /* 0x440 */
+    uint32_t reserved_0x444_0x4fc[47];          /* 0x444 - 0x4fc */
+    hcd_host_channel_t channel[CHANNEL_COUNT];  /* 0x500 - 0x6fc */
+    uint32_t reserved_0x700_0x7fc[64];          /* 0x700 - 0x7fc */
+} __attribute__ ((__packed__)) hcd_host_global_registers_t;
 
 /**
 	\brief Contains the dwc power and clock gating controls.

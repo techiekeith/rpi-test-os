@@ -734,10 +734,13 @@ static usb_call_result_t usb_attach_root_hub()
 
 static void usb_load()
 {
+    DEBUG_START("usb_load");
+    debug_printf("USBD: USB driver version 0.1 (derived from CSUD).\r\n");
     for (uint32_t i = 0; i < MAXIMUM_USB_DEVICES; i++)
         devices[i] = NULL;
     for (uint32_t i = 0; i < INTERFACE_CLASS_ATTACH_COUNT; i++)
         interface_class_attach[i] = NULL;
+    DEBUG_END();
 }
 
 void hcd_load();
@@ -756,21 +759,28 @@ usb_call_result_t usb_init()
     keyboard_load();
 
     usb_call_result_t result;
+    if (sizeof(usb_device_request_t) != 8)
+    {
+        debug_printf("USBD: Incorrectly compiled driver, sizeof(usb_device_request_t) = %d (should be 8).\r\n",
+                     sizeof(usb_device_request_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
     if ((result = hcd_init()) != OK)
     {
-        debug_printf("Failed to initialize HCD.\r\n");
+        debug_printf("USBD: Failed to initialize HCD.\r\n");
         DEBUG_END();
         return result;
     }
     if ((result = hcd_start()) != OK)
     {
-        debug_printf("Failed to start HCD.\r\n");
+        debug_printf("USBD: Failed to start HCD.\r\n");
         DEBUG_END();
         return result;
     }
     if ((result = usb_attach_root_hub()) != OK)
     {
-        debug_printf("Failed to attach root hub.\r\n");
+        debug_printf("USBD: Failed to attach root hub.\r\n");
         DEBUG_END();
         return result;
     }

@@ -74,7 +74,7 @@ static int hcd_power_on()
     int rv = send_messages(tags);
     if (rv != 0)
     {
-        debug_printf("Power on USB Host Controller failed, return code %d\r\n", rv);
+        debug_printf("HCD: Power on USB Host Controller failed, return code %d.\r\n", rv);
     }
     DEBUG_END();
     return rv;
@@ -83,6 +83,70 @@ static int hcd_power_on()
 usb_call_result_t hcd_init()
 {
     DEBUG_START("hcd_init");
+
+    if (sizeof(hcd_otg_control_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_otg_control_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_otg_control_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_ahb_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_ahb_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_ahb_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_usb_register_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_usb_register_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_usb_register_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_reset_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_reset_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_reset_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_hardware_t) != 0x10)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_hardware_t) = 0x%x (should be 0x10).\r\n",
+                     sizeof(hcd_hardware_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_fifo_size_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_fifo_size_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_fifo_size_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_core_global_registers_t) != 0x400)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_core_global_registers_t) = 0x%x (should be 0x400).\r\n",
+                     sizeof(hcd_core_global_registers_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_host_global_registers_t) != 0x400)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_host_global_registers_t) = 0x%x (should be 0x400).\r\n",
+                     sizeof(hcd_host_global_registers_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
+    if (sizeof(hcd_power_t) != 4)
+    {
+        debug_printf("HCD: Incorrectly compiled driver, sizeof(hcd_power_t) = %d (should be 4).\r\n",
+                     sizeof(hcd_power_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
 
     volatile uint32_t vendor_id = mmio_read(HCD_VENDOR_ID);
     volatile uint32_t user_id = mmio_read(HCD_USER_ID);
