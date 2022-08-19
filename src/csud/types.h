@@ -34,10 +34,7 @@ typedef signed		long long	s64;
 
 /** One bit truth value */
 #ifndef __cplusplus
-typedef enum {
-	false = 0,
-	true = 1,
-} bool;
+#include "../../include/common/stdbool.h"
 #endif
 
 /**

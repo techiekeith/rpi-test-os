@@ -9,10 +9,10 @@
 *	is designed such that this driver's interface would be virtually the same
 *	across all systems, and in fact its implementation varies little either.
 ******************************************************************************/
-#include <hcd/hcd.h>
-#include <platform/platform.h>
-#include <usbd/descriptors.h>
-#include <usbd/usbd.h>
+#include "hcd.h"
+#include "platform.h"
+#include "descriptors.h"
+#include "usbd.h"
 
 /** The default timeout in ms of control transfers. */
 #define ControlMessageTimeout 10

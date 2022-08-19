@@ -18,10 +18,10 @@ extern "C"
 #endif
 
 
-#include <usbd/device.h>
-#include <usbd/devicerequest.h>
-#include <usbd/pipe.h>
-#include <types.h>
+#include "device.h"
+#include "devicerequest.h"
+#include "pipe.h"
+#include "types.h"
 
 /**
 	\brief Intialises the host controller driver for this hardware.
@@ -73,7 +73,7 @@ Result HcdSumbitControlMessage(struct UsbDevice *device,
 	struct UsbPipeAddress pipe, void* buffer, u32 bufferLength,
 	struct UsbDeviceRequest *request);
 
-#include "dwc/designware20.h"
+#include "designware20.h"
 
 #ifdef __cplusplus
 }

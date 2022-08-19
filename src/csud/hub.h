@@ -16,9 +16,9 @@ extern "C"
 {
 #endif
 
-#include <usbd/descriptors.h>
-#include <usbd/device.h>
-#include <types.h>
+#include "descriptors.h"
+#include "device.h"
+#include "types.h"
 
 /**
 	\brief The hub descriptor information.

@@ -8,9 +8,12 @@
 *	platform/arm/broadcom2835.c contains code for the broadcom2835 chip, used 
 *	in the Raspberry Pi. Compiled conditionally on LIB_BCM2835=1.
 ******************************************************************************/
-#include <configuration.h>
-#include <platform/platform.h>
-#include <types.h>
+#include "../../include/kernel/barrier.h"
+#include "../../include/kernel/delay.h"
+#include "../../include/kernel/mailbox.h"
+#include "configuration.h"
+#include "platform.h"
+#include "types.h"
 
 void Bcm2835Load()
 {
@@ -19,25 +22,25 @@ void Bcm2835Load()
 
 #ifndef TYPE_DRIVER
 
-void MicroDelay(u32 delay) {
-	volatile u64* timeStamp = (u64*)0x20003004;
-	u64 stop = *timeStamp + delay;
-
-	while (*timeStamp < stop) 
-		__asm__("nop");
+void MicroDelay(u32 delay_value) {
+    delay(delay_value);
 }
 
 Result PowerOnUsb() {
-	volatile u32* mailbox;
-	u32 result;
-
-	mailbox = (u32*)0x2000B880;
-	while (mailbox[6] & 0x80000000);
-	mailbox[8] = 0x80;
-	do {
-		while (mailbox[6] & 0x40000000);		
-	} while (((result = mailbox[0]) & 0xf) != 0);
-	return result == 0x80 ? OK : ErrorDevice;
+    property_message_tag_t tags[2];
+    tags[0].proptag = PWR_SET_STATE;
+    tags[0].value_buffer.data[0] = DEVICE_USB_HOST_CONTROLLER;
+    tags[0].value_buffer.data[1] = 3; // power on, wait
+    tags[1].proptag = NULL_TAG;
+    int rv = send_messages(tags);
+    if (rv == 0)
+    {
+        LOG_DEBUGF("USBD: set power state: %.x %.x.\r\n",
+                   tags[0].value_buffer.data[0],
+                   tags[0].value_buffer.data[1]);
+        return tags[0].value_buffer.data[1] == 1 ? OK : ErrorDevice;
+    }
+    return ErrorDevice;
 }
 
 #endif

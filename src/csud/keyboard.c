@@ -10,13 +10,13 @@
 *	operating system to retrieve the status of each one separately. It is coded
 *	a little awkwardly on purpose to make OS development more fun!
 ******************************************************************************/
-#include <device/hid/hid.h>
-#include <device/hid/keyboard.h>
-#include <device/hid/report.h>
-#include <platform/platform.h>
-#include <types.h>
-#include <usbd/device.h>
-#include <usbd/usbd.h>
+#include "hid.h"
+#include "keyboard.h"
+#include "report.h"
+#include "platform.h"
+#include "types.h"
+#include "device.h"
+#include "usbd.h"
 
 #define KeyboardMaxKeyboards 4
 

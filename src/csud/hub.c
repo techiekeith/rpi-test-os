@@ -9,14 +9,14 @@
 *	is designed such that this driver's interface would be virtually the same
 *	across all systems, and in fact its implementation varies little either.
 ******************************************************************************/
-#include <device/hub.h>
-#include <hcd/hcd.h>
-#include <platform/platform.h>
-#include <usbd/device.h>
-#include <usbd/devicerequest.h>
-#include <usbd/descriptors.h>
-#include <usbd/pipe.h>
-#include <usbd/usbd.h>
+#include "hub.h"
+#include "hcd.h"
+#include "platform.h"
+#include "device.h"
+#include "devicerequest.h"
+#include "descriptors.h"
+#include "pipe.h"
+#include "usbd.h"
 
 #define ControlMessageTimeout 10
 
@@ -391,8 +391,10 @@ Result HubCheckConnection(struct UsbDevice *device, u8 port) {
 		return result;
 	}
 	portStatus = &data->PortStatus[port];
-	
-	if (portStatus->Change.ConnectedChanged) {
+
+    // XXX Experimental
+//	if (portStatus->Change.ConnectedChanged) {
+    if (portStatus->Change.ConnectedChanged || (portStatus->Status.Connected && data->Children[port] == NULL)) {
 		HubPortConnectionChanged(device, port);
 	}
 	if (portStatus->Change.EnabledChanged) {

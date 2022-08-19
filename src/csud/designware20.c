@@ -10,12 +10,12 @@
 *
 *	THIS SOFTWARE IS NOT AFFILIATED WITH NOR ENDORSED BY SYNOPSYS IP.
 ******************************************************************************/
-#include <hcd/hcd.h>
-#include <types.h>
-#include <usbd/device.h>
-#include <usbd/devicerequest.h>
-#include <usbd/pipe.h>
-#include <usbd/usbd.h>
+#include "hcd.h"
+#include "types.h"
+#include "device.h"
+#include "devicerequest.h"
+#include "pipe.h"
+#include "usbd.h"
 
 #ifndef HCD_DESIGNWARE_BASE
 #error Missing required definition HCD_DESIGNWARE_BASE. Should be of the form ((void*)0xhhhhhhhh). Should be defined after HCD_DESIGNWARE_20 in the platform.
@@ -640,11 +640,11 @@ Result HcdInitialise() {
 		goto deallocate;
 	}
 	LOG_DEBUG("HCD: Internal DMA mode.\n");
-	if (Core->Hardware.HighSpeedPhysical == NotSupported) {
-		LOG("HCD: High speed physical unsupported. Driver incompatible.\n");
-		result = ErrorIncompatible;
-		goto deallocate;
-	}
+//	if (Core->Hardware.HighSpeedPhysical == NotSupported) {
+//		LOG("HCD: High speed physical unsupported. Driver incompatible.\n");
+//		result = ErrorIncompatible;
+//		goto deallocate;
+//	}
 	LOG_DEBUGF("HCD: Hardware configuration: %08x %08x %08x %08x\n", *(u32*)&Core->Hardware, *((u32*)&Core->Hardware + 1), *((u32*)&Core->Hardware + 2), *((u32*)&Core->Hardware + 3));
 	ReadBackReg(&Host->Config);
 	LOG_DEBUGF("HCD: Host configuration: %08x\n", *(u32*)&Host->Config);

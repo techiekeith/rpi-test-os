@@ -17,8 +17,11 @@ extern "C"
 {
 #endif
 
-#include <configuration.h>
-#include <types.h>
+#include "../../include/common/string.h"
+#include "../../include/kernel/heap.h"
+#include "../../include/kernel/io.h"
+#include "configuration.h"
+#include "types.h"
 
 /**
 	\brief Allocates memory of specified length. 
@@ -28,7 +31,8 @@ extern "C"
 	provide an implementation which calls MemoryReserve. Can return NULL on
 	error.
 */
-void* MemoryAllocate(u32 length);
+#define MemoryAllocate(x) heap_alloc("csud", (size_t)(x))
+/* void* MemoryAllocate(u32 length); */
 /**
 	\brief Deallocates memory of specified address, previously allocated by
 	MemoryAllocate. 
@@ -38,7 +42,8 @@ void* MemoryAllocate(u32 length);
 	must provide an implementation. Calling with an address not received from
 	MemoryAllocate produces undefined results.
 */
-void MemoryDeallocate(void* address);
+#define MemoryDeallocate(x) heap_free((void *)(x))
+/* void MemoryDeallocate(void* address); */
 /**
 	\brief Notifies the system of memory usage. 
 
@@ -56,7 +61,8 @@ void* MemoryReserve(u32 length, void* physicalAddress);
 	Copies length bytes from source to destinatoin. If either source or 
 	destination are null, should not copy anything.
 */
-void MemoryCopy(void* destination, void* source, u32 length);
+#define MemoryCopy(x,y,z) memcpy((void *)(x), (void *)(y), (size_t)(z))
+/* void MemoryCopy(void* destination, void* source, u32 length); */
 
 #ifdef NO_LOG
 #define LOG(x)
@@ -117,19 +123,6 @@ void PowerOffUsb();
 */
 void MicroDelay(u32 delay);
 
-
-#ifdef ARM
-#	ifdef ARM_V6
-#		include "arm/armv6.h"
-#		ifdef BROADCOM_2835
-#		include "arm/broadcom2835.h"
-#		endif // BROADCOM_2835
-#	else
-#	error Unrecognised ARM Version
-#	endif // ARM_V6
-#else
-#error Unrecognised Processor Family
-#endif // ARM
 
 #ifdef __cplusplus
 }

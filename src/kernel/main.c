@@ -16,6 +16,9 @@
 
 void copy_exception_table();
 int shell();
+#ifdef CSUD
+void UsbInitialise();
+#endif
 
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -49,7 +52,11 @@ void kernel_main(size_t r0, size_t r1, size_t atags)
     graphics_init();
 
     puts("Initializing USB host controller.\r\n");
+#ifdef CSUD
+    UsbInitialise();
+#else
     usb_init();
+#endif
 
     int halted = 0;
     while (!halted)

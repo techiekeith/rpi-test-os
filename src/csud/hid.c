@@ -13,13 +13,13 @@
 *	deal with these reports. More abstracted drivers for keyboards and mice and
 *	whatnot would no doubt be very useful.
 ******************************************************************************/
-#include <device/hid/hid.h>
-#include <device/hid/report.h>
-#include <platform/platform.h>
-#include <usbd/descriptors.h>
-#include <usbd/device.h>
-#include <types.h>
-#include <usbd/usbd.h>
+#include "hid.h"
+#include "report.h"
+#include "platform.h"
+#include "descriptors.h"
+#include "device.h"
+#include "types.h"
+#include "usbd.h"
 
 #define HidMessageTimeout 10
 

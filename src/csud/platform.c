@@ -8,8 +8,8 @@
 *	platform/platform.c contains code for generic system duties such as memory
 *	management and logging, which can be optionally disabled. 
 ******************************************************************************/
-#include <platform/platform.h>
-#include <stdarg.h>
+#include "../../include/common/stdarg.h"
+#include "platform.h"
 
 #ifdef MEM_NO_RESERVE
 
@@ -170,6 +170,11 @@ void MemoryCopy(void* destination, void* source, u32 length) {
 #define FLOAT_TEXT "Floats unsupported."
 
 #ifndef NO_LOG
+void LogPrint(const char* message, u32 messageLength) {
+    for (int index = 0; index < messageLength && message[index]; index++)
+        uart_putc(message[index]);
+}
+
 void LogPrintF(char* format, u32 formatLength, ...) {
 	va_list args;
 	char messageBuffer[160];

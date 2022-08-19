@@ -8,14 +8,14 @@
 
 void usb_info(int argc, char **argv)
 {
-    usb_device_t *root = usb_get_root_hub();
-    if (root == NULL)
-    {
-        printf("\r\nNo USB devices\r\n");
-        return;
-    }
+//    usb_device_t *root = usb_get_root_hub();
+//    if (root == NULL)
+//    {
+//        printf("\r\nNo USB devices\r\n");
+//        return;
+//    }
 
-    printf("\r\nUSB devices:\r\n");
+    printf("\r\nUSB devices: (TODO)\r\n");
 
 
 }
