@@ -18,6 +18,7 @@ if ($build -eq "release") {
     $image = "dist\${machine}_g.elf"
 }
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 & "C:\Program Files\qemu\qemu-system-arm.exe" `
     $debug_opts `
     -M $machine `
