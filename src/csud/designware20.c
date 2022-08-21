@@ -247,7 +247,9 @@ Result HcdPrepareChannel(struct UsbDevice *device, u8 channel,
 
 	// Clear split control.
 	ClearReg(&Host->Channel[channel].SplitControl);
-	if (pipe->Speed != High) {
+    // Unmerged PR #10 by boochow
+	if ((pipe->Speed != High) && (device->Parent != NULL)
+        && (device->Parent->Speed == High) && (device->Parent->Parent != NULL)) {
 		Host->Channel[channel].SplitControl.SplitEnable = true;
 		Host->Channel[channel].SplitControl.HubAddress = device->Parent->Number;
 		Host->Channel[channel].SplitControl.PortAddress = device->PortNumber;			
@@ -260,8 +262,9 @@ Result HcdPrepareChannel(struct UsbDevice *device, u8 channel,
 		Host->Channel[channel].TransferSize.PacketCount = (length + 7) / 8;
 	else
 		Host->Channel[channel].TransferSize.PacketCount = (length + Host->Channel[channel].Characteristic.MaximumPacketSize -  1) / Host->Channel[channel].Characteristic.MaximumPacketSize;
-	if (Host->Channel[channel].TransferSize.PacketCount == 0)
-		Host->Channel[channel].TransferSize.PacketCount = 1;
+// XXX QEMU prefers it if we don't. The real deal may object to us removing this line though
+//	if (Host->Channel[channel].TransferSize.PacketCount == 0)
+//		Host->Channel[channel].TransferSize.PacketCount = 1;
 	Host->Channel[channel].TransferSize.PacketId = type;
 	WriteThroughReg(&Host->Channel[channel].TransferSize);
 	
@@ -367,8 +370,8 @@ Result HcdChannelSendWaitOne(struct UsbDevice *device,
 		} while (true);
 		ReadBackReg(&Host->Channel[channel].TransferSize);
 		
-		if (Host->Channel[channel].SplitControl.SplitEnable) {
-			if (Host->Channel[channel].Interrupt.Acknowledgement) {
+		if (pipe->Speed != High) {
+			if (Host->Channel[channel].SplitControl.SplitEnable && Host->Channel[channel].Interrupt.Acknowledgement) {
 				for (tries = 0; tries < 3; tries++) {
 					SetReg(&Host->Channel[channel].Interrupt);
 					WriteThroughReg(&Host->Channel[channel].Interrupt);
@@ -483,7 +486,7 @@ retry:
 		if (packets == Host->Channel[channel].TransferSize.PacketCount) break;
 	} while (Host->Channel[channel].TransferSize.PacketCount > 0);
 
-	if (packets == Host->Channel[channel].TransferSize.PacketCount) {
+	if (packets != 0 && packets == Host->Channel[channel].TransferSize.PacketCount) {
 		device->Error = ConnectionError;
 		LOGF("HCD: Transfer to %s got stuck.\n", UsbGetDescription(device));
 		return ErrorDevice;
@@ -566,7 +569,7 @@ Result HcdSumbitControlMessage(struct UsbDevice *device,
 	tempPipe.Type = Control;
 	tempPipe.Direction = ((bufferLength == 0) || pipe.Direction == Out) ? In : Out;
 	
-	if ((result = HcdChannelSendWait(device, &tempPipe, 0, databuffer, 0, request, Data1)) != OK) {		
+	if ((result = HcdChannelSendWait(device, &tempPipe, 0, databuffer, 0, request, Data1)) != OK) {
 		LOGF("HCD: Could not send STATUS to %s.\n", UsbGetDescription(device));
 		return OK;
 	}

@@ -171,8 +171,11 @@ void MemoryCopy(void* destination, void* source, u32 length) {
 
 #ifndef NO_LOG
 void LogPrint(const char* message, u32 messageLength) {
-    for (int index = 0; index < messageLength && message[index]; index++)
+    for (int index = 0; index < messageLength && message[index]; index++) {
+        if (message[index] == '\n')
+            uart_putc('\r');
         uart_putc(message[index]);
+    }
 }
 
 void LogPrintF(char* format, u32 formatLength, ...) {

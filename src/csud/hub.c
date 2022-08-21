@@ -382,8 +382,10 @@ Result HubCheckConnection(struct UsbDevice *device, u8 port) {
 	Result result;
 	struct HubPortFullStatus *portStatus;
 	struct HubDevice *data;
+    bool prevConnected; // Unmerged PR #10 by boochow
 
 	data = (struct HubDevice*)device->DriverData;
+    prevConnected = data->PortStatus[port].Status.Connected; // Unmerged PR #10 by boochow
 
 	if ((result = HubPortGetStatus(device, port)) != OK) {
 		if (result != ErrorDisconnected)
@@ -392,9 +394,12 @@ Result HubCheckConnection(struct UsbDevice *device, u8 port) {
 	}
 	portStatus = &data->PortStatus[port];
 
-    // XXX Experimental
-//	if (portStatus->Change.ConnectedChanged) {
-    if (portStatus->Change.ConnectedChanged || (portStatus->Status.Connected && data->Children[port] == NULL)) {
+    // Unmerged PR #10 by boochow
+    if ((device == UsbGetRootHub()) && (prevConnected != portStatus->Status.Connected)) {
+        portStatus->Change.ConnectedChanged = true;
+    }
+
+ 	if (portStatus->Change.ConnectedChanged) {
 		HubPortConnectionChanged(device, port);
 	}
 	if (portStatus->Change.EnabledChanged) {
@@ -480,9 +485,11 @@ Result HubAttach(struct UsbDevice *device, u32 interfaceNumber) {
 		LOG_DEBUG("HUB: Hub power: Individual.\n");
 		break;
 	default:
-		LOGF("HUB: Unknown hub power type %d on %s. Driver incompatible.\n", hubDescriptor->Attributes.PowerSwitchingMode, UsbGetDescription(device));
-		HubDeallocate(device);
-		return ErrorIncompatible;
+        LOG_DEBUG("HUB: Hub power: no power switching.\n");
+// XXX QEMU's hub reports mode 2, and we don't want this to throw an error
+//		LOGF("HUB: Unknown hub power type %d on %s. Driver incompatible.\n", hubDescriptor->Attributes.PowerSwitchingMode, UsbGetDescription(device));
+//		HubDeallocate(device);
+//		return ErrorIncompatible;
 	}
 	
 	if (hubDescriptor->Attributes.Compound)

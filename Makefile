@@ -1,5 +1,5 @@
 RASPI_MODEL?=2
-# CSUD=1
+CSUD=1
 # CSUD_PORT=1
 
 ifeq ($(RASPI_MODEL),1)
