@@ -302,10 +302,10 @@ int set_display_dimensions(int width, int height, int depth, int char_width, int
 {
     if (fbinfo.channel_mode)
     {
-        set_display_dimensions_via_framebuffer_channel(width, height, depth, char_width, char_height);
+        return set_display_dimensions_via_framebuffer_channel(width, height, depth, char_width, char_height);
     }
     else
     {
-        set_display_dimensions_via_property_channel(width, height, depth, char_width, char_height);
+        return set_display_dimensions_via_property_channel(width, height, depth, char_width, char_height);
     }
 }

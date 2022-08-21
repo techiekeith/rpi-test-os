@@ -484,10 +484,12 @@ usb_call_result_t hub_check_connection(usb_device_t *device, uint8_t port)
     usb_call_result_t result;
     hub_port_full_status_t *port_status;
     hub_device_t *data;
+    bool prior_connected_state;
 
     DEBUG_START("hub_check_connection");
 
     data = (hub_device_t *)device->driver_data;
+    prior_connected_state = data->port_status[port].status.connected;
 
     if ((result = hub_port_get_status(device, port)) != OK)
     {
@@ -500,8 +502,12 @@ usb_call_result_t hub_check_connection(usb_device_t *device, uint8_t port)
     }
     port_status = &data->port_status[port];
 
-    // XXX Change from AC's code, experimental.
-    if (port_status->change.connected_changed || (port_status->status.connected && data->children[port] == NULL))
+    if ((device == usb_get_root_hub()) && (prior_connected_state != port_status->status.connected))
+    {
+        port_status->change.connected_changed = true;
+    }
+
+    if (port_status->change.connected_changed)
     {
         hub_port_connection_changed(device, port);
     }
@@ -632,11 +638,7 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
             debug_printf("HUB: Hub power: Individual.\r\n");
             break;
         default:
-            debug_printf("HUB: Unknown hub power type %d on %s. Driver incompatible.\r\n",
-                         hub_descriptor->attributes.power_switching_mode, usb_get_description(device));
-            hub_deallocate(device);
-            DEBUG_END();
-            return ERROR_INCOMPATIBLE;
+            debug_printf("HUB: Hub power: No power switching.\r\n");
     }
 
     // Hub nature

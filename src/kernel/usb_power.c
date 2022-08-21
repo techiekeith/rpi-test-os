@@ -3,20 +3,24 @@
  * Cribbed shamelessly from Alex Chadwick's work at https://github.com/Chadderz121/csud
  */
 
-#include "../../../include/kernel/mailbox.h"
+#include "../../include/kernel/delay.h"
+#include "../../include/kernel/io.h"
+#include "../../include/kernel/mailbox.h"
 
 int usb_power_on_via_power_management_channel()
 {
-    // Power on the USB.
     mail_message_t msg;
     msg.data = 8; // I assume this switches on the USB host controller?
     mailbox_send(msg, POWER_MANAGEMENT_CHANNEL);
     delay(150);
-    msg = mailbox_read(POWER_MANAGEMENT_CHANNEL);
-
-    debug_printf("Power on returned %p.\r\n", msg);
-
-    return (message.data == 8) ? 0 : -1;
+    int rv = mailbox_read_with_timeout(POWER_MANAGEMENT_CHANNEL, &msg, 150);
+    if (rv == 0)
+    {
+        debug_printf("Power on USB Host Controller: %d.\r\n", msg.data);
+        return (msg.data == 8) ? 0 : -1;
+    }
+    debug_printf("Power on USB Host Controller failed: %d.\r\n", rv);
+    return -1;
 }
 
 int usb_power_on_via_property_channel()
@@ -34,5 +38,6 @@ int usb_power_on_via_property_channel()
                    tags[0].value_buffer.data[1]);
         return (tags[0].value_buffer.data[1]) == 1 ? 0 : -1;
     }
+    debug_printf("Set power state (USB Host Controller) failed: %d.\r\n", rv);
     return -1;
 }

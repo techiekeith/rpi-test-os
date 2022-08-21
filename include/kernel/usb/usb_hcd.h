@@ -389,10 +389,10 @@ typedef struct {
     bool suspend: 1;
     bool reset: 1;
     bool reserved_9: 1;
-    uint8_t port_line_status: 3;
+    uint8_t port_line_status: 2;
     bool power: 1;
     uint8_t test_control: 4;
-    bool speed: 1;
+    usb_speed_t speed: 2;
     uint16_t reserved_19_31: 13;
 } __attribute__ ((__packed__)) hcd_host_port_t;
 

@@ -14,7 +14,7 @@
 int shell();
 #ifdef CSUD
 #ifdef CSUD_PORT
-usb_call_result_t usb_init();
+#include "../../include/kernel/usb/usb.h"
 #else
 void UsbInitialise();
 #endif
