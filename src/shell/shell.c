@@ -31,15 +31,17 @@ static void show_help_text()
     puts("\tcharset - show character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
+    puts("\tgfx (fb|prop) - initialise the graphical display using framebuffer or property channel\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
     puts("\tmailbox (list|<method_name|method_id>) [...] - mailbox methods\r\n");
     puts("\tmemory - show memory usage\r\n");
     puts("\tmode <width> <height> <depth> - set display mode\r\n");
-    puts("\tpalette - show colour palette\r\n");
+    puts("\tout (fb|uart) - select output\r\n");
+    puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette (modes are integers 0-4)\r\n");
     puts("\treset - reset the shell\r\n");
     puts("\ttest - run tests\r\n");
-    puts("\ttime - get system clock time\r\n");
+    puts("\ttimers - get system timer information\r\n");
 }
 
 static void bad_command()
@@ -127,6 +129,12 @@ static void cmd_color(int argc, char **argv)
     foreground_color(argc, argv);
 }
 
+void init_graphics(int argc, char **argv);
+static void cmd_gfx(int argc, char **argv)
+{
+    init_graphics(argc, argv);
+}
+
 void show_dump(int argc, char **argv);
 static void cmd_dump(int argc, char **argv)
 {
@@ -156,11 +164,17 @@ static void cmd_mode(int argc, char **argv)
     display_mode(argc, argv);
 }
 
-void show_palette();
+void set_output(int argc, char **argv);
+static void cmd_out(int argc, char **argv)
+{
+    set_output(argc, argv);
+}
+
+void show_palette(int argc, char **argv);
 static void cmd_palette(int argc, char **argv)
 {
     putc(12);
-    show_palette();
+    show_palette(argc, argv);
 }
 
 void run_tests();
@@ -170,15 +184,9 @@ static void cmd_test(int argc, char **argv)
 }
 
 void show_timers();
-static void cmd_time(int argc, char **argv)
+static void cmd_timers(int argc, char **argv)
 {
     show_timers();
-}
-
-void usb_info(int argc, char **argv);
-static void cmd_usb(int argc, char **argv)
-{
-    usb_info(argc, argv);
 }
 
 /*
@@ -203,15 +211,16 @@ command_t commands[] = {
         { .name = "clear",   .function = &cmd_clear },
         { .name = "color",   .function = &cmd_color },
         { .name = "dump",    .function = &cmd_dump },
+        { .name = "gfx",     .function = &cmd_gfx },
         { .name = "halt",    .function = NULL },
         { .name = "mailbox", .function = &cmd_mailbox },
         { .name = "memory",  .function = &cmd_memory },
         { .name = "mode",    .function = &cmd_mode },
+        { .name = "out",     .function = &cmd_out },
         { .name = "palette", .function = &cmd_palette },
         { .name = "reset",   .function = NULL },
         { .name = "test",    .function = &cmd_test },
-        { .name = "time",    .function = &cmd_time },
-        { .name = "usb",    .function = &cmd_usb },
+        { .name = "timers",  .function = &cmd_timers },
         { .name = NULL,      .function = &bad_command }, /* this one goes last */
 };
 

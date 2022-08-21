@@ -16,25 +16,36 @@
 
 DEBUG_INIT("mailbox");
 
-mail_message_t mailbox_read(int channel)
+int mailbox_read_with_timeout(int channel, mail_message_t *data, int timeout)
 {
     volatile mail_status_t stat;
     volatile mail_message_t res;
 
     // Make sure that the message is from the right channel
+    __dmb();
     do
     {
-        // Make sure there is mail to recieve
-        do
+        // Make sure there is mail to receive
+        stat.as_int = mmio_read(MAIL0_STATUS);
+        if (stat.empty && timeout > 0)
         {
-            stat.as_int = mmio_read(MAIL0_STATUS);
-        } while (stat.empty);
+            timeout--;
+            delay(10);
+        }
 
         // Get the message
-        res.as_int = mmio_read(MAIL0_READ);
-    } while (res.channel != channel);
+        if (!stat.empty) res.as_int = mmio_read(MAIL0_READ);
+    } while (!stat.empty && res.channel != channel && timeout != 0);
     __dmb();
 
+    *data = res;
+    return timeout == 0;
+}
+
+mail_message_t mailbox_read(int channel)
+{
+    mail_message_t res;
+    mailbox_read_with_timeout(channel, &res, -1);
     return res;
 }
 
@@ -141,7 +152,6 @@ int send_messages(property_message_tag_t *tags)
         return 2;
     }
 
-    
     // Copy the tags back into the array
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {

@@ -47,9 +47,6 @@ typedef union mail_status
     uint32_t as_int;
 } mail_status_t;
 
-mail_message_t mailbox_read(int channel);
-void mailbox_send(mail_message_t msg, int channel);
-
 /*
  * A property message can either be a request, or a response, and a response can be successful or an error
  */
@@ -256,6 +253,10 @@ typedef struct {
     value_buffer_t value_buffer;
 } property_message_tag_t;
 
+
+int mailbox_read_with_timeout(int channel, mail_message_t *data, int timeout);
+mail_message_t mailbox_read(int channel);
+void mailbox_send(mail_message_t msg, int channel);
 
 /**
  * given an array of tags, will send all of the tags given, and will populate that array with the responses.

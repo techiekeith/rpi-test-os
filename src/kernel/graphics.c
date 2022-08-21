@@ -2,6 +2,7 @@
  * graphics.c
  */
 
+#include "../../include/common/stdbool.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/string.h"
 #include "../../include/kernel/framebuffer.h"
@@ -12,6 +13,7 @@
 
 static int background_color = DEFAULT_BACKGROUND_COLOR;
 static int foreground_color = DEFAULT_FOREGROUND_COLOR;
+static bool initialized;
 uint32_t colors[PALETTE_COLORS];
 
 void set_background_color(int color)
@@ -32,6 +34,7 @@ void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
         fbinfo.buf[location++] = color & 0xff;
         if (fbinfo.bpp > 1) fbinfo.buf[location++] = (color >> 8) & 0xff;
         if (fbinfo.bpp > 2) fbinfo.buf[location++] = (color >> 16) & 0xff;
+        if (fbinfo.bpp > 3) fbinfo.buf[location++] = (color >> 24) & 0xff;
     }
 }
 
@@ -129,16 +132,6 @@ void graphics_putc(int c)
 
     switch (c)
     {
-        case 2:
-            background_color++;
-            background_color %= PALETTE_COLORS;
-            debug_printf("bgcolor %d\r\n", background_color);
-            break;
-        case 6:
-            foreground_color++;
-            foreground_color %= PALETTE_COLORS;
-            debug_printf("fgcolor %d\r\n", foreground_color);
-            break;
         case 8:
             move_cursor_backwards();
             break;
@@ -210,6 +203,12 @@ static void set_default_display_mode()
 
 void set_display_mode(int width, int height, int depth)
 {
+    if (!initialized)
+    {
+        debug_printf("You must initialize graphics before setting the display mode.\r\n");
+        return;
+    }
+
     debug_printf("Setting display mode to %dx%d, %d bpp.\r\n", width, height, depth);
 //    if (bcm2835_set_display_dimensions(width, height, depth, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
     if (set_display_dimensions(width, height, depth, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
@@ -226,10 +225,16 @@ void set_display_mode(int width, int height, int depth)
     cursor_home();
 }
 
-void graphics_init()
+void graphics_init(bool channel_mode)
 {
+    if (initialized)
+    {
+        debug_printf("Graphics is already initialized.\r\n");
+        return;
+    }
     generate_saa505x_glyphs();
-    framebuffer_init();
+    framebuffer_init(channel_mode);
     init_palette();
+    initialized = true;
     set_default_display_mode();
 }

@@ -5,8 +5,11 @@
 #include "../../include/common/stdint.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
-#include "../../include/kernel/io.h"
 #include "../../include/kernel/mem_internal.h"
+
+#if (DEBUG_MEMCPY == 1)
+#include "../../include/kernel/io.h"
+#endif
 
 void memset(void *dest, int value, size_t bytes)
 {
@@ -40,16 +43,20 @@ static void memcpy_rev(void *dest, const void *src, size_t bytes)
             src -= partial;
             bytes -= partial;
             rv = __memory_copy_backwards(dest, src, partial);
+#if (DEBUG_MEMCPY == 1)
             debug_printf("__memory_copy_backwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, partial, rv);
+#endif
         }
         while (bytes) {
             dest -= MAX_BLOCK_COPY;
             src -= MAX_BLOCK_COPY;
             bytes -= MAX_BLOCK_COPY;
             rv = __memory_copy_backwards(dest, src, MAX_BLOCK_COPY);
+#if (DEBUG_MEMCPY == 1)
             debug_printf("__memory_copy_backwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, MAX_BLOCK_COPY, rv);
+#endif
         }
         return;
     }
@@ -71,15 +78,19 @@ static void memcpy_fwd(void *dest, const void *src, size_t bytes)
         bytes -= partial;
         while (bytes) {
             rv = __memory_copy_forwards(dest, src, MAX_BLOCK_COPY);
+#if (DEBUG_MEMCPY == 1)
             debug_printf("__memory_copy_forwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, MAX_BLOCK_COPY, rv);
+#endif
             dest += MAX_BLOCK_COPY;
             src += MAX_BLOCK_COPY;
             bytes -= MAX_BLOCK_COPY;
         }
         rv = __memory_copy_forwards(dest, src, partial);
+#if (DEBUG_MEMCPY == 1)
         debug_printf("__memory_copy_forwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                      dest, src, (uint32_t)bytes, rv);
+#endif
         return;
     }
     // Slow copy if regions are not word-aligned
@@ -93,7 +104,9 @@ void memcpy(void *dest, const void *src, size_t bytes)
 {
     // if bytes is zero or src and dest are equal, memcpy is a no-op, so do nothing
     if (!bytes || src == dest) return;
+#if (DEBUG_MEMCPY == 1)
 //    debug_printf("=> memcpy(%p, %p, 0x%lx)\r\n", dest, src, bytes);
+#endif
     if (dest > src)
         memcpy_rev(dest, src, bytes);
     if (src > dest)

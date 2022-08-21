@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../common/stddef.h"
 #include "../common/stdint.h"
 
 typedef enum
@@ -41,7 +42,8 @@ typedef struct atag
         mem_t mem;
         initrd2_t initrd2;
         cmdline_t cmdline;
+        uint32_t data;
     };
 } atag_t;
 
-uint64_t get_mem_size(atag_t * atags);
+size_t get_mem_size(atag_t * atags);

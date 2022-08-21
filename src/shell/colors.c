@@ -28,8 +28,28 @@ void foreground_color(int argc, char **argv)
     set_foreground_color(color);
 }
 
-void show_palette()
+void set_palette_mode(int argc, char **argv)
 {
+    if (argc < 3)
+    {
+        printf("\r\nSyntax: palette (<palette-mode> <rgb-mode>)\r\n");
+        return;
+    }
+    int palette_mode = atoi(argv[1]);
+    int rgb_mode = atoi(argv[2]);
+    if (palette_mode < DEFAULT_PALETTE_MODE || palette_mode > LAST_PALETTE_MODE) palette_mode = DEFAULT_PALETTE_MODE;
+    if (rgb_mode < DEFAULT_RGB_MODE || rgb_mode > LAST_RGB_MODE) rgb_mode = DEFAULT_RGB_MODE;
+    fbinfo.palette_mode = palette_mode;
+    fbinfo.rgb_mode = rgb_mode;
+    init_palette();
+}
+
+void show_palette(int argc, char **argv)
+{
+    if (argc > 1)
+    {
+        set_palette_mode(argc, argv);
+    }
     int count = 0;
     int h, w;
     int max_columns = 20;
