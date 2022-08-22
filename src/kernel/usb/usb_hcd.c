@@ -21,6 +21,8 @@ DEBUG_INIT("usb_hcd");
 */
 static bool phy_initialized = false;
 
+static bool emulated_host_controller = false;
+
 static uint8_t data_buffer[1024];
 
 static char *operating_mode_capabilities[8] = {
@@ -152,7 +154,6 @@ usb_call_result_t hcd_init()
     volatile uint32_t user_id = mmio_read(HCD_USER_ID);
     volatile hcd_hardware_t hardware;
     mmio_read_in(HCD_HARDWARE, &hardware, 4);
-    bool emulated_device = false;
     __dmb();
 
     // Check hardware capabilities
@@ -172,8 +173,8 @@ usb_call_result_t hcd_init()
     }
     if (!user_id)
     {
-        debug_printf("warning: user_id is zero, are we running in QEMU?\r\n");
-        emulated_device = true;
+        debug_printf("HCD: WARNING: user_id is zero, we are probably running in an emulator.\r\n");
+        emulated_host_controller = true;
     }
     debug_printf("HCD: Operating mode: %s [%d], architecture: %s [%d], high_speed_physical: %s [%d],"
                  " full_speed_physical: %s [%d], hardware: [%p %p %p %p]\r\n",
@@ -185,9 +186,9 @@ usb_call_result_t hcd_init()
 
     // Ignore compatibility checks for now, since QEMU's emulated HCD doesn't report the expected values.
     // This might cause us problems later, but we'll cross that bridge when we come to it
-    if (emulated_device)
+    if (emulated_host_controller)
     {
-        debug_printf("HCD is an emulated device; skipping compatibility checks.\r\n");
+        debug_printf("HCD: Skipping compatibility checks on suspected emulated device.\r\n");
     }
     else
     {
@@ -640,6 +641,8 @@ static usb_call_result_t hcd_prepare_channel(usb_device_t *device, uint8_t chann
     volatile int max_packet_size = (pipe->speed == USB_SPEED_LOW) ? 8 : characteristic.maximum_packet_size;
     transfer_size->transfer_size = length;
     transfer_size->packet_count = (length + max_packet_size - 1) / max_packet_size;
+    // To make this work in QEMU, don't increment the packet count if the length is zero.
+    if (!emulated_host_controller && !transfer_size->packet_count) transfer_size->packet_count++;
     transfer_size->packet_id = type;
     transfer_size->do_ping = false;
     mmio_write_out(HCD_HOST_CHANNEL_TRANSFER_SIZE(channel), transfer_size, 1);

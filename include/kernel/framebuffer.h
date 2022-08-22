@@ -33,9 +33,7 @@ typedef enum
     DEFAULT_RGB_MODE = 0,
     ARGB32,
     ABGR32,
-    RGBA32,
-    BGRA32,
-    LAST_RGB_MODE = BGRA32
+    LAST_RGB_MODE = ABGR32
 } rgb_mode_t;
 
 typedef struct
@@ -54,7 +52,9 @@ typedef struct
 
 typedef struct framebuffer_info
 {
+    bool mode_discovered;
     bool channel_mode;
+    bool rgb;
     palette_mode_t palette_mode;
     rgb_mode_t rgb_mode;
     uint32_t width;
@@ -74,6 +74,7 @@ typedef struct framebuffer_info
 
 extern framebuffer_info_t fbinfo;
 
-void framebuffer_init(bool channel_mode);
+void framebuffer_init();
+int set_pixel_order(bool rgb);
 int init_palette();
-int set_display_dimensions(int width, int height, int depth, int char_width, int char_height);
+int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth, uint32_t char_width, uint32_t char_height);

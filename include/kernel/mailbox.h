@@ -10,11 +10,11 @@
 /*
  * See https://github.com/raspberrypi/firmware/wiki/Mailboxes
  */
-#define MAILBOX_BASE    (PERIPHERAL_BASE + MAILBOX_OFFSET)
-#define MAIL0_READ      (MAILBOX_BASE + 0x00)
-#define MAIL0_STATUS    (MAILBOX_BASE + 0x18)
-#define MAIL1_WRITE     (MAILBOX_BASE + 0x20)
-#define MAIL1_STATUS    (MAILBOX_BASE + 0x38)
+#define MAILBOX_BASE                (peripheral_base + MAILBOX_OFFSET)
+#define MAIL0_READ                  (MAILBOX_BASE + 0x00)
+#define MAIL0_STATUS                (MAILBOX_BASE + 0x18)
+#define MAIL1_WRITE                 (MAILBOX_BASE + 0x20)
+#define MAIL1_STATUS                (MAILBOX_BASE + 0x38)
 #define POWER_MANAGEMENT_CHANNEL    0
 #define FRAMEBUFFER_CHANNEL         1
 #define VIRTUAL_UART_CHANNEL        2
@@ -188,9 +188,24 @@ typedef enum
     VOLTAGE_ID_SDRAM_I = 2,
 } voltage_id_t;
 
+/*
+ * Pixel order values.
+ */
+typedef enum
+{
+    PIXEL_ORDER_BGR = 0,
+    PIXEL_ORDER_RGB = 1,
+} pixel_order_t;
+
 /**
  * For each possible tag, we create a struct corresponding to the request value buffer, and the response value buffer
  */
+
+typedef struct
+{
+    void *base_address;
+    uint32_t size;
+} memory_block_t;
 
 typedef struct
 {
@@ -234,9 +249,11 @@ typedef struct
  */
 typedef union
 {
+    memory_block_t memory_block;
     uint32_t fb_allocate_align;
     fb_allocate_res_t fb_allocate_res;
     fb_screen_size_t fb_screen_size;
+    pixel_order_t pixel_order;
     fb_palette_t fb_palette;
     uint32_t fb_depth;
     uint32_t fb_pitch;
@@ -265,4 +282,4 @@ void mailbox_send(mail_message_t msg, int channel);
  */
 mailbox_method_t *get_mailbox_method_by_tag(property_tag_t tag);
 mailbox_method_t *get_mailbox_method_by_name(char *method_name);
-int send_messages(property_message_tag_t * tags);
+int send_messages(property_message_tag_t *tags);

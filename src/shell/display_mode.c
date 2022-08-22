@@ -10,11 +10,6 @@
 
 DEBUG_INIT("display_mode");
 
-static void gfx_syntax()
-{
-    puts("\r\nSyntax: gfx <fb|prop>\r\n");
-}
-
 static void mode_syntax()
 {
     puts("\r\nSyntax: mode <width> <height> <depth>\r\n");
@@ -23,28 +18,6 @@ static void mode_syntax()
 static void output_syntax()
 {
     puts("\r\nSyntax: out <fb|uart>\r\n");
-}
-
-void init_graphics(int argc, char **argv)
-{
-    DEBUG_START("init_graphics");
-    if (argc < 2)
-    {
-        gfx_syntax();
-    }
-    else if (!strcmp(argv[1], "fb"))
-    {
-        graphics_init(true);
-    }
-    else if (!strcmp(argv[1], "prop"))
-    {
-        graphics_init(false);
-    }
-    else
-    {
-        gfx_syntax();
-    }
-    DEBUG_END();
 }
 
 void display_mode(int argc, char **argv)

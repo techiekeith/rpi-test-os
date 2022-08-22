@@ -6,35 +6,38 @@
 .section ".text.boot"
 
 /* Make _start and halt global. */
-.globl _start
-.globl halt
+.globl      _start
+.globl      halt
 
 /*
  * Entry point for the kernel.
  * r15 -> should begin execution at 0x8000.
- * r0 -> 0x00000000
- * r1 -> 0x00000C42
- * r2 -> 0x00000100 - start of ATAGS
- * preserve these registers as argument for kernel_main
  */
 _start:
-#ifndef BCM2835
+    mrc     p15, #0, r0, c0, c0, #0
+    ldr     r1, board_id_mask
+    and     r0, r1, r0, lsr #4
+    ldr     r1, rpi1_board_id
+    cmp     r0, r1
+    beq     enable_fpu
+
     /* shut down all cores except core 0 */
-    mrc     p15, #0, r1, c0, c0, #5
-    and     r1, r1, #3          /* only interested in b0-1 of r1 */
-    cmp     r1, #0              /* is this core 0? */
+disable_cores:
+    mrc     p15, #0, r4, c0, c0, #5
+    and     r4, r4, #3          /* only interested in b0-1 of r4 */
+    cmp     r4, #0              /* is this core 0? */
     bne     halt                /* if not, go to halt */
-#endif
 
     /*
      * enable FPU (https://forums.raspberrypi.com/viewtopic.php?t=11183)
      */
-    mrc     p15, #0, r0, c1, c0, #2
-    orr     r0, r0, #0x300000            /* single precision */
-    orr     r0, r0, #0xC00000            /* double precision */
-    mcr     p15, #0, r0, c1, c0, #2
-    mov     r0, #0x40000000
-    fmxr    fpexc, r0
+enable_fpu:
+    mrc     p15, #0, r4, c1, c0, #2
+    orr     r4, r4, #0x300000            /* single precision */
+    orr     r4, r4, #0xC00000            /* double precision */
+    mcr     p15, #0, r4, c1, c0, #2
+    mov     r4, #0x40000000
+    fmxr    fpexc, r4
 
     /*
      * initialize stack pointer - this will grow downwards from 0x8000
@@ -66,3 +69,8 @@ halt:
     b       halt
 
     .size	_start, .-_start
+
+board_id_mask:
+    .word   0xfff
+rpi1_board_id:
+    .word   0xb76

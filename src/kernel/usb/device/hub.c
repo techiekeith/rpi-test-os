@@ -672,6 +672,13 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
     debug_printf("HUB: Hub current required: %dmA.\r\n", hub_descriptor->maximum_hub_power * 2);
     debug_printf("HUB: Hub ports: %d.\r\n", hub_descriptor->port_count);
 
+    for (uint32_t i = 0; i < data->max_children; i++) {
+        if (hub_descriptor->data[(i + 1) >> 3] & 1 << ((i + 1) & 0x7))
+            debug_printf("HUB: Hub port %d is not removable.\n", i + 1);
+        else
+            debug_printf("HUB: Hub port %d is removable.\n", i + 1);
+    }
+
     // Get hub status
     if ((result = hub_get_status(device)) != OK)
     {

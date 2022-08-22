@@ -21,4 +21,4 @@ void set_foreground_color(int color);
 void write_pixel(uint32_t x, uint32_t y, const uint32_t color);
 void graphics_putc(int c);
 void set_display_mode(int width, int height, int depth);
-void graphics_init(bool channel_mode);
+void graphics_init();

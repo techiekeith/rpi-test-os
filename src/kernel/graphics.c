@@ -190,7 +190,10 @@ static void init_colors(int depth)
         }
         else
         {
-            colors[i] = palette[i];
+            // This may need revisiting
+            colors[i] = fbinfo.channel_mode ?
+                    (palette[i] & 0xff00ff00) | ((palette[i] & 0xff0000) >> 16) | ((palette[i] & 0xff) << 16)
+                    : palette[i];
         }
     }
 }
@@ -210,22 +213,24 @@ void set_display_mode(int width, int height, int depth)
     }
 
     debug_printf("Setting display mode to %dx%d, %d bpp.\r\n", width, height, depth);
-//    if (bcm2835_set_display_dimensions(width, height, depth, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
     if (set_display_dimensions(width, height, depth, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
     {
         debug_printf("Setting default display mode instead.\r\n");
-//        if (bcm2835_set_display_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
         if (set_display_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
         {
             debug_printf("Cannot set display.\r\n");
         }
+    }
+    if (fbinfo.channel_mode && depth == 8)
+    {
+        init_palette();
     }
     init_colors(depth);
     clear_framebuffer();
     cursor_home();
 }
 
-void graphics_init(bool channel_mode)
+void graphics_init()
 {
     if (initialized)
     {
@@ -233,7 +238,8 @@ void graphics_init(bool channel_mode)
         return;
     }
     generate_saa505x_glyphs();
-    framebuffer_init(channel_mode);
+    framebuffer_init();
+    set_pixel_order(false);
     init_palette();
     initialized = true;
     set_default_display_mode();

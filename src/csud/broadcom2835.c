@@ -26,21 +26,9 @@ void MicroDelay(u32 delay_value) {
     delay(delay_value);
 }
 
+int usb_power_on();
 Result PowerOnUsb() {
-    property_message_tag_t tags[2];
-    tags[0].proptag = PWR_SET_STATE;
-    tags[0].value_buffer.data[0] = DEVICE_USB_HOST_CONTROLLER;
-    tags[0].value_buffer.data[1] = 3; // power on, wait
-    tags[1].proptag = NULL_TAG;
-    int rv = send_messages(tags);
-    if (rv == 0)
-    {
-        LOG_DEBUGF("USBD: set power state: %.x %.x.\r\n",
-                   tags[0].value_buffer.data[0],
-                   tags[0].value_buffer.data[1]);
-        return tags[0].value_buffer.data[1] == 1 ? OK : ErrorDevice;
-    }
-    return ErrorDevice;
+    return usb_power_on();
 }
 
 #endif

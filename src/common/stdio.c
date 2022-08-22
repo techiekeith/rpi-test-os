@@ -151,8 +151,9 @@ void vprintf(const char *fmt, va_list args)
             switch (modifier)
             {
                 case 'p': /* pointer */
+                case 'P': /* pointer */
                     *p++ = '0';
-                    *p++ = 'x';
+                    *p++ = modifier == 'P' ? 'X' : 'x';
                     long_number = (__WORD_SIZE == 64);
                     /* fall through */
                 case 'x': /* hexadecimal */
@@ -174,7 +175,7 @@ void vprintf(const char *fmt, va_list args)
                     : (
                             unsigned_number ? uitoa(va_arg(args, unsigned int), radix, p)
                             : itoa(va_arg(args, int), radix, p));
-                    if (modifier == 'X')
+                    if ((modifier == 'P') || (modifier == 'X'))
                     {
                         for (p = str; *p; p++)
                         {

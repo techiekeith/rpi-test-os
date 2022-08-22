@@ -31,7 +31,6 @@ static void show_help_text()
     puts("\tcharset - show character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
-    puts("\tgfx (fb|prop) - initialise the graphical display using framebuffer or property channel\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
     puts("\tmailbox (list|<method_name|method_id>) [...] - mailbox methods\r\n");
@@ -39,6 +38,7 @@ static void show_help_text()
     puts("\tmode <width> <height> <depth> - set display mode\r\n");
     puts("\tout (fb|uart) - select output\r\n");
     puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette (modes are integers 0-4)\r\n");
+    puts("\tpixels [(rgb|bgr)] - show/set pixel order\r\n");
     puts("\treset - reset the shell\r\n");
     puts("\ttest - run tests\r\n");
     puts("\ttimers - get system timer information\r\n");
@@ -129,12 +129,6 @@ static void cmd_color(int argc, char **argv)
     foreground_color(argc, argv);
 }
 
-void init_graphics(int argc, char **argv);
-static void cmd_gfx(int argc, char **argv)
-{
-    init_graphics(argc, argv);
-}
-
 void show_dump(int argc, char **argv);
 static void cmd_dump(int argc, char **argv)
 {
@@ -173,8 +167,13 @@ static void cmd_out(int argc, char **argv)
 void show_palette(int argc, char **argv);
 static void cmd_palette(int argc, char **argv)
 {
-    putc(12);
     show_palette(argc, argv);
+}
+
+void set_pixels(int argc, char **argv);
+static void cmd_pixels(int argc, char **argv)
+{
+    set_pixels(argc, argv);
 }
 
 void run_tests();
@@ -211,13 +210,13 @@ command_t commands[] = {
         { .name = "clear",   .function = &cmd_clear },
         { .name = "color",   .function = &cmd_color },
         { .name = "dump",    .function = &cmd_dump },
-        { .name = "gfx",     .function = &cmd_gfx },
         { .name = "halt",    .function = NULL },
         { .name = "mailbox", .function = &cmd_mailbox },
         { .name = "memory",  .function = &cmd_memory },
         { .name = "mode",    .function = &cmd_mode },
         { .name = "out",     .function = &cmd_out },
         { .name = "palette", .function = &cmd_palette },
+        { .name = "pixels",  .function = &cmd_pixels },
         { .name = "reset",   .function = NULL },
         { .name = "test",    .function = &cmd_test },
         { .name = "timers",  .function = &cmd_timers },

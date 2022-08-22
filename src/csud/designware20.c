@@ -25,6 +25,7 @@ volatile struct CoreGlobalRegs *CorePhysical, *Core = NULL;
 volatile struct HostGlobalRegs *HostPhysical, *Host = NULL;
 volatile struct PowerReg *PowerPhysical, *Power = NULL;
 bool PhyInitialised = false;
+bool EmulatedHostController = false;
 u8* databuffer = NULL;
 
 void DwcLoad() 
@@ -262,9 +263,12 @@ Result HcdPrepareChannel(struct UsbDevice *device, u8 channel,
 		Host->Channel[channel].TransferSize.PacketCount = (length + 7) / 8;
 	else
 		Host->Channel[channel].TransferSize.PacketCount = (length + Host->Channel[channel].Characteristic.MaximumPacketSize -  1) / Host->Channel[channel].Characteristic.MaximumPacketSize;
-// XXX QEMU prefers it if we don't. The real deal may object to us removing this line though
-//	if (Host->Channel[channel].TransferSize.PacketCount == 0)
-//		Host->Channel[channel].TransferSize.PacketCount = 1;
+    // To make this work in QEMU, don't increment the packet count if the length is zero.
+    if (!EmulatedHostController)
+    {
+        if (Host->Channel[channel].TransferSize.PacketCount == 0)
+            Host->Channel[channel].TransferSize.PacketCount = 1;
+    }
 	Host->Channel[channel].TransferSize.PacketId = type;
 	WriteThroughReg(&Host->Channel[channel].TransferSize);
 	
@@ -369,7 +373,7 @@ Result HcdChannelSendWaitOne(struct UsbDevice *device,
 			else break;
 		} while (true);
 		ReadBackReg(&Host->Channel[channel].TransferSize);
-		
+
 		if (pipe->Speed != High) {
 			if (Host->Channel[channel].SplitControl.SplitEnable && Host->Channel[channel].Interrupt.Acknowledgement) {
 				for (tries = 0; tries < 3; tries++) {
@@ -636,18 +640,32 @@ Result HcdInitialise() {
 	}
 #endif
 
-	ReadBackReg(&Core->Hardware);
-	if (Core->Hardware.Architecture != InternalDma) {
-		LOG("HCD: Host architecture is not Internal DMA. Driver incompatible.\n");
-		result = ErrorIncompatible;
-		goto deallocate;
-	}
-	LOG_DEBUG("HCD: Internal DMA mode.\n");
-//	if (Core->Hardware.HighSpeedPhysical == NotSupported) {
-//		LOG("HCD: High speed physical unsupported. Driver incompatible.\n");
-//		result = ErrorIncompatible;
-//		goto deallocate;
-//	}
+    if (!Core->UserId)
+    {
+        LOG("HCD: WARNING: UserId is zero, we are probably running in an emulator.\r\n");
+        EmulatedHostController = true;
+    }
+
+    // Ignore compatibility checks for now, since QEMU's emulated HCD doesn't report the expected values.
+    // This might cause us problems later, but we'll cross that bridge when we come to it
+    if (EmulatedHostController)
+    {
+        LOG("HCD: Skipping compatibility checks on suspected emulated device.\r\n");
+    }
+    else {
+        ReadBackReg(&Core->Hardware);
+        if (Core->Hardware.Architecture != InternalDma) {
+            LOG("HCD: Host architecture is not Internal DMA. Driver incompatible.\n");
+            result = ErrorIncompatible;
+            goto deallocate;
+        }
+        LOG_DEBUG("HCD: Internal DMA mode.\n");
+        if (Core->Hardware.HighSpeedPhysical == NotSupported) {
+            LOG("HCD: High speed physical unsupported. Driver incompatible.\n");
+            result = ErrorIncompatible;
+            goto deallocate;
+        }
+    }
 	LOG_DEBUGF("HCD: Hardware configuration: %08x %08x %08x %08x\n", *(u32*)&Core->Hardware, *((u32*)&Core->Hardware + 1), *((u32*)&Core->Hardware + 2), *((u32*)&Core->Hardware + 3));
 	ReadBackReg(&Host->Config);
 	LOG_DEBUGF("HCD: Host configuration: %08x\n", *(u32*)&Host->Config);

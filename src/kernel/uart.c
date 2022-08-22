@@ -108,8 +108,8 @@ void uart_enable_interrupts()
     /* Set interrupt FIFO level. */
     mmio_write(UART0_IFLS, 0);
 
-    /* Unmask RX DATA interrupts. */
-    mmio_write(UART0_IMSC, (1 << 4));
+    /* Unmask RX DATA and RX DATA TIMEOUT interrupts. */
+    mmio_write(UART0_IMSC, (1 << 4) | (1 << 6));
 }
 
 void uart_putc(int c)

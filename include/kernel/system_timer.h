@@ -4,7 +4,7 @@
 
 #include "peripheral.h"
 
-#define SYSTEM_TIMER_BASE           (PERIPHERAL_BASE + SYSTEM_TIMER_OFFSET)
+#define SYSTEM_TIMER_BASE           (peripheral_base + SYSTEM_TIMER_OFFSET)
 
 typedef struct {
     uint8_t timer0_matched: 1;

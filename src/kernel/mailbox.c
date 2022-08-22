@@ -21,31 +21,56 @@ int mailbox_read_with_timeout(int channel, mail_message_t *data, int timeout)
     volatile mail_status_t stat;
     volatile mail_message_t res;
 
+    stat.as_int = res.as_int = 0;
+
     // Make sure that the message is from the right channel
     __dmb();
     do
     {
         // Make sure there is mail to receive
         stat.as_int = mmio_read(MAIL0_STATUS);
-        if (stat.empty && timeout > 0)
-        {
-            timeout--;
-            delay(10);
-        }
+        if (stat.empty) delay(10);
 
         // Get the message
-        if (!stat.empty) res.as_int = mmio_read(MAIL0_READ);
-    } while (!stat.empty && res.channel != channel && timeout != 0);
-    __dmb();
-
-    *data = res;
-    return timeout == 0;
+        if (!stat.empty) {
+            res.as_int = mmio_read(MAIL0_READ);
+            if (res.channel == channel) {
+                data->as_int = res.as_int;
+                return 0;
+            }
+        }
+        if (timeout-- == 0) return -1;
+        delay(10);
+    } while (true);
 }
+
+//mail_message_t mailbox_read(int channel)
+//{
+//    mail_message_t res __attribute__((aligned(16)));
+//    mailbox_read_with_timeout(channel, &res, -1);
+//    return res;
+//}
 
 mail_message_t mailbox_read(int channel)
 {
-    mail_message_t res;
-    mailbox_read_with_timeout(channel, &res, -1);
+    volatile mail_status_t stat;
+    volatile mail_message_t res;
+
+    stat.as_int = res.as_int = 0;
+
+    // Make sure that the message is from the right channel
+    __dmb();
+    do
+    {
+        // Make sure there is mail to receive
+        do {
+            stat.as_int = mmio_read(MAIL0_STATUS);
+        } while (stat.empty);
+
+        // Get the message
+        res.as_int = mmio_read(MAIL0_READ);
+    } while (res.channel != channel);
+
     return res;
 }
 
@@ -155,7 +180,7 @@ int send_messages(property_message_tag_t *tags)
     // Copy the tags back into the array
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
-        debug_printf("mailbox_read returned tag 0x%ux\r\n", tags[i].proptag);
+//        debug_printf("mailbox_read returned tag 0x%ux\r\n", tags[i].proptag);
         len = get_value_buffer_size(tags[i].proptag);
         bufpos += 3; // skip over the tag bookkeeping info
         memcpy(&tags[i].value_buffer, msg->tags+bufpos, len);
