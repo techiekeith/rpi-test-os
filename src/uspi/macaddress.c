@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/macaddress.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/macaddress.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
 
 void MACAddress (TMACAddress *pThis)
 {

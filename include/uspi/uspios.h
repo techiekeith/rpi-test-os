@@ -44,8 +44,8 @@ extern "C" {
 //#define USPI_DEFAULT_KEYMAP_US
 
 // Undefine this if you want to use your own implementation of the functions in uspi/util.h
-#define USPI_PROVIDE_MEM_FUNCTIONS	// mem*()
-#define USPI_PROVIDE_STR_FUNCTIONS	// str*()
+#undef USPI_PROVIDE_MEM_FUNCTIONS	// mem*()
+#undef USPI_PROVIDE_STR_FUNCTIONS	// str*()
 
 //
 // Memory allocation

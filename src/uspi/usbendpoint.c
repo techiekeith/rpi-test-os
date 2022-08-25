@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbendpoint.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbendpoint.h"
+#include "../../include/uspi/assert.h"
 
 void USBEndpoint (TUSBEndpoint *pThis, TUSBDevice *pDevice)
 {

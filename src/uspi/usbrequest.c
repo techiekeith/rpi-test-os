@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbrequest.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbrequest.h"
+#include "../../include/uspi/assert.h"
 
 void USBRequest (TUSBRequest *pThis, TUSBEndpoint *pEndpoint, void *pBuffer, u32 nBufLen, TSetupData *pSetupData)
 {

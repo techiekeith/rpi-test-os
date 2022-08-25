@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbdevice.h>
-#include <uspi/dwhcidevice.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbdevicefactory.h>
-#include <uspios.h>
-#include <uspi/util.h>
-#include <uspi/stdarg.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbdevice.h"
+#include "../../include/uspi/dwhcidevice.h"
+#include "../../include/uspi/usbendpoint.h"
+#include "../../include/uspi/usbdevicefactory.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/stdarg.h"
+#include "../../include/uspi/assert.h"
 
 #define MAX_CONFIG_DESC_SIZE		512		// best guess
 

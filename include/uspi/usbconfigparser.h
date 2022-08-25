@@ -20,8 +20,8 @@
 #ifndef _uspi_usbconfigparser_h
 #define _uspi_usbconfigparser_h
 
-#include <uspi/usb.h>
-#include <uspi/types.h>
+#include "usb.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

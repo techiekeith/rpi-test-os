@@ -20,8 +20,8 @@
 #ifndef _uspi_synchronize_h
 #define _uspi_synchronize_h
 
-#include <uspi/macros.h>
-#include <uspi/types.h>
+#include "macros.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

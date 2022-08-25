@@ -17,12 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbfunction.h>
-#include <uspi/usbdevice.h>
-#include <uspi/dwhcidevice.h>
-#include <uspi/usbendpoint.h>
-#include <uspios.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbfunction.h"
+#include "../../include/uspi/usbdevice.h"
+#include "../../include/uspi/dwhcidevice.h"
+#include "../../include/uspi/usbendpoint.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/assert.h"
 
 static const char FromUSBFunction[] = "usbfct";
 

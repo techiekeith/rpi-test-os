@@ -17,10 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/dwhcixferstagedata.h>
-#include <uspi/dwhci.h>
-#include <uspios.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/dwhcixferstagedata.h"
+#include "../../include/uspi/dwhci.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/assert.h"
 
 void DWHCITransferStageData (TDWHCITransferStageData *pThis, unsigned nChannel, TUSBRequest *pURB, boolean bIn, boolean bStatusStage)
 {

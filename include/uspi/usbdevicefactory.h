@@ -20,8 +20,8 @@
 #ifndef _uspi_usbdevicefactory_h
 #define _uspi_usbdevicefactory_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/string.h>
+#include "usbfunction.h"
+#include "string.h"
 
 TUSBFunction *USBDeviceFactoryGetDevice (TUSBFunction *pParent, TString *pName);
 

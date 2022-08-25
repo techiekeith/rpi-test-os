@@ -22,12 +22,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/lan7800.h>
-#include <uspi/usbhostcontroller.h>
-#include <uspi/devicenameservice.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/lan7800.h"
+#include "../../include/uspi/usbhostcontroller.h"
+#include "../../include/uspi/devicenameservice.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 // Sizes
 #define HS_USB_PKT_SIZE			512

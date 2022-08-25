@@ -21,10 +21,10 @@
 #ifndef _uspi_usbmidi_h
 #define _uspi_usbmidi_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/types.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "types.h"
 
 typedef void TMIDIPacketHandler(unsigned nCable, unsigned nLength, u8 *pPacket);
 

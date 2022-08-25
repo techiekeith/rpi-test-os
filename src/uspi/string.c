@@ -17,10 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/string.h>
-#include <uspios.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/string.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
 
 #define FORMAT_RESERVE		64	// additional bytes to allocate
 #define MAX_NUMBER_LEN		11	// 32 bit octal number

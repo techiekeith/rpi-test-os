@@ -17,12 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbstring.h>
-#include <uspi/usbdevice.h>
-#include <uspi/dwhcidevice.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/usbstring.h"
+#include "../../include/uspi/usbdevice.h"
+#include "../../include/uspi/dwhcidevice.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 #define USBSTR_MIN_LENGTH	4
 

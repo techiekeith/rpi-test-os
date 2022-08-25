@@ -20,8 +20,8 @@
 #ifndef _uspi_dwhciframeschedper_h
 #define _uspi_dwhciframeschedper_h
 
-#include <uspi/dwhciframescheduler.h>
-#include <uspi/types.h>
+#include "dwhciframescheduler.h"
+#include "types.h"
 
 typedef struct TDWHCIFrameSchedulerPeriodic
 {

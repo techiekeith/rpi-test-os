@@ -20,7 +20,7 @@
 #ifndef _uspi_dwhciframescheduler_h
 #define _uspi_dwhciframescheduler_h
 
-#include <uspi/types.h>
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

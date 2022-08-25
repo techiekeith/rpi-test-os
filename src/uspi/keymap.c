@@ -17,11 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/keymap.h>
-#include <uspi/usbhid.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/keymap.h"
+#include "../../include/uspi/usbhid.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 #define KEYPAD_FIRST	0x53
 #define KEYPAD_LAST	0x63
@@ -87,17 +87,17 @@ static const char *s_KeyStrings[KeyMaxCode-KeySpace] =
 static const u16 s_DefaultMap[PHY_MAX_CODE+1][K_ALTSHIFTTAB+1] =
 {
 #if defined (USPI_DEFAULT_KEYMAP_DE)
-	#include "keymap_de.h"
+	#include "../../include/uspi/keymap_de.h"
 #elif defined (USPI_DEFAULT_KEYMAP_ES)
-	#include "keymap_es.h"
+	#include "../../include/uspi/keymap_es.h"
 #elif defined (USPI_DEFAULT_KEYMAP_FR)
-	#include "keymap_fr.h"
+	#include "../../include/uspi/keymap_fr.h"
 #elif defined (USPI_DEFAULT_KEYMAP_IT)
-	#include "keymap_it.h"
+	#include "../../include/uspi/keymap_it.h"
 #elif defined (USPI_DEFAULT_KEYMAP_UK)
-	#include "keymap_uk.h"
+	#include "../../include/uspi/keymap_uk.h"
 #elif defined (USPI_DEFAULT_KEYMAP_US)
-	#include "keymap_us.h"
+	#include "../../include/uspi/keymap_us.h"
 #else
 	{KeyNone}
 #endif

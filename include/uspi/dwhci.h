@@ -24,7 +24,7 @@
 #ifndef _uspi_dwhci_h
 #define _uspi_dwhci_h
 
-#include <uspi/bcm2835.h>
+#include "bcm2835.h"
 
 #define DWHCI_MAX_CHANNELS		16
 

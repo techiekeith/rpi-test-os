@@ -20,10 +20,10 @@
 #ifndef _uspi_usbmouse_h
 #define _uspi_usbmouse_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/types.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "types.h"
 
 #define MOUSE_BOOT_REPORT_SIZE	3
 

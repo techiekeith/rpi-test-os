@@ -17,13 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/uspilibrary.h>
-#include <uspi.h>
-#include <uspios.h>
-#include <uspi/usbfunction.h>
-#include <uspi/string.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/uspilibrary.h"
+#include "../../include/uspi/uspi.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/usbfunction.h"
+#include "../../include/uspi/string.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
 
 static const char FromUSPi[] = "uspi";
 

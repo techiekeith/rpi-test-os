@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/synchronize.h>
-#include <uspi/types.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/synchronize.h"
+#include "../../include/uspi/types.h"
+#include "../../include/uspi/assert.h"
 
 #ifndef AARCH64
 	#define	EnableInterrupts()	__asm volatile ("cpsie i")

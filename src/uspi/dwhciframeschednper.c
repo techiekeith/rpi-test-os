@@ -17,10 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/dwhciframeschednper.h>
-#include <uspi/dwhci.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/dwhciframeschednper.h"
+#include "../../include/uspi/dwhci.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 #define uFRAME			125		// micro seconds
 

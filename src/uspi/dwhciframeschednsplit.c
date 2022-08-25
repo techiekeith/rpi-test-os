@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/dwhciframeschednsplit.h>
-#include <uspi/dwhciregister.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/dwhciframeschednsplit.h"
+#include "../../include/uspi/dwhciregister.h"
+#include "../../include/uspi/assert.h"
 
 #define FRAME_UNSET	(DWHCI_MAX_FRAME_NUMBER+1)
 
@@ -73,10 +73,13 @@ void DWHCIFrameSchedulerNoSplitWaitForFrame (TDWHCIFrameScheduler *pBase)
 
 	if (!pThis->m_bIsPeriodic)
 	{
-		while ((DWHCI_HOST_FRM_NUM_NUMBER (DWHCIRegisterRead (&FrameNumber)) & DWHCI_MAX_FRAME_NUMBER) != pThis->m_nNextFrame)
-		{
-			// do nothing
-		}
+        // Stop driver from getting stuck if frame numbers aren't strictly sequential.
+        int lastFrame;
+        int thisFrame = 0;
+        do {
+            lastFrame = thisFrame;
+            thisFrame = DWHCI_HOST_FRM_NUM_NUMBER (DWHCIRegisterRead (&FrameNumber)) & DWHCI_MAX_FRAME_NUMBER;
+        } while ((thisFrame > lastFrame) && (thisFrame < pThis->m_nNextFrame));
 	}
 
 	_DWHCIRegister (&FrameNumber);

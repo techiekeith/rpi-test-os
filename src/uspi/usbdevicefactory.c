@@ -17,19 +17,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbdevicefactory.h>
-#include <uspios.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbdevicefactory.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/assert.h"
 
 // for factory
-#include <uspi/usbstandardhub.h>
-#include <uspi/usbmassdevice.h>
-#include <uspi/usbkeyboard.h>
-#include <uspi/usbmouse.h>
-#include <uspi/usbgamepad.h>
-#include <uspi/usbmidi.h>
-#include <uspi/smsc951x.h>
-#include <uspi/lan7800.h>
+#include "../../include/uspi/usbstandardhub.h"
+#include "../../include/uspi/usbmassdevice.h"
+#include "../../include/uspi/usbkeyboard.h"
+#include "../../include/uspi/usbmouse.h"
+#include "../../include/uspi/usbgamepad.h"
+#include "../../include/uspi/usbmidi.h"
+#include "../../include/uspi/smsc951x.h"
+#include "../../include/uspi/lan7800.h"
 
 TUSBFunction *USBDeviceFactoryGetDevice (TUSBFunction *pParent, TString *pName)
 {

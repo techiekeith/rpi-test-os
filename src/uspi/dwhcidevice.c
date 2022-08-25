@@ -22,12 +22,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/dwhcidevice.h>
-#include <uspios.h>
-#include <uspi/bcm2835.h>
-#include <uspi/synchronize.h>
-#include <uspi/macros.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/dwhcidevice.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/bcm2835.h"
+#include "../../include/uspi/synchronize.h"
+#include "../../include/uspi/macros.h"
+#include "../../include/uspi/assert.h"
 
 #define ARM_IRQ_USB		9		// for ConnectInterrupt()
 
@@ -113,7 +113,8 @@ boolean DWHCIDeviceInitialize (TDWHCIDevice *pThis)
 
 	TDWHCIRegister VendorId;
 	DWHCIRegister (&VendorId, DWHCI_CORE_VENDOR_ID);
-	if (DWHCIRegisterRead (&VendorId) != 0x4F54280A)
+    // Support vendor ID of emulated DWC in QEMU
+	if (DWHCIRegisterRead (&VendorId) != 0x4F54280A && DWHCIRegisterRead (&VendorId) != 0x4F54294A)
 	{
 		LogWrite (FromDWHCI, LOG_ERROR, "Unknown vendor 0x%0X", DWHCIRegisterGet (&VendorId));
 		_DWHCIRegister (&VendorId);

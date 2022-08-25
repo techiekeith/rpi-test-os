@@ -20,8 +20,8 @@
 #ifndef _uspi_macaddress_h
 #define _uspi_macaddress_h
 
-#include <uspi/string.h>
-#include <uspi/types.h>
+#include "string.h"
+#include "types.h"
 
 #define MAC_ADDRESS_SIZE	6
 

@@ -20,7 +20,7 @@
 #ifndef _uspi_usb_h
 #define _uspi_usb_h
 
-#include <uspi/macros.h>
+#include "macros.h"
 
 // PID
 typedef enum

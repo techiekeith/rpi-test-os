@@ -20,12 +20,12 @@
 #ifndef _uspi_usbdevice_h
 #define _uspi_usbdevice_h
 
-#include <uspi/usb.h>
-#include <uspi/usbconfigparser.h>
-#include <uspi/usbfunction.h>
-#include <uspi/usbstring.h>
-#include <uspi/string.h>
-#include <uspi/types.h>
+#include "usb.h"
+#include "usbconfigparser.h"
+#include "usbfunction.h"
+#include "usbstring.h"
+#include "string.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

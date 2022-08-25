@@ -20,7 +20,7 @@
 #ifndef _uspi_keymap_h
 #define _uspi_keymap_h
 
-#include <uspi/types.h>
+#include "types.h"
 
 #define PHY_MAX_CODE	127
 

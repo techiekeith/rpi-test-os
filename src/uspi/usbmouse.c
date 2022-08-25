@@ -17,13 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbmouse.h>
-#include <uspi/usbhid.h>
-#include <uspi/usbhostcontroller.h>
-#include <uspi/devicenameservice.h>
-#include <uspi/util.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/usbmouse.h"
+#include "../../include/uspi/usbhid.h"
+#include "../../include/uspi/usbhostcontroller.h"
+#include "../../include/uspi/devicenameservice.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 static unsigned s_nDeviceNumber = 1;
 

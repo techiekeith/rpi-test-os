@@ -20,7 +20,7 @@
 #ifndef _uspi_devicenameservice_h
 #define _uspi_devicenameservice_h
 
-#include <uspi/types.h>
+#include "types.h"
 
 typedef struct TDeviceInfo
 {

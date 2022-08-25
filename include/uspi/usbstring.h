@@ -20,9 +20,9 @@
 #ifndef _uspi_usbstring_h
 #define _uspi_usbstring_h
 
-#include <uspi/usb.h>
-#include <uspi/string.h>
-#include <uspi/types.h>
+#include "usb.h"
+#include "string.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

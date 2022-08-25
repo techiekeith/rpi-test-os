@@ -20,7 +20,7 @@
 #ifndef _uspi_bcm2835_h
 #define _uspi_bcm2835_h
 
-#include <uspios.h>
+#include "../../include/uspi/uspios.h"
 
 #if RASPPI == 1
 #define ARM_IO_BASE		0x20000000

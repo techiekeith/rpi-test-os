@@ -20,10 +20,10 @@
 #ifndef _uspi_usbfunction_h
 #define _uspi_usbfunction_h
 
-#include <uspi/usbconfigparser.h>
-#include <uspi/usb.h>
-#include <uspi/string.h>
-#include <uspi/types.h>
+#include "usbconfigparser.h"
+#include "usb.h"
+#include "string.h"
+#include "types.h"
 
 struct TUSBDevice;
 struct TDWHCIDevice;

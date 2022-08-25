@@ -20,8 +20,8 @@
 #ifndef _uspi_dwhciregister_h
 #define _uspi_dwhciregister_h
 
-#include <uspi/dwhci.h>
-#include <uspi/types.h>
+#include "dwhci.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

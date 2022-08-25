@@ -20,8 +20,8 @@
 #ifndef _uspi_util_h
 #define _uspi_util_h
 
-#include <uspios.h>
-#include <uspi/types.h>
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/types.h"
 
 #ifdef __cplusplus
 extern "C" {

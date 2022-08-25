@@ -17,11 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbstandardhub.h>
-#include <uspi/usbdevicefactory.h>
-#include <uspios.h>
-#include <uspi/macros.h>
-#include <uspi/assert.h>
+#include "../../include/uspi/usbstandardhub.h"
+#include "../../include/uspi/usbdevicefactory.h"
+#include "../../include/uspi/uspios.h"
+#include "../../include/uspi/macros.h"
+#include "../../include/uspi/assert.h"
 
 boolean USBStandardHubEnumeratePorts (TUSBStandardHub *pThis);
 

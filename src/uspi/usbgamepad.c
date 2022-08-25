@@ -18,12 +18,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <uspi/usbgamepad.h>
-#include <uspi/usbhostcontroller.h>
-#include <uspi/devicenameservice.h>
-#include <uspi/assert.h>
-#include <uspi/util.h>
-#include <uspios.h>
+#include "../../include/uspi/usbgamepad.h"
+#include "../../include/uspi/usbhostcontroller.h"
+#include "../../include/uspi/devicenameservice.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/util.h"
+#include "../../include/uspi/uspios.h"
 
 // HID Report Items from HID 1.11 Section 6.2.2
 #define HID_USAGE_PAGE      0x04

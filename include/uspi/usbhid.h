@@ -20,7 +20,7 @@
 #ifndef _uspi_usbhid_h
 #define _uspi_usbhid_h
 
-#include <uspi/macros.h>
+#include "macros.h"
 
 // Class-specific requests
 #define GET_REPORT          0x01

@@ -20,11 +20,11 @@
 #ifndef _uspi_usbkeyboard_h
 #define _uspi_usbkeyboard_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/keymap.h>
-#include <uspi/types.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "keymap.h"
+#include "types.h"
 
 #define BOOT_REPORT_SIZE	8
 

@@ -20,7 +20,7 @@
 #ifndef _uspi_usbhostcontroller_h
 #define _uspi_usbhostcontroller_h
 
-#include <uspi/dwhcidevice.h>
+#include "dwhcidevice.h"
 
 #define TUSBHostController	TDWHCIDevice		// alias
 

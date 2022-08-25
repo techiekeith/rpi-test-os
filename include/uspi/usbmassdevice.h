@@ -20,9 +20,9 @@
 #ifndef _uspi_usbmassdevice_h
 #define _uspi_usbmassdevice_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/types.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

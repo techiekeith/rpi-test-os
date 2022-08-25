@@ -20,8 +20,8 @@
 #ifndef _uspi_string_h
 #define _uspi_string_h
 
-#include <uspi/stdarg.h>
-#include <uspi/types.h>
+#include "stdarg.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

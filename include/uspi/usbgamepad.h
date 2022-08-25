@@ -21,12 +21,12 @@
 #ifndef _uspi_usbgamepad_h
 #define _uspi_usbgamepad_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/usbhid.h>
-#include <uspi/types.h>
-#include <uspi.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "usbhid.h"
+#include "types.h"
+#include "uspi.h"
 
 typedef struct TUSBGamePadDevice
 {

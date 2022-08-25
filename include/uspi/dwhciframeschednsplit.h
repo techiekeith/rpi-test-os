@@ -20,8 +20,8 @@
 #ifndef _uspi_dwhciframeschednsplit_h
 #define _uspi_dwhciframeschednsplit_h
 
-#include <uspi/dwhciframescheduler.h>
-#include <uspi/types.h>
+#include "dwhciframescheduler.h"
+#include "types.h"
 
 typedef struct TDWHCIFrameSchedulerNoSplit
 {

@@ -22,7 +22,7 @@
 #ifndef _uspi_usbhub_h
 #define _uspi_usbhub_h
 
-#include <uspi/macros.h>
+#include "macros.h"
 
 // Configuration
 #define USB_HUB_MAX_PORTS		8		// TODO

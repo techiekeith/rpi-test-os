@@ -20,9 +20,9 @@
 #ifndef _uspi_usbrequest_h
 #define _uspi_usbrequest_h
 
-#include <uspi/usb.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/types.h>
+#include "usb.h"
+#include "usbendpoint.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

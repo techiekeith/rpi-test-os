@@ -20,11 +20,11 @@
 
 // Refer to "Universal Serial Bus Device Class Specification for MIDI Devices"
 
-#include <uspi/usbmidi.h>
-#include <uspi/usbhostcontroller.h>
-#include <uspi/devicenameservice.h>
-#include <uspi/assert.h>
-#include <uspios.h>
+#include "../../include/uspi/usbmidi.h"
+#include "../../include/uspi/usbhostcontroller.h"
+#include "../../include/uspi/devicenameservice.h"
+#include "../../include/uspi/assert.h"
+#include "../../include/uspi/uspios.h"
 
 static const char FromMIDI[] = "umidi";
 

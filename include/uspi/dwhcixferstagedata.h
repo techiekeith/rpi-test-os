@@ -20,16 +20,16 @@
 #ifndef _uspi_dwhcixferstagedata_h
 #define _uspi_dwhcixferstagedata_h
 
-#include <uspi/usb.h>
-#include <uspi/usbrequest.h>
-#include <uspi/usbdevice.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/dwhciframescheduler.h>
-#include <uspi/dwhciframeschedper.h>
-#include <uspi/dwhciframeschednper.h>
-#include <uspi/dwhciframeschednsplit.h>
-#include <uspi/macros.h>
-#include <uspi/types.h>
+#include "usb.h"
+#include "usbrequest.h"
+#include "usbdevice.h"
+#include "usbendpoint.h"
+#include "dwhciframescheduler.h"
+#include "dwhciframeschedper.h"
+#include "dwhciframeschednper.h"
+#include "dwhciframeschednsplit.h"
+#include "macros.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {

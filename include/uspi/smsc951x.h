@@ -20,11 +20,11 @@
 #ifndef _uspi_smsc951x_h
 #define _uspi_smsc951x_h
 
-#include <uspi/usbfunction.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/macaddress.h>
-#include <uspi/types.h>
+#include "usbfunction.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "macaddress.h"
+#include "types.h"
 
 #define FRAME_BUFFER_SIZE	1600
 

@@ -20,15 +20,15 @@
 #ifndef _uspi_uspilibrary_h
 #define _uspi_uspilibrary_h
 
-#include <uspi/devicenameservice.h>
-#include <uspi/dwhcidevice.h>
-#include <uspi/usbkeyboard.h>
-#include <uspi/usbmouse.h>
-#include <uspi/usbgamepad.h>
-#include <uspi/usbmassdevice.h>
-#include <uspi/usbmidi.h>
-#include <uspi/smsc951x.h>
-#include <uspi/lan7800.h>
+#include "devicenameservice.h"
+#include "dwhcidevice.h"
+#include "usbkeyboard.h"
+#include "usbmouse.h"
+#include "usbgamepad.h"
+#include "usbmassdevice.h"
+#include "usbmidi.h"
+#include "smsc951x.h"
+#include "lan7800.h"
 
 #ifdef __cplusplus
 extern "C" {

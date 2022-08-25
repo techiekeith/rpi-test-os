@@ -20,16 +20,16 @@
 #ifndef _uspi_dwhcidevice_h
 #define _uspi_dwhcidevice_h
 
-#include <uspi/usb.h>
-#include <uspi/usbendpoint.h>
-#include <uspi/usbrequest.h>
-#include <uspi/dwhcirootport.h>
-#include <uspi/dwhcixferstagedata.h>
-#include <uspi/dwhciregister.h>
-#include <uspi/dwhci.h>
-#include <uspi/usb.h>
-#include <uspi/types.h>
-#include <uspios.h>
+#include "usb.h"
+#include "usbendpoint.h"
+#include "usbrequest.h"
+#include "dwhcirootport.h"
+#include "dwhcixferstagedata.h"
+#include "dwhciregister.h"
+#include "dwhci.h"
+#include "usb.h"
+#include "types.h"
+#include "uspios.h"
 
 #ifdef __cplusplus
 extern "C" {

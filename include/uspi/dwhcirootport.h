@@ -20,8 +20,8 @@
 #ifndef _uspi_dwhcirootport_h
 #define _uspi_dwhcirootport_h
 
-#include <uspi/usbdevice.h>
-#include <uspi/types.h>
+#include "usbdevice.h"
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {
