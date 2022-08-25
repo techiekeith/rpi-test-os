@@ -4,6 +4,7 @@
 
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
+#include "../../include/common/string.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/io.h"
 
@@ -12,6 +13,11 @@ DEBUG_INIT("display_mode");
 static void mode_syntax()
 {
     puts("\r\nSyntax: mode <width> <height> <depth>\r\n");
+}
+
+static void output_syntax()
+{
+    puts("\r\nSyntax: out <fb|uart>\r\n");
 }
 
 void display_mode(int argc, char **argv)
@@ -42,6 +48,32 @@ void display_mode(int argc, char **argv)
     {
         debug_printf("Mode: %dx%d, %d bpp\r\n", width, height, depth);
         set_display_mode(width, height, depth);
+    }
+    DEBUG_END();
+}
+
+void set_output(int argc, char **argv)
+{
+    DEBUG_START("set_output");
+    if (argc < 2)
+    {
+        output_syntax();
+    }
+    else if (!strcmp("oldfb", argv[1]))
+    {
+        set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
+    }
+    else if (!strcmp("fb", argv[1]))
+    {
+        set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
+    }
+    else if (!strcmp("uart", argv[1]))
+    {
+        set_output_channel(OUTPUT_CHANNEL_UART);
+    }
+    else
+    {
+        output_syntax();
     }
     DEBUG_END();
 }

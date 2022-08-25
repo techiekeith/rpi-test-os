@@ -25,7 +25,10 @@ static usb_attach_f interface_class_attach[INTERFACE_CLASS_ATTACH_COUNT];
 
 void attach_driver_for_class(interface_class_t interface_class, usb_attach_f function)
 {
+    DEBUG_START("attach_driver_for_class");
+    debug_printf("Attaching driver for class %d: %p.\r\n", interface_class, function);
     interface_class_attach[interface_class] = function;
+    DEBUG_END();
 }
 
 const char *usb_get_description(usb_device_t *device)
@@ -548,7 +551,8 @@ static usb_call_result_t usb_configure(usb_device_t *device, uint8_t configurati
                 }
                 else
                 {
-                    memcpy((void *)&device->interfaces[last_interface = interface->number], (void *)interface,
+                    last_interface = interface->number;
+                    memcpy((void *)&device->interfaces[last_interface], (void *)interface,
                            sizeof(usb_interface_descriptor_t));
                     last_endpoint = 0;
                     is_alternate = false;
@@ -597,7 +601,6 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
     DEBUG_START("usb_attach_device");
 
     usb_call_result_t result;
-    char *buffer;
     uint8_t address = device->number;
     device->number = 0;
     debug_printf("USBD: Scanning %d. %s.\r\n", address, device_speeds[MIN(device->speed, 3, uint8_t)]);
@@ -642,14 +645,26 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
         return result;
     }
 
+    // Configure device - we only support devices with one configuration for now
+    if (usb_configure(device, 0) != OK)
+    {
+        debug_printf("USBD: Failed to configure device %x.\n", address);
+        DEBUG_END();
+        return OK;
+    }
+
     debug_printf("USBD: Attach device %s. Address: %d Class: %d Subclass: %d"
                  " USB: %x.%x. %d configurations, %d interfaces.\r\n",
                  usb_get_description(device), address, device->descriptor.device_class, device->descriptor.sub_class,
                  device->descriptor.usb_version >> 8, (device->descriptor.usb_version >> 4) & 0xf,
                  device->descriptor.configuration_count, device->configuration.interface_count);
 
+    debug_printf("USBD:  -VID:PID:       %x:%x v%d.%x.\r\n",
+                 device->descriptor.vendor_id, device->descriptor.product_id,
+                 device->descriptor.version >> 8, device->descriptor.version & 0xff);
+
     // Read and display product, manufacturer, serial number
-    buffer = heap_alloc("usb_attach_device", 0x100);
+    char *buffer = heap_alloc("usb_attach_device", 0x100);
     if (buffer != NULL)
     {
         if (device->descriptor.product != 0)
@@ -667,27 +682,13 @@ usb_call_result_t usb_attach_device(usb_device_t *device)
             result = usb_read_string(device, device->descriptor.serial_number, buffer, 0x100);
             if (result == OK) debug_printf("USBD:  -SerialNumber:  %s.\r\n", buffer);
         }
+        if (device->configuration.string_index != 0)
+        {
+            result = usb_read_string(device, device->configuration.string_index, buffer, 0x100);
+            if (result == OK) debug_printf("USBD:  -Configuration: %s.\r\n", buffer);
+        }
+        heap_free(buffer);
     }
-
-    debug_printf("USBD:  -VID:PID:       %x:%x v%d.%x.\r\n",
-                 device->descriptor.vendor_id, device->descriptor.product_id,
-                 device->descriptor.version >> 8, device->descriptor.version & 0xff);
-
-    // Configure device - we only support devices with one configuration for now
-    if ((result = usb_configure(device, 0)) != OK)
-    {
-        debug_printf("USBD: Failed to configure device %x.\n", address);
-        DEBUG_END();
-        if (buffer != NULL) heap_free(buffer);
-        return OK;
-    }
-
-    if (buffer != NULL && device->configuration.string_index != 0)
-    {
-        result = usb_read_string(device, device->configuration.string_index, buffer, 0x100);
-        if (result == OK) debug_printf("USBD:  -Configuration: %s.\r\n", buffer);
-    }
-    if (buffer != NULL) heap_free(buffer);
 
     // Start driver
     if (device->interfaces[0].interface_class < INTERFACE_CLASS_ATTACH_COUNT
@@ -733,10 +734,13 @@ static usb_call_result_t usb_attach_root_hub()
 
 static void usb_load()
 {
+    DEBUG_START("usb_load");
+    debug_printf("USBD: USB driver version 0.1 (derived from CSUD).\r\n");
     for (uint32_t i = 0; i < MAXIMUM_USB_DEVICES; i++)
         devices[i] = NULL;
     for (uint32_t i = 0; i < INTERFACE_CLASS_ATTACH_COUNT; i++)
         interface_class_attach[i] = NULL;
+    DEBUG_END();
 }
 
 void hcd_load();
@@ -755,21 +759,28 @@ usb_call_result_t usb_init()
     keyboard_load();
 
     usb_call_result_t result;
+    if (sizeof(usb_device_request_t) != 8)
+    {
+        debug_printf("USBD: Incorrectly compiled driver, sizeof(usb_device_request_t) = %d (should be 8).\r\n",
+                     sizeof(usb_device_request_t));
+        DEBUG_END();
+        return ERROR_COMPILER;
+    }
     if ((result = hcd_init()) != OK)
     {
-        debug_printf("Failed to initialize HCD.\r\n");
+        debug_printf("USBD: Failed to initialize HCD.\r\n");
         DEBUG_END();
         return result;
     }
     if ((result = hcd_start()) != OK)
     {
-        debug_printf("Failed to start HCD.\r\n");
+        debug_printf("USBD: Failed to start HCD.\r\n");
         DEBUG_END();
         return result;
     }
     if ((result = usb_attach_root_hub()) != OK)
     {
-        debug_printf("Failed to attach root hub.\r\n");
+        debug_printf("USBD: Failed to attach root hub.\r\n");
         DEBUG_END();
         return result;
     }
@@ -793,7 +804,12 @@ void usb_check_for_change()
 
     if (devices[0] != NULL && devices[0]->device_check_for_change != NULL)
     {
+        debug_printf("Checking root hub for changes.\r\n");
         devices[0]->device_check_for_change(devices[0]);
+    }
+    else
+    {
+        debug_printf("Root hub not present.\r\n");
     }
 
     DEBUG_END();

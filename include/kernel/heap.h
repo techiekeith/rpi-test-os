@@ -15,7 +15,7 @@ typedef struct heap_segment
     struct heap_segment *next;
     struct heap_segment *prev;
     uint32_t is_allocated;
-    uint32_t segment_size;  /* Includes this header */
+    size_t segment_size;  /* Includes this header */
 } heap_segment_t;
 
 void heap_init();

@@ -40,40 +40,48 @@ void show_memory_usage()
     printf(" %30s | %08x | %08x\r\n", "Kernel heap", heap_start, heap_start + KERNEL_HEAP_SIZE - 1);
     uint8_t *segment_start = heap_start;
     uint8_t *segment_end;
-    for (heap_segment_t *segment = heap_segment_list_head; segment; segment = segment->next)
+    for (heap_segment_t *segment = heap_segment_list_head; segment != NULL; segment = segment->next)
     {
-        segment_end = segment_start + segment->segment_size;
-        set_foreground_color(segment->is_allocated ? 235 : 35); // yellow = allocated, green = free
-        printf(" %30s | %08x | %08x\r\n",
-               segment->is_allocated ? segment->consumer : "Free kernel heap space",
-               segment_start, segment_end - 1);
-        segment_start = segment_end;
+        if ((uint8_t *)segment >= heap_start + KERNEL_HEAP_SIZE)
+        {
+            printf("segment->next should be NULL, but is not!\r\n");
+            break;
+        }
+        else
+        {
+            segment_start = (uint8_t *)segment;
+            segment_end = segment_start + segment->segment_size;
+            set_foreground_color(segment->is_allocated ? 235 : 35); // yellow = allocated, green = free
+            printf(" %30s | %08x | %08x\r\n",
+                   segment->is_allocated ? segment->consumer : "Free kernel heap space",
+                   segment_start, segment_end - 1);
+        }
     }
     set_foreground_color(239); // White
     if (all_pages_array)
     {
         printf(" %30s | %08x | %08x\r\n", "Page Table", all_pages_array, heap_start - 1);
     }
-    if (framebuffer < (uint8_t *)PERIPHERAL_BASE)
+    if (framebuffer < (uint8_t *)peripheral_base)
     {
         set_foreground_color(220); // Orange
         printf(" %30s | %08x | %08x\r\n", "Framebuffer", framebuffer, framebuffer + fbinfo.buf_size - 1);
     }
     set_foreground_color(200); // Red
-    if (framebuffer + fbinfo.buf_size < (uint8_t *)PERIPHERAL_BASE)
+    if (framebuffer + fbinfo.buf_size < (uint8_t *)peripheral_base)
     {
-        printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, PERIPHERAL_BASE - 1);
+        printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, peripheral_base - 1);
     }
-    printf(" %30s | %08x | %08x\r\n", "Peripherals", PERIPHERAL_BASE, PERIPHERAL_BASE + PERIPHERAL_LENGTH - 1);
-    printf(" %30s | %08x |\r\n", "(interrupts)", PERIPHERAL_BASE + INTERRUPTS_OFFSET);
-    printf(" %30s | %08x |\r\n", "(mailbox)", PERIPHERAL_BASE + MAILBOX_OFFSET);
-    printf(" %30s | %08x |\r\n", "(GPIO)", PERIPHERAL_BASE + GPIO_OFFSET);
-    printf(" %30s | %08x |\r\n", "(UART)", PERIPHERAL_BASE + UART0_OFFSET);
-    if ((uint8_t *)(PERIPHERAL_BASE + PERIPHERAL_LENGTH) < framebuffer)
+    printf(" %30s | %08x | %08x\r\n", "Peripherals", peripheral_base, peripheral_base + PERIPHERAL_LENGTH - 1);
+    printf(" %30s | %08x |\r\n", "(interrupts)", peripheral_base + INTERRUPTS_OFFSET);
+    printf(" %30s | %08x |\r\n", "(mailbox)", peripheral_base + MAILBOX_OFFSET);
+    printf(" %30s | %08x |\r\n", "(GPIO)", peripheral_base + GPIO_OFFSET);
+    printf(" %30s | %08x |\r\n", "(UART)", peripheral_base + UART0_OFFSET);
+    if ((uint8_t *)(peripheral_base + PERIPHERAL_LENGTH) < framebuffer)
     {
-        printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, PERIPHERAL_BASE - 1);
+        printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, peripheral_base - 1);
     }
-    if (framebuffer > (uint8_t *)PERIPHERAL_BASE)
+    if (framebuffer > (uint8_t *)peripheral_base)
     {
         set_foreground_color(220); // Orange
         printf(" %30s | %08x | %08x\r\n", "Framebuffer", framebuffer, framebuffer + fbinfo.buf_size - 1);

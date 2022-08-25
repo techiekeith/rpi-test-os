@@ -1,4 +1,6 @@
 RASPI_MODEL?=2
+CSUD=1
+# CSUD_PORT=1
 
 ifeq ($(RASPI_MODEL),1)
 	DIRECTIVES=-D BCM2835
@@ -24,7 +26,16 @@ OBJCOPY=$(COMPILER_PREFIX)objcopy
 SRC_DIR=src
 DIST_DIR=dist
 
-SUBDIRS=common kernel saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
+ifeq ($(CSUD),1)
+	SUBDIRS=common kernel saa505x shell test csud $(SOFTWARE_MATH_LIB)
+	DRIVER_FLAGS=-D CSUD
+else ifeq ($(CSUD_PORT),1)
+	SUBDIRS=common kernel saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
+	DRIVER_FLAGS=-D CSUD -D CSUD_PORT
+else
+	SUBDIRS=common kernel saa505x shell test $(SOFTWARE_MATH_LIB)
+	DRIVER_FLAGS=
+endif
 
 ifeq ($(DEBUG),1)
 	DEBUG_FLAGS=-ggdb
@@ -36,7 +47,7 @@ else
 	BUILD_DIR=build/$(MACHINE)/release
 endif
 
-FLAGS=$(DEBUG_FLAGS) $(DIRECTIVES) $(ARCH_FLAGS) -fpic -ffreestanding -Iinclude
+FLAGS=$(DEBUG_FLAGS) $(DIRECTIVES) $(DRIVER_FLAGS) $(ARCH_FLAGS) -fpic -ffreestanding -Iinclude
 CFLAGS=$(FLAGS) -std=gnu99 -O2 -Wall -Wextra
 LDFLAGS=-ffreestanding -O2 -nostdlib
 

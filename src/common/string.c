@@ -5,8 +5,11 @@
 #include "../../include/common/stdint.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
-#include "../../include/kernel/io.h"
 #include "../../include/kernel/mem_internal.h"
+
+#if (DEBUG_MEMCPY == 1)
+#include "../../include/kernel/io.h"
+#endif
 
 void memset(void *dest, int value, size_t bytes)
 {
@@ -31,7 +34,9 @@ static void memcpy_rev(void *dest, const void *src, size_t bytes)
     // Fast copy if regions are word-aligned
     if (((size_t)dest & 3) == 0 && ((size_t)src & 3) == 0)
     {
+#if (DEBUG_MEMCPY == 1)
         int rv;
+#endif
         dest += bytes;
         src += bytes;
         uint32_t partial = bytes % MAX_BLOCK_COPY;
@@ -39,17 +44,25 @@ static void memcpy_rev(void *dest, const void *src, size_t bytes)
             dest -= partial;
             src -= partial;
             bytes -= partial;
+#if (DEBUG_MEMCPY == 1)
             rv = __memory_copy_backwards(dest, src, partial);
             debug_printf("__memory_copy_backwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, partial, rv);
+#else
+            __memory_copy_backwards(dest, src, partial);
+#endif
         }
         while (bytes) {
             dest -= MAX_BLOCK_COPY;
             src -= MAX_BLOCK_COPY;
             bytes -= MAX_BLOCK_COPY;
+#if (DEBUG_MEMCPY == 1)
             rv = __memory_copy_backwards(dest, src, MAX_BLOCK_COPY);
             debug_printf("__memory_copy_backwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, MAX_BLOCK_COPY, rv);
+#else
+            __memory_copy_backwards(dest, src, MAX_BLOCK_COPY);
+#endif
         }
         return;
     }
@@ -66,20 +79,30 @@ static void memcpy_fwd(void *dest, const void *src, size_t bytes)
     // Fast copy if regions are word-aligned
     if (((size_t)dest & 3) == 0 && ((size_t)src & 3) == 0)
     {
+#if (DEBUG_MEMCPY == 1)
         int rv;
+#endif
         uint32_t partial = bytes % MAX_BLOCK_COPY;
         bytes -= partial;
         while (bytes) {
+#if (DEBUG_MEMCPY == 1)
             rv = __memory_copy_forwards(dest, src, MAX_BLOCK_COPY);
             debug_printf("__memory_copy_forwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                          dest, src, MAX_BLOCK_COPY, rv);
+#else
+            __memory_copy_forwards(dest, src, MAX_BLOCK_COPY);
+#endif
             dest += MAX_BLOCK_COPY;
             src += MAX_BLOCK_COPY;
             bytes -= MAX_BLOCK_COPY;
         }
+#if (DEBUG_MEMCPY == 1)
         rv = __memory_copy_forwards(dest, src, partial);
         debug_printf("__memory_copy_forwards(%p, %p, 0x%x) returned value 0x%x\r\n",
                      dest, src, (uint32_t)bytes, rv);
+#else
+        __memory_copy_forwards(dest, src, partial);
+#endif
         return;
     }
     // Slow copy if regions are not word-aligned
@@ -93,7 +116,9 @@ void memcpy(void *dest, const void *src, size_t bytes)
 {
     // if bytes is zero or src and dest are equal, memcpy is a no-op, so do nothing
     if (!bytes || src == dest) return;
-//    debug_printf("=> memcpy(%p, %p, 0x%lx)\r\n", dest, src, bytes);
+#if (DEBUG_MEMCPY == 1)
+    debug_printf("=> memcpy(%p, %p, 0x%lx)\r\n", dest, src, bytes);
+#endif
     if (dest > src)
         memcpy_rev(dest, src, bytes);
     if (src > dest)

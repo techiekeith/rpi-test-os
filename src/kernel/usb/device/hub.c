@@ -277,7 +277,7 @@ static usb_call_result_t hub_port_connection_changed(usb_device_t *device, uint8
     debug_printf("HUB: %s.Port%d Status %x:%x.\r\n", usb_get_description(device), port + 1,
                  *(uint16_t *)&port_status->status, *(uint16_t *)&port_status->change);
 
-    if ((result = hub_change_port_feature(device, HUB_PORT_FEATURE_CONNECTION_CHANGE, port, false)) != OK)
+    if (hub_change_port_feature(device, HUB_PORT_FEATURE_CONNECTION_CHANGE, port, false) != OK)
     {
         debug_printf("HUB: Failed to clear change on %s.Port%d.\r\n", usb_get_description(device), port + 1);
     }
@@ -484,10 +484,12 @@ usb_call_result_t hub_check_connection(usb_device_t *device, uint8_t port)
     usb_call_result_t result;
     hub_port_full_status_t *port_status;
     hub_device_t *data;
+    bool prior_connected_state;
 
     DEBUG_START("hub_check_connection");
 
     data = (hub_device_t *)device->driver_data;
+    prior_connected_state = data->port_status[port].status.connected;
 
     if ((result = hub_port_get_status(device, port)) != OK)
     {
@@ -499,6 +501,11 @@ usb_call_result_t hub_check_connection(usb_device_t *device, uint8_t port)
         return result;
     }
     port_status = &data->port_status[port];
+
+    if ((device == usb_get_root_hub()) && (prior_connected_state != port_status->status.connected))
+    {
+        port_status->change.connected_changed = true;
+    }
 
     if (port_status->change.connected_changed)
     {
@@ -631,11 +638,7 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
             debug_printf("HUB: Hub power: Individual.\r\n");
             break;
         default:
-            debug_printf("HUB: Unknown hub power type %d on %s. Driver incompatible.\r\n",
-                         hub_descriptor->attributes.power_switching_mode, usb_get_description(device));
-            hub_deallocate(device);
-            DEBUG_END();
-            return ERROR_INCOMPATIBLE;
+            debug_printf("HUB: Hub power: No power switching.\r\n");
     }
 
     // Hub nature
@@ -668,6 +671,13 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
     debug_printf("HUB: Hub power to good: %dms.\r\n", hub_descriptor->power_good_delay * 2);
     debug_printf("HUB: Hub current required: %dmA.\r\n", hub_descriptor->maximum_hub_power * 2);
     debug_printf("HUB: Hub ports: %d.\r\n", hub_descriptor->port_count);
+
+    for (uint32_t i = 0; i < data->max_children; i++) {
+        if (hub_descriptor->data[(i + 1) >> 3] & 1 << ((i + 1) & 0x7))
+            debug_printf("HUB: Hub port %d is not removable.\n", i + 1);
+        else
+            debug_printf("HUB: Hub port %d is removable.\n", i + 1);
+    }
 
     // Get hub status
     if ((result = hub_get_status(device)) != OK)
@@ -713,7 +723,7 @@ usb_call_result_t hub_attach(usb_device_t *device, uint32_t interface_number)
 
 void hub_load()
 {
-    DEBUG_START("hub_attach");
+    DEBUG_START("hub_load");
 
     debug_printf("HUB: Hub driver version 0.1 (derived from CSUD).\r\n");
     attach_driver_for_class(INTERFACE_CLASS_HUB, hub_attach);

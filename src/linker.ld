@@ -3,6 +3,7 @@ ENTRY(_start)
 SECTIONS
 {
     /* Starts at LOADER_ADDR. */
+    atags = 0x100;
     . = 0x8000;
     __start = .;
     __text_start = .;

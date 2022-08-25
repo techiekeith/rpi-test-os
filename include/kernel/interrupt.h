@@ -7,8 +7,8 @@
 #include "../common/stdint.h"
 #include "peripheral.h"
 
-#define INTERRUPTS_BASE     (PERIPHERAL_BASE + INTERRUPTS_OFFSET)
-#define INTERRUPTS_PENDING  (INTERRUPTS_BASE + 0x200)
+#define INTERRUPTS_BASE             (peripheral_base + INTERRUPTS_OFFSET)
+#define INTERRUPTS_PENDING          (INTERRUPTS_BASE + 0x200)
 
 #define NUM_IRQS 72
 #define IRQ_IS_BASIC(irq_number)    ((irq_number) & 0x40) /* IRQs 64-71 */

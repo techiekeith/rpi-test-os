@@ -4,7 +4,7 @@
 
 #include "peripheral.h"
 
-#define ARM_TIMER_BASE          (PERIPHERAL_BASE + ARM_TIMER_OFFSET)
+#define ARM_TIMER_BASE          (peripheral_base + ARM_TIMER_OFFSET)
 
 typedef union
 {
