@@ -70,10 +70,10 @@ typedef union uart_control
     uint32_t as_int;
 } uart_control_t;
 
-#define UART_CLOCK_FREQUENCY 250000000
+#define UART_CLOCK_FREQUENCY 3072000000
 #define INTEGER_BAUD_RATE(baud_rate) ((UART_CLOCK_FREQUENCY/(16*baud_rate)) / 64)
 #define FRACTION_BAUD_RATE(baud_rate) ((UART_CLOCK_FREQUENCY/(16*baud_rate)) % 64)
-#define BAUD_RATE 300
+#define BAUD_RATE 115200
 
 #define UART_FIFO_BUFFER_SIZE 1024
 #define UART_RX_FIFO 0x3f0

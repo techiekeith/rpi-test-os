@@ -524,11 +524,7 @@ Result HubAttach(struct UsbDevice *device, u32 interfaceNumber) {
 	
 	if ((result = HubGetStatus(device)) != OK) {
 		LOGF("HUB: Failed to get hub status for %s.\n", UsbGetDescription(device));
-//		return result;
-        data->Status.Status.LocalPower = false;
-        data->Status.Status.OverCurrent = false;
-        data->Status.Change.LocalPowerChanged = false;
-        data->Status.Change.OverCurrentChanged = false;
+		return result;
 	}
 	status = &data->Status;
 
@@ -546,12 +542,8 @@ Result HubAttach(struct UsbDevice *device, u32 interfaceNumber) {
 
 	if ((result = HubGetStatus(device)) != OK) {
 		LOGF("HUB: Failed to get hub status for %s.\n", UsbGetDescription(device));
-//		HubDeallocate(device);
-//		return result;
-        status->Status.LocalPower = false;
-        status->Status.OverCurrent = false;
-        status->Change.LocalPowerChanged = false;
-        status->Change.OverCurrentChanged = false;
+		HubDeallocate(device);
+		return result;
 	}
 
 	if (!status->Status.LocalPower) LOG_DEBUG("USB Hub power: Good.\n");

@@ -10,6 +10,8 @@ static interrupt_registers_t *interrupt_registers;
 static interrupt_handler_f handlers[NUM_IRQS];
 static interrupt_clearer_f clearers[NUM_IRQS];
 
+extern void panic();
+
 __inline__ int INTERRUPTS_ENABLED(void) {
     int res;
     __asm__ __volatile__("mrs %[res], CPSR": [res] "=r" (res)::);
@@ -67,6 +69,7 @@ void register_irq_handler(irq_number_t irq_num, interrupt_handler_f handler, int
 void undefined_instruction_handler()
 {
     debug_printf("\r\n\r\n*** UNDEFINED INSTRUCTION ***");
+    panic();
     HALT;
 }
 
@@ -79,12 +82,14 @@ void software_interrupt_handler()
 void prefetch_abort_handler()
 {
     debug_printf("\r\n\r\n*** PREFETCH ABORT ***");
+    panic();
     HALT;
 }
 
 void data_abort_handler()
 {
     debug_printf("\r\n\r\n*** DATA ABORT ***");
+    panic();
     HALT;
 }
 
