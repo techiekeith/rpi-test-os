@@ -20,6 +20,9 @@ void UsbInitialise();
 #ifdef CSUD_PORT
 #include "../../include/kernel/usb/usb.h"
 #endif
+#ifdef USPI
+int USPiInitialize();
+#endif
 #endif
 
 #if defined(__cplusplus)
@@ -68,6 +71,9 @@ void kernel_main(uint32_t board_id)
 #endif
 #ifdef CSUD_PORT
     usb_init();
+#endif
+#ifdef USPI
+    USPiInitialize();
 #endif
 #endif
 

@@ -101,6 +101,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 ===============================================================================
+This repository contains a port of https://github.com/rsta2/uspi
+which is covered by the GNU General Public License v3.0. Go to
+https://github.com/rsta2/uspi/blob/master/LICENSE for more details.
+See also src/uspi/README in this repository for license terms
+related to derived works contained in that project.
+
+===============================================================================
 The optional utility script "make_image.sh" script in this repository
 references the repository https://github.com/raspberrypi/firmware
 which contains code covered by the Broadcom license. Please check that

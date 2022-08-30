@@ -1,6 +1,7 @@
 RASPI_MODEL?=2
 # USB_SUPPORT=csud
 # USB_SUPPORT=csud_port
+USB_SUPPORT=uspi
 
 ifeq ($(RASPI_MODEL),1)
 	DIRECTIVES=-D BCM2835
@@ -32,6 +33,10 @@ ifeq ($(USB_SUPPORT),csud)
 else ifeq ($(USB_SUPPORT),csud_port)
 	SUBDIRS=common kernel saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
 	DRIVER_FLAGS=-D USB_SUPPORT -D CSUD_PORT
+else ifeq ($(USB_SUPPORT),uspi)
+	SUBDIRS=common kernel saa505x shell test uspi $(SOFTWARE_MATH_LIB)
+	USPI_FLAGS=-D RASPPI=$(RASPI_MODEL)
+	DRIVER_FLAGS=-D USB_SUPPORT -D USPI $(USPI_FLAGS)
 else
 	SUBDIRS=common kernel saa505x shell test $(SOFTWARE_MATH_LIB)
 	DRIVER_FLAGS=
