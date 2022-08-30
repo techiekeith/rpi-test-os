@@ -7,9 +7,9 @@
 #include "../../../include/common/stdlib.h"
 #include "../../../include/common/string.h"
 #include "../../../include/common/utf8.h"
-#include "../../../include/kernel/delay.h"
 #include "../../../include/kernel/heap.h"
 #include "../../../include/kernel/io.h"
+#include "../../../include/kernel/system_timer.h"
 #include "../../../include/kernel/usb/usb.h"
 #include "../../../include/kernel/usb/usb_hcd.h"
 
@@ -145,7 +145,7 @@ usb_call_result_t usb_control_message(usb_device_t *device, usb_pipe_address_t p
 
     while (timeout-- > 0 && device->error & USB_TRANSFER_PROCESSING)
     {
-        delay(1000);
+        system_timer_busy_wait(1000);
     }
     if (device->error & USB_TRANSFER_PROCESSING)
     {
@@ -251,7 +251,7 @@ static usb_call_result_t usb_set_address(usb_device_t *device, uint8_t address)
         return result;
     }
 
-    delay(10000); // Hopefully this is long enough...
+    system_timer_busy_wait(10000); // Hopefully this is long enough...
     device->number = address;
     device->status = USB_DEVICE_STATUS_ADDRESSED;
 

@@ -13,11 +13,12 @@
 #include "../../include/kernel/uart.h"
 
 int shell();
+#ifdef USB_SUPPORT
 #ifdef CSUD
+void UsbInitialise();
+#endif
 #ifdef CSUD_PORT
 #include "../../include/kernel/usb/usb.h"
-#else
-void UsbInitialise();
 #endif
 #endif
 
@@ -27,7 +28,7 @@ extern "C" /* Use C linkage for kernel_main. */
 void kernel_main(uint32_t board_id)
 {
     // Discover the peripheral base address
-    discover_peripheral_base(board_id);
+    get_peripheral_base(board_id);
 
     // Initialise the UART - must be done before we can print anything
     uart_init();
@@ -37,6 +38,10 @@ void kernel_main(uint32_t board_id)
     // Initialise the heap - must be done before we can call a lot of things
     puts("Initializing kernel heap.\r\n");
     heap_init();
+
+    // Get the serial number and MAC address
+    get_serial_number();
+    get_mac_address();
 
     // Discover RAM capacity
     size_t mem_size = get_mem_size();
@@ -56,13 +61,13 @@ void kernel_main(uint32_t board_id)
     puts("Initializing graphics.\r\n");
     graphics_init();
 
+#ifdef USB_SUPPORT
+    puts("Initializing USB host controller.\r\n");
 #ifdef CSUD
-#ifdef CSUD_PORT
-    puts("Initializing USB host controller (CSUD port).\r\n");
-    usb_init();
-#else
-    puts("Initializing USB host controller (CSUD).\r\n");
     UsbInitialise();
+#endif
+#ifdef CSUD_PORT
+    usb_init();
 #endif
 #endif
 
@@ -71,11 +76,7 @@ void kernel_main(uint32_t board_id)
     {
         puts("Starting shell.\r\n");
 //        set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
-#if (__WORD_SIZE == 64)
         printf("\f\r\nRaspberry Pi %ldK\r\n\r\n", mem_size >> 10);
-#else
-        printf("\f\r\nRaspberry Pi %dK\r\n\r\n", mem_size >> 10);
-#endif
         halted = shell();
 //        set_output_channel(OUTPUT_CHANNEL_UART);
         puts("Shell stopped.\r\n");

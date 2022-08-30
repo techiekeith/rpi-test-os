@@ -32,12 +32,9 @@ static void uart_read()
     }
 }
 
-static void uart_interrupt_handler()
+static void uart_interrupt_handler(void *unused)
 {
-}
-
-static void uart_interrupt_clearer()
-{
+    (void) unused;
     __dmb();
     mmio_write(UART0_ICR, (1 << 4)); // Clear interrupt
     uart_read();
@@ -63,13 +60,13 @@ void uart_init() {
     mmio_write(UART0_CR, 0x00000000);
     /* Set up the GPIO pin 14 && 15. */
 
-    /* Disable pull up/down for all GPIO pins & delay for 150 cycles. */
+    /* Disable pull up/down for all GPIO pins & delay for at least 150 cycles. */
     mmio_write(GPPUD, 0x00000000);
-    delay(150);
+    delay(1);
 
-    /* Disable pull up/down for pin 14,15 & delay for 150 cycles. */
+    /* Disable pull up/down for pin 14,15 & delay for at least 150 cycles. */
     mmio_write(GPPUDCLK0, (1 << 14) | (1 << 15));
-    delay(150);
+    delay(1);
 
     /* Write 0 to GPPUDCLK0 to make it take effect. */
     mmio_write(GPPUDCLK0, 0x00000000);
@@ -103,7 +100,7 @@ void uart_init() {
 void uart_enable_interrupts()
 {
     /* Register UART interrupt handler. */
-    register_irq_handler(UART_INT, uart_interrupt_handler, uart_interrupt_clearer);
+    register_irq_handler(UART_INT, NULL, NULL, uart_interrupt_handler, NULL);
 
     /* Set interrupt FIFO level. */
     mmio_write(UART0_IFLS, 0);

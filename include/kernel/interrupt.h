@@ -17,6 +17,7 @@
 
 typedef enum {
     SYSTEM_TIMER_1      = 0x01,
+    SYSTEM_TIMER_3      = 0x03,
     USB_CONTROLLER      = 0x09,
     GPU0_AUX            = 0x1d,
     I2C_SPI_SLV_INT     = 0x2b,
@@ -55,7 +56,8 @@ typedef struct {
 } interrupt_registers_t;
 
 void interrupts_init();
-typedef void (*interrupt_handler_f)();
-typedef void (*interrupt_clearer_f)();
-void register_irq_handler(irq_number_t irq_num, interrupt_handler_f handler, interrupt_clearer_f clearer);
+typedef void (*interrupt_handler_f)(void *);
+typedef void (*interrupt_clearer_f)(void *);
+void register_irq_handler(irq_number_t irq_num, interrupt_handler_f handler, void *handler_param,
+                          interrupt_clearer_f clearer, void *clearer_param);
 void unregister_irq_handler(irq_number_t irq_num);

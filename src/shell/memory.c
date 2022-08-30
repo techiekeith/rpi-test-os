@@ -9,6 +9,7 @@
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/heap.h"
+#include "../../include/kernel/mailbox.h"
 #include "../../include/kernel/mem.h"
 #include "../../include/kernel/peripheral.h"
 
@@ -21,26 +22,16 @@ extern uint8_t __end;
 extern page_t *all_pages_array;
 extern heap_segment_t *heap_segment_list_head;
 
-void show_memory_usage()
+static void show_kernel_heap_usage()
 {
-    uint8_t *sp = (uint8_t *)__get_stack_pointer();
+    char buffer[31];
+    char buffer2[16];
     uint8_t *heap_start = (uint8_t *)heap_segment_list_head;
-    uint8_t *framebuffer = (uint8_t *)fbinfo.buf;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-    uint8_t *last = &__end - 1;
-#pragma GCC diagnostic pop
-    puts("\r\n");
-    printf(" %30s | %-8s | %-8s\r\n", "Memory Usage", "Start", "End");
-    printf("%.32s+%.10s+%.10s\r\n", divider, divider, divider);
-    printf(" %30s | %08x | %08x\r\n", "Exception Table", 0, 63);
-    printf(" %30s | %08x | %08x\r\n", "Reserved", 64, sp - 1);
-    printf(" %30s | %08x | %08x\r\n", "Stack", sp, &_start - 1);
-    printf(" %30s | %08x | %08x\r\n", "Kernel", &_start, last);
     printf(" %30s | %08x | %08x\r\n", "Kernel heap", heap_start, heap_start + KERNEL_HEAP_SIZE - 1);
-    uint8_t *segment_start = heap_start;
+    uint8_t *segment_start;
     uint8_t *segment_end;
-    for (heap_segment_t *segment = heap_segment_list_head; segment != NULL; segment = segment->next)
+    heap_segment_t *next_segment;
+    for (heap_segment_t *segment = heap_segment_list_head; segment != NULL; segment = next_segment)
     {
         if ((uint8_t *)segment >= heap_start + KERNEL_HEAP_SIZE)
         {
@@ -51,34 +42,96 @@ void show_memory_usage()
         {
             segment_start = (uint8_t *)segment;
             segment_end = segment_start + segment->segment_size;
+            next_segment = segment->next;
+            if (segment->is_allocated)
+            {
+                int segment_count = 1;
+                while (next_segment != NULL
+                    && next_segment->is_allocated
+                    && !strcmp(next_segment->consumer, segment->consumer))
+                {
+                    segment_end += next_segment->segment_size;
+                    next_segment = next_segment->next;
+                    segment_count++;
+                }
+                strcpy(buffer, segment->consumer);
+                if (segment_count != 1)
+                {
+                    // We could use a sprintf() function here
+                    strcpy(buffer2, " <");
+                    itoa(segment_count, 10, buffer2 + 2);
+                    strcat(buffer2, ">");
+                    int idx = strlen(buffer);
+                    int idx2 = strlen(buffer2);
+                    if (idx + idx2 > 30) idx = 30 - idx2;
+                    strcpy(buffer + idx, buffer2);
+                }
+                set_foreground_color(235); // yellow = allocated
+            }
+            else
+            {
+                strcpy(buffer, "Free kernel heap space");
+                set_foreground_color(35); // green = free
+            }
             set_foreground_color(segment->is_allocated ? 235 : 35); // yellow = allocated, green = free
-            printf(" %30s | %08x | %08x\r\n",
-                   segment->is_allocated ? segment->consumer : "Free kernel heap space",
-                   segment_start, segment_end - 1);
+            printf(" %30s | %08x | %08x\r\n", buffer, segment_start, segment_end - 1);
         }
     }
     set_foreground_color(239); // White
+}
+
+static void show_arm_memory_usage(void *arm_memory_start, void *arm_memory_end)
+{
+    (void) arm_memory_start; // XXX This is assumed to be zero, for now
+    uint8_t *sp = (uint8_t *)__get_stack_pointer();
+    uint8_t *heap_start = (uint8_t *)heap_segment_list_head;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+    uint8_t *last = &__end - 1;
+#pragma GCC diagnostic pop
+    printf(" %30s | %08x | %08x\r\n", "Exception Table", 0, 63);
+    printf(" %30s | %08x | %08x\r\n", "Reserved", 64, sp - 1);
+    printf(" %30s | %08x | %08x\r\n", "Stack", sp, &_start - 1);
+    printf(" %30s | %08x | %08x\r\n", "Kernel", &_start, last);
     if (all_pages_array)
     {
         printf(" %30s | %08x | %08x\r\n", "Page Table", all_pages_array, heap_start - 1);
+    }
+    show_kernel_heap_usage();
+    printf(" %30s | %08x | %08x\r\n", "Unallocated RAM", heap_start + KERNEL_HEAP_SIZE, arm_memory_end);
+}
+
+static void show_videocore_memory_usage(void *vc_memory_start, void *vc_memory_end)
+{
+    (void) vc_memory_end;
+    uint8_t *framebuffer = (uint8_t *)fbinfo.buf;
+    if (framebuffer > (uint8_t *)vc_memory_start)
+    {
+        set_foreground_color(200); // Red
+        printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", vc_memory_start, framebuffer - 1);
     }
     if (framebuffer < (uint8_t *)peripheral_base)
     {
         set_foreground_color(220); // Orange
         printf(" %30s | %08x | %08x\r\n", "Framebuffer", framebuffer, framebuffer + fbinfo.buf_size - 1);
     }
-    set_foreground_color(200); // Red
     if (framebuffer + fbinfo.buf_size < (uint8_t *)peripheral_base)
     {
+        set_foreground_color(200); // Red
         printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, peripheral_base - 1);
     }
+    set_foreground_color(175); // Dark orange
     printf(" %30s | %08x | %08x\r\n", "Peripherals", peripheral_base, peripheral_base + PERIPHERAL_LENGTH - 1);
-    printf(" %30s | %08x |\r\n", "(interrupts)", peripheral_base + INTERRUPTS_OFFSET);
-    printf(" %30s | %08x |\r\n", "(mailbox)", peripheral_base + MAILBOX_OFFSET);
+    printf(" %30s | %08x |\r\n", "(System timer)", peripheral_base + SYSTEM_TIMER_OFFSET);
+    printf(" %30s | %08x |\r\n", "(Interrupts)", peripheral_base + INTERRUPTS_OFFSET);
+    printf(" %30s | %08x |\r\n", "(ARM timer)", peripheral_base + ARM_TIMER_OFFSET);
+    printf(" %30s | %08x |\r\n", "(Mailbox)", peripheral_base + MAILBOX_OFFSET);
     printf(" %30s | %08x |\r\n", "(GPIO)", peripheral_base + GPIO_OFFSET);
     printf(" %30s | %08x |\r\n", "(UART)", peripheral_base + UART0_OFFSET);
+    printf(" %30s | %08x |\r\n", "(USB host controller)", peripheral_base + HOST_CONTROLLER_OFFSET);
     if ((uint8_t *)(peripheral_base + PERIPHERAL_LENGTH) < framebuffer)
     {
+        set_foreground_color(200); // Red
         printf(" %30s | %08x | %08x\r\n", "VideoCore RAM", framebuffer + fbinfo.buf_size, peripheral_base - 1);
     }
     if (framebuffer > (uint8_t *)peripheral_base)
@@ -87,6 +140,36 @@ void show_memory_usage()
         printf(" %30s | %08x | %08x\r\n", "Framebuffer", framebuffer, framebuffer + fbinfo.buf_size - 1);
     }
     set_foreground_color(239); // White
+}
+
+void show_memory_usage()
+{
+    property_message_tag_t tags[3];
+    tags[0].proptag = HW_GET_ARM_MEMORY;
+    tags[1].proptag = HW_GET_VIDEOCORE_MEMORY;
+    tags[2].proptag = NULL_TAG;
+    int rv = send_messages(tags);
+    if (rv < 0)
+    {
+        printf("\r\nMemory size read error\r\n");
+        return;
+    }
+    puts("\r\n");
+    printf(" %30s | %-8s | %-8s\r\n", "Memory Usage", "Start", "End");
+    printf("%.32s+%.10s+%.10s\r\n", divider, divider, divider);
+    void *arm_memory_start = tags[0].value_buffer.memory_block.base_address;
+    void *arm_memory_end = arm_memory_start + tags[0].value_buffer.memory_block.size - 1;
+    set_foreground_color(219); // Pale green
+    printf(" %30s | %08x | %08x\r\n", "[ARM Memory]", arm_memory_start, arm_memory_end);
+    set_foreground_color(239); // White
+    show_arm_memory_usage(arm_memory_start, arm_memory_end);
+    printf("%.32s+%.10s+%.10s\r\n", divider, divider, divider);
+    void *vc_memory_start = tags[1].value_buffer.memory_block.base_address;
+    void *vc_memory_end = vc_memory_start + tags[1].value_buffer.memory_block.size - 1;
+    set_foreground_color(219); // Pale green
+    printf(" %30s | %08x | %08x\r\n", "[VideoCore Memory]", vc_memory_start, vc_memory_end);
+    set_foreground_color(239); // White
+    show_videocore_memory_usage(vc_memory_start, vc_memory_end);
 }
 
 static void memory_dump(size_t start, size_t end)
@@ -109,9 +192,9 @@ static void memory_dump(size_t start, size_t end)
             i %= columns;
             if (!i) {
                 if (p != start) printf(" |%s|", text);
-                printf("\r\n%08ux  ", p);
+                printf("\r\n%08x  ", p);
             }
-            printf("%02ux ", c);
+            printf("%02x ", c);
             text[i++] = ((c >= 0x20) && (c < 0x7f)) ? c : '.';
         }
     }

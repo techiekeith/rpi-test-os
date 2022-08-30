@@ -6,8 +6,10 @@
 
 #include "stddef.h"
 
-char *ultoa(unsigned long long number, int radix, char *buffer);
-char *ltoa(long long number, int radix, char *buffer);
+char *ulltoa(unsigned long long number, int radix, char *buffer);
+char *lltoa(long long number, int radix, char *buffer);
+char *ultoa(unsigned long number, int radix, char *buffer);
+char *ltoa(long number, int radix, char *buffer);
 char *uitoa(unsigned int number, int radix, char *buffer);
 char *itoa(int number, int radix, char *buffer);
 

@@ -24,8 +24,4 @@ void test_utf8()
            "\U00100077\U0010006f\U00100072\U0010006c\U00100064\U00100021\r\n");
     printf("Double height, format   (hi) = %^%s%=\r\n", "Hello, world!");
     printf("Double height, format  (low) = %_%s%=\r\n", "Hello, world!");
-    printf("  Align left: | %-20s |\r\n", "Hello, world!");
-    printf("Align centre: | %|20s |\r\n", "Hello, world!");
-    printf("Align centre: | %|20s |\r\n", "Hello, world!!");
-    printf(" Align right: | %20s |\r\n", "Hello, world!");
 }

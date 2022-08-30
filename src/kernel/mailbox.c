@@ -29,7 +29,7 @@ int mailbox_read_with_timeout(int channel, mail_message_t *data, int timeout)
     {
         // Make sure there is mail to receive
         stat.as_int = mmio_read(MAIL0_STATUS);
-        if (stat.empty) delay(10);
+        if (stat.empty) delay(1);
 
         // Get the message
         if (!stat.empty) {
@@ -40,7 +40,7 @@ int mailbox_read_with_timeout(int channel, mail_message_t *data, int timeout)
             }
         }
         if (timeout-- == 0) return -1;
-        delay(10);
+        delay(1);
     } while (true);
 }
 
@@ -149,7 +149,7 @@ int send_messages(property_message_tag_t *tags)
         msg->tags[bufpos++] = tags[i].proptag;
         msg->tags[bufpos++] = len;
         msg->tags[bufpos++] = 0;
-        memcpy(msg->tags+bufpos, &tags[i].value_buffer, len);
+        memcpy(msg->tags+bufpos, (void *)&(tags[i].value_buffer), len);
         bufpos += len / 4;
     }
 
@@ -159,28 +159,30 @@ int send_messages(property_message_tag_t *tags)
     mail.data = ((size_t)msg) >> 4;
 
     mailbox_send(mail, PROPERTY_CHANNEL);
-    delay(150);
+    delay(1);
     mail = mailbox_read(PROPERTY_CHANNEL);
 
-    debug_printf("mailbox_read returned 0x%ux\r\n", mail);
+    debug_printf("mailbox_read returned 0x%x\r\n", mail);
 
     if (msg->req_res_code == REQUEST)
     {
         debug_printf("msg still has req_res_code REQUEST\r\n");
         heap_free(msg);
+        DEBUG_END();
         return 1;
     }
     // Check the response code
     if (msg->req_res_code == RESPONSE_ERROR)
     {
         heap_free(msg);
+        DEBUG_END();
         return 2;
     }
 
     // Copy the tags back into the array
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++)
     {
-//        debug_printf("mailbox_read returned tag 0x%ux\r\n", tags[i].proptag);
+//        debug_printf("mailbox_read returned tag 0x%x\r\n", tags[i].proptag);
         len = get_value_buffer_size(tags[i].proptag);
         bufpos += 3; // skip over the tag bookkeeping info
         memcpy(&tags[i].value_buffer, msg->tags+bufpos, len);

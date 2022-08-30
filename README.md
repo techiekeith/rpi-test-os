@@ -1,8 +1,7 @@
 # rpi-test-os
 
-Experimental repo for building a Raspberry Pi OS.
-
-At the moment it's pretty much just this - https://github.com/jsandler18/raspi-kernel - with some reorganisation.
+My first attempt at writing an operating system for a Raspberry Pi, derived initially from [Jake Sandler's tutorial](https://github.com/jsandler18/raspi-kernel)
+with embellishments from a variety of other sources.
 
 SAA505x glyphs are courtesy of Mullard.
 
@@ -102,7 +101,7 @@ make
 
 ## Caveat
 
-I have yet to test any of this on a real Raspberry Pi. It mostly works in QEMU, but that's no guarantee.
+I have done the barest amount of manual testing on a Raspberry Pi Model B. USB keyboard support is still pending.
 
 ## Resources
 

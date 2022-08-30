@@ -316,6 +316,14 @@ static int set_display_dimensions_via_property_channel(uint32_t width, uint32_t 
     tags[2].value_buffer.fb_depth = depth;
     tags[3].proptag = NULL_TAG;
 
+    debug_printf("Set framebuffer properties [0]: trying to set physical screen size %d x %d.\r\n",
+                 tags[0].value_buffer.fb_screen_size.width,
+                 tags[0].value_buffer.fb_screen_size.height);
+    debug_printf("Set framebuffer properties [1]: trying to set virtual screen size %d x %d.\r\n",
+                 tags[1].value_buffer.fb_screen_size.width,
+                 tags[1].value_buffer.fb_screen_size.height);
+    debug_printf("Set framebuffer properties [2]: trying to set depth %d bpp.\r\n", tags[2].value_buffer.fb_depth);
+
     // Send over the initialization
     int rv = send_messages(tags);
     if (rv != 0)
@@ -324,13 +332,13 @@ static int set_display_dimensions_via_property_channel(uint32_t width, uint32_t 
         DEBUG_END();
         return -1;
     }
-    debug_printf("Set framebuffer properties [0]: physical screen size %d x %d.\r\n",
+    debug_printf("Set framebuffer properties [0]: returned physical screen size %d x %d.\r\n",
                  tags[0].value_buffer.fb_screen_size.width,
                  tags[0].value_buffer.fb_screen_size.height);
-    debug_printf("Set framebuffer properties [1]: virtual screen size %d x %d.\r\n",
+    debug_printf("Set framebuffer properties [1]: returned virtual screen size %d x %d.\r\n",
                  tags[1].value_buffer.fb_screen_size.width,
                  tags[1].value_buffer.fb_screen_size.height);
-    debug_printf("Set framebuffer properties [2]: depth %d bpp.\r\n", tags[2].value_buffer.fb_depth);
+    debug_printf("Set framebuffer properties [2]: returned depth %d bpp.\r\n", tags[2].value_buffer.fb_depth);
 
     tags[0].proptag = FB_GET_PHYSICAL_DISPLAY_SIZE;
     tags[0].value_buffer.fb_screen_size.width = 0;

@@ -9,7 +9,7 @@
 #include "../peripheral.h"
 #include "usb.h"
 
-#define HOST_CONTROLLER_BASE                (PERIPHERAL_BASE + HOST_CONTROLLER_OFFSET)
+#define HOST_CONTROLLER_BASE                (peripheral_base + HOST_CONTROLLER_OFFSET)
 
 #define CORE_GLOBAL_OFFSET                  (HOST_CONTROLLER_BASE + 0x0000)
 #define HOST_GLOBAL_OFFSET                  (HOST_CONTROLLER_BASE + 0x0400)

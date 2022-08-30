@@ -11,7 +11,7 @@ extern uint32_t get_arm_timer_control();
 
 void show_timers()
 {
-    printf("ARM: control %p, free_running_counter %ld value %ld\r\n",
+    printf("ARM: control %p, free_running_counter %d value %d\r\n",
            get_arm_timer_control(), get_arm_timer_free_running_counter(), get_arm_timer_value());
-    printf("System: %ld\r\n", get_system_timer_counter());
+    printf("System: %llu\r\n", get_system_timer_counter());
 }

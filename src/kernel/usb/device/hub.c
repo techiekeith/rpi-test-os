@@ -3,9 +3,9 @@
  */
 
 #include "../../../../include/common/string.h"
-#include "../../../../include/kernel/delay.h"
 #include "../../../../include/kernel/heap.h"
 #include "../../../../include/kernel/io.h"
+#include "../../../../include/kernel/system_timer.h"
 #include "../../../../include/kernel/usb/usb.h"
 #include "../../../../include/kernel/usb/usb_hcd.h"
 #include "../../../../include/kernel/usb/device/hub.h"
@@ -192,7 +192,7 @@ static usb_call_result_t hub_power_on(usb_device_t *device)
         }
     }
 
-    delay(hub_descriptor->power_good_delay * 2000);
+    system_timer_busy_wait(hub_descriptor->power_good_delay * 2000);
 
     DEBUG_END();
     return OK;
@@ -218,7 +218,7 @@ usb_call_result_t hub_port_reset(usb_device_t *device, uint8_t port)
         }
         timeout = 0;
         do {
-            delay(20000);
+            system_timer_busy_wait(20000);
             if ((result = hub_port_get_status(device, port)) != OK)
             {
                 debug_printf("HUB: Hub failed to get status (4) for %s.Port%d.\r\n",

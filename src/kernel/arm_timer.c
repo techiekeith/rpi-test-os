@@ -2,6 +2,7 @@
  * arm_timer.c
  */
 
+#include "../../include/common/stdio.h"
 #include "../../include/kernel/barrier.h"
 #include "../../include/kernel/interrupt.h"
 #include "../../include/kernel/io.h"
@@ -30,13 +31,15 @@ __attribute__ ((optimize(0))) void arm_timer_delay(uint32_t usecs)
     }
 }
 
-static void arm_timer_irq_handler()
+static void arm_timer_irq_handler(void *unused)
 {
-    debug_printf("ARM timer timeout.\r\n");
+    (void) unused;
+    printf("ARM timer timeout.\r\n");
 }
 
-static void arm_timer_irq_clearer()
+static void arm_timer_irq_clearer(void *unused)
 {
+    (void) unused;
     arm_timer_registers->irq_clear_ack = 0;
     __dmb();
 }
@@ -72,6 +75,6 @@ void arm_timer_init()
     arm_timer_registers->control.interrupt_enable = 1;
     arm_timer_registers->control.free_running_counter_enable = 1;
     __dmb();
-    register_irq_handler(ARM_TIMER, arm_timer_irq_handler, arm_timer_irq_clearer);
+    register_irq_handler(ARM_TIMER, arm_timer_irq_handler, NULL, arm_timer_irq_clearer, NULL);
     DEBUG_END();
 }

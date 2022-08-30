@@ -61,10 +61,8 @@ void debug_pop(bool correctly)
     }
 }
 
-void debug_printf(const char *fmt, ...)
+void debug_vprintf(const char *fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
     int channel = output_channel;
     if (output_channel != OUTPUT_CHANNEL_UART)
     {
@@ -82,5 +80,50 @@ void debug_printf(const char *fmt, ...)
     {
         output_channel = channel;
     }
+}
+
+void debug_printf(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    debug_vprintf(fmt, args);
     va_end(args);
+}
+
+void debug_writeline()
+{
+    int channel = output_channel;
+    if (output_channel != OUTPUT_CHANNEL_UART)
+    {
+        output_channel = OUTPUT_CHANNEL_UART;
+    }
+    puts("\r\n");
+    if (channel != OUTPUT_CHANNEL_UART)
+    {
+        output_channel = channel;
+    }
+}
+
+void debug_hexdump(void *start, void *end)
+{
+    void *p = start;
+    int i = 0;
+    while (p < end) {
+        if (!i) {
+            printf("\r\n%p : ", p);
+        }
+        printf("%02x ", *((uint8_t *)p));
+        i++;
+        i %= 16;
+        p++;
+    }
+    puts("\r\n");
+}
+
+void *__get_stack_pointer();
+void _start();
+
+void debug_stacktrace()
+{
+    debug_hexdump(__get_stack_pointer(), (void *)_start);
 }

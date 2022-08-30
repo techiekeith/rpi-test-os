@@ -16,16 +16,13 @@ int usb_power_on_via_power_management_channel()
     msg.data = 8; // I assume this switches on the USB host controller
     msg.channel = POWER_MANAGEMENT_CHANNEL;
     mailbox_send(msg, POWER_MANAGEMENT_CHANNEL);
-    delay(150);
     mail_message_t result;
-//    result = mailbox_read(POWER_MANAGEMENT_CHANNEL);
     int rv = mailbox_read_with_timeout(POWER_MANAGEMENT_CHANNEL, &result, 10000);
     if (rv == 0)
     {
         debug_printf("Power on USB Host Controller: result=%p msg=%p.\r\n", result.as_int, msg.as_int);
         DEBUG_END();
         return (msg.data == 8) ? 0 : -1;
-//        return 0;
     }
     debug_printf("Power on USB Host Controller failed: %d.\r\n", rv);
     DEBUG_END();

@@ -4,9 +4,9 @@
 
 #include "../../../include/common/stdlib.h"
 #include "../../../include/common/string.h"
-#include "../../../include/kernel/delay.h"
 #include "../../../include/kernel/io.h"
 #include "../../../include/kernel/mmio.h"
+#include "../../../include/kernel/system_timer.h"
 #include "../../../include/kernel/usb/device/hub.h"
 #include "../../../include/kernel/usb/usb_hcd.h"
 #include "../../../include/kernel/usb/usb_root_hub.h"
@@ -177,11 +177,11 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             break;
                         case HUB_PORT_FEATURE_SUSPEND:
                             mmio_write(HCD_POWER, NO_BITS);
-                            delay(5000);
+                            system_timer_busy_wait(5000);
                             mmio_read_in(HCD_HOST_PORT, &host_port, 1);
                             host_port.resume = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x40); // XXX MAGIC
-                            delay(100000);
+                            system_timer_busy_wait(100000);
                             host_port.resume = false;
                             host_port.suspend = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0xc0); // XXX MAGIC
@@ -234,7 +234,7 @@ usb_call_result_t hcd_process_root_hub_message(usb_device_t *device, usb_pipe_ad
                             host_port.reset = true;
                             host_port.power = true;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1180); // XXX MAGIC
-                            delay(6000);
+                            system_timer_busy_wait(6000);
                             host_port.reset = false;
                             mmio_write_with_mask(HCD_HOST_PORT, &host_port, HCD_HOST_PORT_MASK | 0x1000); // XXX MAGIC
                             break;

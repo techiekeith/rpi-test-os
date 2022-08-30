@@ -1,6 +1,6 @@
 RASPI_MODEL?=2
-CSUD=1
-# CSUD_PORT=1
+# USB_SUPPORT=csud
+# USB_SUPPORT=csud_port
 
 ifeq ($(RASPI_MODEL),1)
 	DIRECTIVES=-D BCM2835
@@ -26,12 +26,12 @@ OBJCOPY=$(COMPILER_PREFIX)objcopy
 SRC_DIR=src
 DIST_DIR=dist
 
-ifeq ($(CSUD),1)
+ifeq ($(USB_SUPPORT),csud)
 	SUBDIRS=common kernel saa505x shell test csud $(SOFTWARE_MATH_LIB)
-	DRIVER_FLAGS=-D CSUD
-else ifeq ($(CSUD_PORT),1)
+	DRIVER_FLAGS=-D USB_SUPPORT -D CSUD
+else ifeq ($(USB_SUPPORT),csud_port)
 	SUBDIRS=common kernel saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
-	DRIVER_FLAGS=-D CSUD -D CSUD_PORT
+	DRIVER_FLAGS=-D USB_SUPPORT -D CSUD_PORT
 else
 	SUBDIRS=common kernel saa505x shell test $(SOFTWARE_MATH_LIB)
 	DRIVER_FLAGS=
