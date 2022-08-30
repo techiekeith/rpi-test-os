@@ -30,7 +30,7 @@ void foreground_color(int argc, char **argv)
     set_foreground_color(color);
 }
 
-int set_pixels(int argc, char **argv)
+void set_pixels(int argc, char **argv)
 {
     if (argc > 2 || (argc == 2 && strcmp(argv[1], "rgb") && strcmp(argv[1], "bgr")))
     {
@@ -43,12 +43,13 @@ int set_pixels(int argc, char **argv)
     }
     printf("\r\nPixel order: %s.\r\n", fbinfo.rgb ? "RGB" : "BGR");
 }
+
 int set_palette_mode(int argc, char **argv)
 {
     if (argc < 3)
     {
         printf("\r\nSyntax: palette (<palette-mode> <rgb-mode>)\r\n");
-        return;
+        return -1;
     }
     int palette_mode = atoi(argv[1]);
     int rgb_mode = atoi(argv[2]);

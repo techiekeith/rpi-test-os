@@ -1,0 +1,82 @@
+  <component name="RunManager" selected="Remote Debug.Raspberry Pi 2">
+    <configuration name="Build" type="CLionNativeAppRunConfigurationType" PROGRAM_PARAMS="-c echo" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-test-os" TARGET_NAME="Make (WSL)" CONFIG_NAME="Make (WSL)" version="1" RUN_PATH="/usr/bin/bash">
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi 2" type="CLion_Remote" version="1" remoteCommand="localhost:1234" symbolFile="$PROJECT_DIR$/dist/raspi2b_g.elf" sysroot="$PROJECT_DIR$/dist">
+      <debugger kind="GDB" isBundled="true" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi Model B" type="CLion_Remote" version="1" remoteCommand="localhost:1234" symbolFile="$PROJECT_DIR$/dist/raspi1ap_g.elf" sysroot="$PROJECT_DIR$/dist">
+      <debugger kind="GDB" isBundled="true" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi 2 (GDB)" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi2b -name raspi2b-debug -m 1G -serial stdio -usb -usbdevice keyboard -kernel dist\raspi2b_g.elf" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="false" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi 2" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi2b -name raspi2b -m 1G -serial stdio -usb -usbdevice keyboard -kernel dist\raspi2b.elf" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="false" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi Model B (GDB)" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -s -S -M raspi1ap -name raspi1ap-debug -m 512M -serial stdio -usb -usbdevice keyboard -kernel dist\raspi1ap_g.elf" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="false" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Raspberry Pi Model B" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="&amp; 'C:\Program Files\qemu\qemu-system-arm.exe' -M raspi1ap -name raspi1ap -m 512M -serial stdio -usb -usbdevice keyboard -kernel dist\raspi1ap.elf" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="false" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Makefile Application.Build" />
+      <item itemvalue="Remote Debug.Raspberry Pi Model B" />
+      <item itemvalue="Remote Debug.Raspberry Pi 2" />
+      <item itemvalue="Shell Script.Raspberry Pi Model B" />
+      <item itemvalue="Shell Script.Raspberry Pi Model B (GDB)" />
+      <item itemvalue="Shell Script.Raspberry Pi 2" />
+      <item itemvalue="Shell Script.Raspberry Pi 2 (GDB)" />
+    </list>
+  </component>

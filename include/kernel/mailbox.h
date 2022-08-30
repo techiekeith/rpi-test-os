@@ -209,6 +209,16 @@ typedef struct
 
 typedef struct
 {
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+    uint8_t b3;
+    uint8_t b4;
+    uint8_t b5;
+} __attribute__((packed)) hw_board_mac_address_t;
+
+typedef struct
+{
     void *fb_addr;
     uint32_t fb_size;
 } fb_allocate_res_t;
@@ -250,6 +260,7 @@ typedef struct
 typedef union
 {
     memory_block_t memory_block;
+    hw_board_mac_address_t mac_address;
     uint32_t fb_allocate_align;
     fb_allocate_res_t fb_allocate_res;
     fb_screen_size_t fb_screen_size;

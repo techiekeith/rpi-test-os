@@ -80,8 +80,8 @@ void vprintf(const char *fmt, va_list args)
             int pad_char = ' ';
             size_t min_width = 0;
             size_t max_width = 0;
-            bool unsigned_number = false;
-            bool long_number = false;
+            bool unsigned_number;
+            int long_number = 0;
             int radix = 2;
             int suppress = 0;
             if (modifier == '^') /* top row for double-height characters */
@@ -133,16 +133,15 @@ void vprintf(const char *fmt, va_list args)
                     if (!modifier) return;
                 }
             }
-            if (modifier == 'u') /* unsigned integer; only makes sense with %b, %d, %o or %x */
-            {
-                unsigned_number = 1;
-                modifier = *(++fmt);
-                if (!modifier) return;
-            }
-            if (modifier == 'l') /* long integer; only makes sense with %b, %d, %o or %x */
+            if (modifier == 'l') /* long integer; only makes sense with %b, %d, %i, %o or %x */
             {
                 long_number = 1;
                 modifier = *(++fmt);
+                if (modifier == 'l') /* long long integer; only makes sense with %b, %d, %i, %o or %x */
+                {
+                    long_number = 2;
+                    modifier = *(++fmt);
+                }
                 if (!modifier) return;
             }
             char *str = buffer;
@@ -154,13 +153,15 @@ void vprintf(const char *fmt, va_list args)
                 case 'P': /* pointer */
                     *p++ = '0';
                     *p++ = modifier == 'P' ? 'X' : 'x';
-                    long_number = (__WORD_SIZE == 64);
+                    long_number = 1;
                     /* fall through */
                 case 'x': /* hexadecimal */
                 case 'X': /* hexadecimal, but with upper case letters */
                     radix += 6;
                     /* fall through */
-                case 'd': /* decimal */
+                case 'd': /* decimal (integer) */
+                case 'i': /* (decimal) integer */
+                case 'u': /* unsigned decimal integer */
                     radix += 2;
                     /* fall through */
                 case 'o': /* octal */
@@ -168,13 +169,20 @@ void vprintf(const char *fmt, va_list args)
                     /* fall through */
                 case 'b': /* binary */
                     // all bases except decimal are treated as unsigned
-                    if (modifier != 'd') unsigned_number = true;
-                    long_number ? (
-                            unsigned_number ? ultoa(va_arg(args, unsigned long long), radix, p)
-                            : ltoa(va_arg(args, long long), radix, p))
-                    : (
+                    unsigned_number = ((modifier != 'd') && (modifier != 'i'));
+                    switch (long_number) {
+                        case 2:
+                            unsigned_number ? ulltoa(va_arg(args, unsigned long long), radix, p)
+                                            : lltoa(va_arg(args, long long), radix, p);
+                            break;
+                        case 1:
+                            unsigned_number ? ultoa(va_arg(args, unsigned long), radix, p)
+                                            : ltoa(va_arg(args, long), radix, p);
+                            break;
+                        default:
                             unsigned_number ? uitoa(va_arg(args, unsigned int), radix, p)
-                            : itoa(va_arg(args, int), radix, p));
+                                            : itoa(va_arg(args, int), radix, p);
+                    }
                     if ((modifier == 'P') || (modifier == 'X'))
                     {
                         for (p = str; *p; p++)

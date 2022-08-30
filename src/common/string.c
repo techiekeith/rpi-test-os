@@ -11,22 +11,18 @@
 #include "../../include/kernel/io.h"
 #endif
 
-void memset(void *dest, int value, size_t bytes)
+int memcmp(const void *s1, const void *s2, size_t n)
 {
-    while (((size_t)dest & 3) != 0 && bytes > 0)
+    char *p1 = (char *)s1;
+    char *p2 = (char *)s2;
+    int i = n;
+    while ((i > 0) && (*p1 == *p2))
     {
-        *((uint8_t *)dest++) = value;
-        bytes--;
+        i--;
+        p1++;
+        p2++;
     }
-    while (bytes >= MAX_BLOCK_COPY) {
-        __memory_set_byte(dest, value, MAX_BLOCK_COPY);
-        dest += MAX_BLOCK_COPY;
-        bytes -= MAX_BLOCK_COPY;
-    }
-    if (bytes > 0)
-    {
-        __memory_set_byte(dest, value, (uint32_t)bytes);
-    }
+    return i && *p1 - *p2;
 }
 
 static void memcpy_rev(void *dest, const void *src, size_t bytes)
@@ -130,19 +126,35 @@ void memmove(void *dest, const void *src, size_t bytes)
     memcpy(dest, src, bytes);
 }
 
-size_t strlen(const char *s)
+void memset(void *dest, int value, size_t bytes)
 {
-    char *p = (char *)s;
-    while (*p++);
-    p--;
-    return (size_t)(p - s);
+    while (((size_t)dest & 3) != 0 && bytes > 0)
+    {
+        *((uint8_t *)dest++) = value;
+        bytes--;
+    }
+    while (bytes >= MAX_BLOCK_COPY) {
+        __memory_set_byte(dest, value, MAX_BLOCK_COPY);
+        dest += MAX_BLOCK_COPY;
+        bytes -= MAX_BLOCK_COPY;
+    }
+    if (bytes > 0)
+    {
+        __memory_set_byte(dest, value, (uint32_t)bytes);
+    }
+}
+
+char *strcat(char *dest, const char *src)
+{
+    strcpy(dest + strlen(dest), src);
+    return dest;
 }
 
 char *strchr(const char *s, int c)
 {
     char *p = (char *)s;
     while (*p && *p != c) p++;
-    return *p ? p : NULL;
+    return *p == c ? p : NULL;
 }
 
 int strcmp(const char *s1, const char *s2)
@@ -157,12 +169,28 @@ int strcmp(const char *s1, const char *s2)
     return *p1 - *p2;
 }
 
+char *strcpy(char *dest, const char *src)
+{
+    char *p = dest;
+    for (char *q = (char *)src; *q != '\0'; p++, q++)
+    {
+        *p = *q;
+    }
+    *p = '\0';
+    return dest;
+}
+
+size_t strlen(const char *s)
+{
+    return (size_t)(strchr(s, '\0') - s);
+}
+
 int strncmp(const char *s1, const char *s2, size_t n)
 {
     char *p1 = (char *)s1;
     char *p2 = (char *)s2;
     int i = n;
-    while (i > 0 && (*p1 | *p2) && (*p1 == *p2))
+    while ((i > 0) && (*p1 | *p2) && (*p1 == *p2))
     {
         i--;
         p1++;

@@ -43,28 +43,36 @@ static char *ntoa(unsigned long long number, unsigned long long radix, int sign,
     return buffer;
 }
 
-char *ultoa(unsigned long long number, int radix, char *buffer)
+char *ulltoa(unsigned long long number, int radix, char *buffer)
 {
     return ntoa(number, radix, 0, buffer);
 }
 
-char *ltoa(long long number, int radix, char *buffer)
+char *lltoa(long long number, int radix, char *buffer)
 {
-    unsigned long long cast = number;
+    unsigned long long cast = *((unsigned long long *)&number);
     int sign = cast >> 63ULL;
     return ntoa(sign ? -cast : cast, radix, sign, buffer);
+}
+
+char *ultoa(unsigned long number, int radix, char *buffer)
+{
+    return ulltoa((unsigned long long) number, radix, buffer);
+}
+
+char *ltoa(long number, int radix, char *buffer)
+{
+    return lltoa((long long) number, radix, buffer);
 }
 
 char *uitoa(unsigned int number, int radix, char *buffer)
 {
-    return ntoa((unsigned long long) number, radix, 0, buffer);
+    return ulltoa((unsigned long long) number, radix, buffer);
 }
 
 char *itoa(int number, int radix, char *buffer)
 {
-    unsigned long long cast = number;
-    int sign = cast >> 63ULL;
-    return ntoa(sign ? -cast : cast, radix, sign, buffer);
+    return lltoa((long long) number, radix, buffer);
 }
 
 long long strtoll(const char *str, char **endptr, int base)

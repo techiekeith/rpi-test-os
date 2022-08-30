@@ -104,7 +104,7 @@ void mailbox_options(int argc, char **argv)
             puts(method->method_name);
             puts(" = ");
         }
-        printf("%08ux ", tags[0].value_buffer.data[i]);
+        printf("%08x ", tags[0].value_buffer.data[i]);
     }
     if (method->response_size > 64)
     {

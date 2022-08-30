@@ -182,7 +182,7 @@ static void test_idivmod()
 
 static void print_ldivmod_results(long long a, long long b, long long c, long long d)
 {
-    printf("test_ldivmod: %ld / %ld = %ld r%ld (%s)\r\n", a, b, c, d,
+    printf("test_ldivmod: %lld / %lld = %lld r%lld (%s)\r\n", a, b, c, d,
            (b * c + d == a) ? "PASS" : "FAIL");
 }
 
@@ -210,7 +210,7 @@ static void test_divide_by_ten()
     unsigned long long quot, rem;
     debug_printf("In test_div10()\r\n");
     for (int i = 0; i < 18; i++) {
-        debug_printf("i: %d test_case: 0x%016lx\r\n", i, div10_test_cases[i]);
+        debug_printf("i: %d test_case: 0x%016llx\r\n", i, div10_test_cases[i]);
         puts("u32: ");
         unsigned int test_case = div10_test_cases[i];
         printhex((unsigned long long)test_case, 8);
