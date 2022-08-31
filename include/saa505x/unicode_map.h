@@ -109,9 +109,9 @@ typedef struct {
     int *block;
 } unicode_block_idx_t;
 
-#define UNICODE_BLOCKS 10
+#define SAA505X_UNICODE_BLOCKS 10
 
-unicode_block_idx_t unicode_block_index[UNICODE_BLOCKS] = {
+unicode_block_idx_t unicode_block_index[SAA505X_UNICODE_BLOCKS] = {
         { .start = 0x0020, .end = 0x007f, .block = basic_latin },
         { .start = 0x00a0, .end = 0x00ff, .block = latin1_supplement },
         { .start = 0x0410, .end = 0x044f, .block = cyrillic },

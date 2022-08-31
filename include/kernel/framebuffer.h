@@ -77,4 +77,4 @@ extern framebuffer_info_t fbinfo;
 void framebuffer_init();
 int set_pixel_order(bool rgb);
 int init_palette();
-int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth, uint32_t char_width, uint32_t char_height);
+int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth);

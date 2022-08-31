@@ -51,6 +51,7 @@ void interrupts_init() {
 void register_irq_handler(irq_number_t irq_num, interrupt_handler_f handler, void *handler_param,
                           interrupt_clearer_f clearer, void *clearer_param) {
     uint32_t irq_pos;
+    debug_printf("*** Registering handler for IRQ %d ***\r\n", irq_num);
     if (IRQ_IS_BASIC(irq_num)) {
         irq_pos = irq_num - 64;
         handlers[irq_num] = handler;

@@ -58,7 +58,6 @@ void usb_keyboard_fifo_init()
 
 void uspi_key_input_handler(const char *keys)
 {
-    debug_printf("Received keys: '%s'.\r\n", keys);
     for (char *p = (char *)keys; *p; p++) fifo_add(USB_RX_FIFO, (uint8_t)(*p));
 }
 

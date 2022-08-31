@@ -64,7 +64,7 @@ static uint64_t handle_timers()
             if (now > uspi_timers[i].when)
             {
                 TKernelTimerHandler *pHandler = uspi_timers[i].pHandler;
-                debug_printf("Timer handle %d triggered.\r\n", i + 1);
+//                debug_printf("Timer handle %d triggered.\r\n", i + 1);
                 uspi_timers[i].pHandler = NULL;
                 (*pHandler)(i + 1, uspi_timers[i].pParam, uspi_timers[i].pContext);
             }
@@ -81,20 +81,16 @@ static void usb_driver_timer_interrupt_handler(void *unused)
 {
     (void) unused;
 
+    system_timer_3_irq_clearer(NULL);
     uint64_t now, next;
     do {
         next = handle_timers();
         now = get_system_timer_counter();
     } while (now > next);
-    if (next == NEVER)
+    next_expected_timer_event = next;
+    if (next != NEVER)
     {
-        debug_printf("No timers triggered.\r\n");
-    }
-    else
-    {
-        unsigned nDelay = next_expected_timer_event - get_system_timer_counter();
-        system_timer_set_3(nDelay);
-        debug_printf("Reset timeout to %d us.\r\n", nDelay);
+        system_timer_set_3_abs(next_expected_timer_event);
     }
 }
 
@@ -107,31 +103,32 @@ static void usb_driver_timer_interrupt_init()
 
 unsigned StartKernelTimer (unsigned nDelay, TKernelTimerHandler *pHandler, void *pParam, void *pContext)
 {
-    DEBUG_START("StartKernelTimer");
+//    DEBUG_START("StartKernelTimer");
 
     for (int i = 0; i < MAX_USPI_TIMERS; i++)
     {
         if (uspi_timers[i].pHandler == NULL)
         {
-            uint64_t now = get_system_timer_counter();
-            uspi_timers[i].when = now + nDelay;
+            uint64_t when = get_system_timer_counter() + nDelay * 1000000 / HZ;
+            uspi_timers[i].when = when;
             uspi_timers[i].pHandler = pHandler;
             uspi_timers[i].pParam = pParam;
             uspi_timers[i].pContext = pContext;
-            if (next_expected_timer_event > uspi_timers[i].when)
+            if (next_expected_timer_event > when)
             {
-                next_expected_timer_event = uspi_timers[i].when;
-                system_timer_set(nDelay);
+                next_expected_timer_event = when;
+                system_timer_set_3_abs(when);
             }
-            debug_printf("Registered new timer with handle %d.\r\n", i + 1);
-            DEBUG_END();
+//            debug_printf("Registered new timer with handle %d (now=%lld, when=%lld).\r\n",
+//                         i + 1, now, uspi_timers[i].when);
+//            DEBUG_END();
             return i + 1;
         }
     }
 
-    debug_printf("Cannot register new timer, no timers available.\r\n");
-
-    DEBUG_END();
+//    debug_printf("Cannot register new timer, no timers available.\r\n");
+//
+//    DEBUG_END();
     return 0;
 }
 

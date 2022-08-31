@@ -24,7 +24,9 @@ typedef struct {
 } __attribute__ ((packed)) system_timer_control_reg_t;
 
 void system_timer_set(uint32_t usec);
-void system_timer_set_3(uint32_t usec);
+void system_timer_set_3_abs(uint32_t when);
 void system_timer_busy_wait(uint32_t usecs);
+void system_timer_irq_clearer(void *unused);
+void system_timer_3_irq_clearer(void *unused);
 uint64_t get_system_timer_counter();
 void system_timer_init();

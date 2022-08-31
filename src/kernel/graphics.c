@@ -10,9 +10,12 @@
 #include "../../include/kernel/io.h"
 #include "../../include/kernel/mem_internal.h"
 #include "../../include/saa505x/glyphs.h"
+#include "../../include/raster/glyphs_8bit.h"
 
 static int background_color = DEFAULT_BACKGROUND_COLOR;
 static int foreground_color = DEFAULT_FOREGROUND_COLOR;
+static get_glyph_8bit_f get_glyph_8bit;
+static get_glyph_16bit_f get_glyph_16bit;
 static bool initialized;
 uint32_t colors[PALETTE_COLORS];
 
@@ -38,14 +41,36 @@ void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
     }
 }
 
-static void write_char_at_cursor(int c)
+static void write_char_at_cursor_8bit(int c)
 {
     if (fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
         fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
     {
         return;
     }
-    const uint16_t *bitmap = get_saa505x_glyph(c);
+    const uint8_t *bitmap = get_glyph_8bit(c);
+    uint8_t w, h;
+    uint8_t mask;
+    for (w = 0; w < fbinfo.char_width; w++)
+    {
+        for (h = 0; h < fbinfo.char_height; h++)
+        {
+            mask = 1 << (fbinfo.char_width - w - 1);
+            write_pixel(fbinfo.current_column * fbinfo.char_width + w,
+                        fbinfo.current_row * fbinfo.char_height + h,
+                        bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
+        }
+    }
+}
+
+static void write_char_at_cursor_16bit(int c)
+{
+    if (fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
+        fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
+    {
+        return;
+    }
+    const uint16_t *bitmap = get_glyph_16bit(c);
     uint8_t w, h;
     uint16_t mask;
     for (w = 0; w < fbinfo.char_width; w++)
@@ -58,6 +83,11 @@ static void write_char_at_cursor(int c)
                 bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
         }
     }
+}
+
+static void write_char_at_cursor(int c)
+{
+    fbinfo.char_width <= 8 ? write_char_at_cursor_8bit(c) : write_char_at_cursor_16bit(c);
 }
 
 static void move_cursor_backwards()
@@ -206,6 +236,28 @@ static void set_default_display_mode()
     set_display_mode(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH);
 }
 
+static void set_charset(uint32_t width, uint32_t height)
+{
+    fbinfo.char_width = width;
+    fbinfo.char_height = height;
+    fbinfo.columns = fbinfo.width / width;
+    fbinfo.rows = fbinfo.height / height;
+    fbinfo.current_column = 0;
+    fbinfo.current_row = 0;
+}
+
+void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyph_function)
+{
+    get_glyph_8bit = get_glyph_function;
+    set_charset(width, height);
+}
+
+void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_glyph_function)
+{
+    get_glyph_16bit = get_glyph_function;
+    set_charset(width, height);
+}
+
 void set_display_mode(int width, int height, int depth)
 {
     if (!initialized)
@@ -215,14 +267,16 @@ void set_display_mode(int width, int height, int depth)
     }
 
     debug_printf("Setting display mode to %dx%d, %d bpp.\r\n", width, height, depth);
-    if (set_display_dimensions(width, height, depth, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
+    if (set_display_dimensions(width, height, depth) < 0)
     {
         debug_printf("Setting default display mode instead.\r\n");
-        if (set_display_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH, GLYPH_WIDTH, GLYPH_HEIGHT) < 0)
+        if (set_display_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH) < 0)
         {
             debug_printf("Cannot set display.\r\n");
         }
     }
+    set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_bbc_micro_glyph);
+//    set_16bit_charset(SAA505X_GLYPH_WIDTH, SAA505X_GLYPH_HEIGHT, get_saa505x_glyph);
     if (fbinfo.channel_mode && depth == 8)
     {
         init_palette();

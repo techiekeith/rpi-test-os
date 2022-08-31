@@ -17,10 +17,10 @@ void system_timer_set(uint32_t usecs)
     __dmb();
 }
 
-void system_timer_set_3(uint32_t usecs)
+void system_timer_set_3_abs(uint32_t when)
 {
     __dmb();
-    mmio_write(SYSTEM_TIMER_COMPARE_3, mmio_read(SYSTEM_TIMER_COUNTER_LOW) + usecs);
+    mmio_write(SYSTEM_TIMER_COMPARE_3, when);
     __dmb();
 }
 
@@ -39,12 +39,24 @@ static void system_timer_irq_handler(void *unused)
     (void) unused;
 }
 
-static void system_timer_irq_clearer(void *unused)
+void system_timer_irq_clearer(void *unused)
 {
     (void) unused;
     system_timer_control_reg_t control;
+    __dmb();
     mmio_read_in(SYSTEM_TIMER_CONTROL, &control, 1);
     control.timer1_matched = 1;
+    mmio_write_out(SYSTEM_TIMER_CONTROL, &control, 1);
+    __dmb();
+}
+
+void system_timer_3_irq_clearer(void *unused)
+{
+    (void) unused;
+    system_timer_control_reg_t control;
+    __dmb();
+    mmio_read_in(SYSTEM_TIMER_CONTROL, &control, 1);
+    control.timer3_matched = 1;
     mmio_write_out(SYSTEM_TIMER_CONTROL, &control, 1);
     __dmb();
 }

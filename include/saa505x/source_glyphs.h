@@ -6,7 +6,7 @@
 
 #include "../common/stdint.h"
 
-static uint8_t saa505x_source_glyphs[SOURCE_GLYPHS][SOURCE_GLYPH_ROWS] = {
+static uint8_t saa505x_source_glyphs[SAA505X_SOURCE_GLYPHS][SAA505X_SOURCE_GLYPH_ROWS] = {
   { 000, 000, 000, 000, 000, 000, 000, 000, 000 }, /* U+0020 SPACE */
   { 004, 004, 004, 004, 004, 000, 004, 000, 000 }, /* U+0021 EXCLAMATION MARK */
   { 012, 012, 012, 000, 000, 000, 000, 000, 000 }, /* U+0022 QUOTATION MARK */

@@ -7,19 +7,19 @@
 #include "../../include/saa505x/source_glyphs.h"
 #include "../../include/saa505x/unicode_map.h"
 
-static uint16_t saa505x_glyphs[MAX_GRAPHICS][GLYPH_HEIGHT];
+static uint16_t saa505x_glyphs[SAA505X_MAX_GRAPHICS][SAA505X_GLYPH_HEIGHT];
 
 static void generate_character_glyph(int c)
 {
     int glyph_number = c + 128;
-    int high_glyph_number = glyph_number + SOURCE_GLYPHS;
-    int low_glyph_number = high_glyph_number + SOURCE_GLYPHS;
-    uint16_t raw_glyph[GLYPH_HEIGHT];
+    int high_glyph_number = glyph_number + SAA505X_SOURCE_GLYPHS;
+    int low_glyph_number = high_glyph_number + SAA505X_SOURCE_GLYPHS;
+    uint16_t raw_glyph[SAA505X_GLYPH_HEIGHT];
     // Double up every source row to generate a 12x20 glyph
     // The first two rows are always blank (not stored in source)
     raw_glyph[0] = 0;
     raw_glyph[1] = 0;
-    for (int row = 0; row < SOURCE_GLYPH_ROWS; row++)
+    for (int row = 0; row < SAA505X_SOURCE_GLYPH_ROWS; row++)
     {
         uint16_t pixels = saa505x_source_glyphs[c][row];
         pixels = ((pixels & 0x10) << 4
@@ -32,11 +32,11 @@ static void generate_character_glyph(int c)
         raw_glyph[row * 2 + 3] = pixels;
     }
     // We now have a 12x20 glyph where each source pixel is represented by two pixels
-    for (int row = 0; row < GLYPH_HEIGHT; row++)
+    for (int row = 0; row < SAA505X_GLYPH_HEIGHT; row++)
     {
         uint16_t bits = raw_glyph[row];
         // Add quarter dots if needed
-        if (row > 2 && row < GLYPH_HEIGHT - 1)
+        if (row > 2 && row < SAA505X_GLYPH_HEIGHT - 1)
         {
             uint16_t bits2, mask, bit, bit2, bit3, bit4;
             // Work out which source row to compare to. Even scanline = previous row, odd scanline = next row
@@ -121,7 +121,7 @@ static void generate_box_glyphs(int c) {
 }
 
 void generate_saa505x_glyphs() {
-    for (int c = 0; c < SOURCE_GLYPHS; c++)
+    for (int c = 0; c < SAA505X_SOURCE_GLYPHS; c++)
     {
         if (c < 64)
         {
@@ -142,17 +142,17 @@ uint16_t *get_saa505x_glyph(int c) {
     {
         return saa505x_glyphs[c & 0x7f];
     }
-    int glyph_number = SOURCE_GLYPHS - 1;
+    int glyph_number = SAA505X_SOURCE_GLYPHS - 1;
     int offset = 128;
     // High/low portions of double-height graphics
     if (c >= 0xf0000) {
-        offset += SOURCE_GLYPHS;
+        offset += SAA505X_SOURCE_GLYPHS;
         if (c & 0x100000) {
-            offset += SOURCE_GLYPHS;
+            offset += SAA505X_SOURCE_GLYPHS;
         }
         c &= 0xffff;
     }
-    for (int block = 0; block < UNICODE_BLOCKS; block++)
+    for (int block = 0; block < SAA505X_UNICODE_BLOCKS; block++)
     {
         if (c >= unicode_block_index[block].start && c <= unicode_block_index[block].end)
         {
