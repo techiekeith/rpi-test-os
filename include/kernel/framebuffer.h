@@ -16,7 +16,7 @@ typedef struct
     uint8_t green: 8;
     uint8_t blue: 8;
     uint8_t alpha: 8;
-} __attribute__((packed)) rgb_t;
+} __attribute__ ((packed)) rgb_t;
 
 typedef enum
 {

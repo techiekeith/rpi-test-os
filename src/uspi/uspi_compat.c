@@ -223,6 +223,7 @@ void uspi_assertion_failed (const char *pExpr, const char *pFile, unsigned nLine
     DEBUG_START("uspi_assertion_failed");
     debug_stacktrace();
     debug_printf(pExpr, pFile, nLine);
+    debug_writeline();
     DEBUG_END();
 }
 

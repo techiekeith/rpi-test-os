@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../common/stdint.h"
+#include "fifo.h"
 #include "peripheral.h"
 
 /* The base address for UART. */
@@ -75,19 +76,6 @@ typedef union uart_control
 #define FRACTION_BAUD_RATE(baud_rate) ((UART_CLOCK_FREQUENCY/(16*baud_rate)) % 64)
 #define BAUD_RATE 115200
 
-#define UART_FIFO_BUFFER_SIZE 1024
-#define UART_RX_FIFO 0x3f0
-#define UART_RX_FIFO_BUFFER 0x400
-
-typedef struct {
-    int start;
-    int end;
-    short buffer_full;
-    short hw_fifo_full;
-    unsigned char *buffer;
-} uart_fifo_t;
-
 void uart_init();
 void uart_enable_interrupts();
 void uart_putc(int c);
-unsigned char uart_getc();

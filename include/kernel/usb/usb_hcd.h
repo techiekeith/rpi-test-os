@@ -179,7 +179,7 @@ typedef struct {
     uint8_t mult_valid_bc: 5;
     bool chirp_en: 1;
     uint8_t reserved_28_31: 4;
-} __attribute__ ((__packed__)) hcd_otg_control_t;
+} __attribute__ ((packed)) hcd_otg_control_t;
 
 typedef struct {
     bool interrupt_enable: 1;
@@ -195,7 +195,7 @@ typedef struct {
     bool noti_all_dma_writ: 1;
     bool dma_remainder_mode: 1;
     bool reserved_24_31: 8;
-} __attribute__ ((__packed__)) hcd_ahb_t;
+} __attribute__ ((packed)) hcd_ahb_t;
 
 typedef struct {
     uint8_t toutcal: 3; // ???
@@ -225,7 +225,7 @@ typedef struct {
     bool force_host_mode: 1;
     bool force_dev_mode: 1;
     bool reserved_31: 1;
-} __attribute__ ((__packed__)) hcd_usb_register_t;
+} __attribute__ ((packed)) hcd_usb_register_t;
 
 typedef struct {
     bool core_soft: 1;
@@ -238,7 +238,7 @@ typedef struct {
     uint32_t reserved_11_29: 19;
     bool dma_request_signal: 1;
     bool ahb_master_idle: 1;
-} __attribute__ ((__packed__)) hcd_reset_t;
+} __attribute__ ((packed)) hcd_reset_t;
 
 typedef struct {
     union {
@@ -259,7 +259,7 @@ typedef struct {
            uint8_t direction13: 2;
            uint8_t direction14: 2;
            uint8_t direction15: 2;
-       } __attribute__ ((__packed__));
+       } __attribute__ ((packed));
        uint32_t word0; /* bits 0-31 */
     };
     union {
@@ -279,7 +279,7 @@ typedef struct {
             uint8_t host_periodic_queue_depth: 2;
             uint8_t device_token_queue_depth: 2;
             bool enable_ic_usb: 1;
-        } __attribute__ ((__packed__));
+        } __attribute__ ((packed));
         uint32_t word1; /* bits 32-63 */
     };
     union {
@@ -296,7 +296,7 @@ typedef struct {
             bool bc_support: 1;
             bool low_power_mode_enabled: 1;
             uint16_t fifo_depth: 16;
-        } __attribute__ ((__packed__));
+        } __attribute__ ((packed));
         uint32_t word2; /* bits 64-95 */
     };
     union {
@@ -317,15 +317,15 @@ typedef struct {
             uint8_t in_endpoint_count: 4;
             bool dma_description: 1;
             bool dma_dynamic_description: 1;
-        } __attribute__ ((__packed__));
+        } __attribute__ ((packed));
         uint32_t word3; /* bits 96-127 */
     };
-} __attribute__ ((__packed__)) hcd_hardware_t;
+} __attribute__ ((packed)) hcd_hardware_t;
 
 typedef struct {
     uint16_t start_address: 16;
     uint16_t depth: 16;
-} __attribute__ ((__packed__)) hcd_fifo_size_t;
+} __attribute__ ((packed)) hcd_fifo_size_t;
 
 /**
 	\brief Contains the core global registers structure that control the HCD.
@@ -361,7 +361,7 @@ typedef struct {
     hcd_fifo_size_t host_size;                  /* 0x100 */
     hcd_fifo_size_t data_size[15];              /* 0x104 - 0x13c */
     uint32_t reserved_0x140_0x3fc[176];         /* 0x140 - 0x3fc */
-} __attribute__ ((__packed__)) hcd_core_global_registers_t;
+} __attribute__ ((packed)) hcd_core_global_registers_t;
 
 typedef struct {
     host_clock_rate_t clock_rate: 2;
@@ -376,7 +376,7 @@ typedef struct {
     bool periodic_schedule_status: 1;
     uint8_t reserved_28_30: 3;
     bool chg_time: 1;
-} __attribute__ ((__packed__)) hcd_host_configuration_t;
+} __attribute__ ((packed)) hcd_host_configuration_t;
 
 typedef struct {
     bool connect: 1;
@@ -394,7 +394,7 @@ typedef struct {
     uint8_t test_control: 4;
     usb_speed_t speed: 2;
     uint16_t reserved_19_31: 13;
-} __attribute__ ((__packed__)) hcd_host_port_t;
+} __attribute__ ((packed)) hcd_host_port_t;
 
 typedef struct {
     uint16_t maximum_packet_size: 11;
@@ -408,7 +408,7 @@ typedef struct {
     bool odd_frame: 1;
     bool disable: 1;
     bool enable: 1;
-} __attribute__ ((__packed__)) hcd_host_channel_characteristic_t;
+} __attribute__ ((packed)) hcd_host_channel_characteristic_t;
 
 typedef struct {
     uint8_t port_address: 7;
@@ -417,7 +417,7 @@ typedef struct {
     bool complete_split: 1;
     uint16_t reserved_17_30: 14;
     bool split_enable: 1;
-} __attribute__ ((__packed__)) hcd_host_channel_split_control_t;
+} __attribute__ ((packed)) hcd_host_channel_split_control_t;
 
 typedef struct {
     bool transfer_complete: 1;
@@ -435,14 +435,14 @@ typedef struct {
     bool excessive_transmission: 1;
     bool frame_list_rollover: 1;
     uint32_t reserved_14_31: 18;
-} __attribute__ ((__packed__)) hcd_host_channel_interrupt_t;
+} __attribute__ ((packed)) hcd_host_channel_interrupt_t;
 
 typedef struct {
     uint32_t transfer_size: 19;
     uint16_t packet_count: 10;
     packet_id_t packet_id: 2;
     bool do_ping: 1;
-} __attribute__ ((__packed__)) hcd_host_channel_transfer_size_t;
+} __attribute__ ((packed)) hcd_host_channel_transfer_size_t;
 
 typedef struct {
     hcd_host_channel_characteristic_t characteristic;
@@ -453,7 +453,7 @@ typedef struct {
     uint32_t dma_address;
     uint32_t reserved_0x18;
     uint32_t reserved_0x1c;
-} __attribute__ ((__packed__)) hcd_host_channel_t;
+} __attribute__ ((packed)) hcd_host_channel_t;
 
 /**
 	\brief Contains the host mode global registers structure that control the HCD.
@@ -475,7 +475,7 @@ typedef struct {
     uint32_t reserved_0x444_0x4fc[47];          /* 0x444 - 0x4fc */
     hcd_host_channel_t channel[CHANNEL_COUNT];  /* 0x500 - 0x6fc */
     uint32_t reserved_0x700_0x7fc[64];          /* 0x700 - 0x7fc */
-} __attribute__ ((__packed__)) hcd_host_global_registers_t;
+} __attribute__ ((packed)) hcd_host_global_registers_t;
 
 /**
 	\brief Contains the dwc power and clock gating controls.
@@ -493,7 +493,7 @@ typedef struct {
     bool phy_sleeping: 1;
     bool deep_sleep: 1;
     uint32_t reserved_8_31: 24;
-} __attribute__ ((__packed__)) hcd_power_t;
+} __attribute__ ((packed)) hcd_power_t;
 
 /**
 	\brief Sends a control message to a device.

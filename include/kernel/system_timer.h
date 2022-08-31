@@ -21,7 +21,7 @@ typedef struct {
     uint8_t timer2_matched: 1;
     uint8_t timer3_matched: 1;
     uint32_t reserved: 28;
-} __attribute__((packed)) system_timer_control_reg_t;
+} __attribute__ ((packed)) system_timer_control_reg_t;
 
 void system_timer_set(uint32_t usec);
 void system_timer_set_3(uint32_t usec);

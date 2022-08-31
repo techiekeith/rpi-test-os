@@ -128,6 +128,8 @@ static void scroll_up()
 
 void graphics_putc(int c)
 {
+    if (!initialized) return;
+
     int32_t num_rows = fbinfo.height / fbinfo.char_height;
 
     switch (c)

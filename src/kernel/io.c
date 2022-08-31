@@ -5,10 +5,13 @@
 #include "../../include/common/stdarg.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/string.h"
+#include "../../include/kernel/fifo.h"
 #include "../../include/kernel/io.h"
+#include "../../include/kernel/graphics.h"
 #include "../../include/kernel/heap.h"
+#include "../../include/kernel/uart.h"
 
-static int input_channel, output_channel;
+static int input_channel, output_channel, debug_output_channel;
 int debug_counter;
 #define DEBUG_ENTRY_SIZE 64
 typedef struct debug_entry {
@@ -28,6 +31,11 @@ int get_output_channel()
     return output_channel;
 }
 
+int get_debug_output_channel()
+{
+    return debug_output_channel;
+}
+
 void set_input_channel(int channel)
 {
     input_channel = channel;
@@ -36,6 +44,46 @@ void set_input_channel(int channel)
 void set_output_channel(int channel)
 {
     output_channel = channel;
+}
+
+void set_debug_output_channel(int channel)
+{
+    debug_output_channel = channel;
+}
+
+void usb_keyboard_fifo_init()
+{
+    fifo_init(USB_RX_FIFO, USB_RX_FIFO_BUFFER, USB_RX_FIFO_BUFFER_SIZE);
+}
+
+void uspi_key_input_handler(const char *keys)
+{
+    debug_printf("Received keys: '%s'.\r\n", keys);
+    for (char *p = (char *)keys; *p; p++) fifo_add(USB_RX_FIFO, (uint8_t)(*p));
+}
+
+char kernel_getc()
+{
+    unsigned char rx_char;
+    while (1)
+    {
+        if ((input_channel & INPUT_CHANNEL_UART) && fifo_get(UART_RX_FIFO, &rx_char)) break;
+        if ((input_channel & INPUT_CHANNEL_USB) && fifo_get(USB_RX_FIFO, &rx_char)) break;
+        asm("wfi");
+    }
+    return rx_char;
+}
+
+void kernel_putc(int c)
+{
+    if (output_channel & OUTPUT_CHANNEL_UART)
+    {
+        uart_putc(c);
+    }
+    if (output_channel & OUTPUT_CHANNEL_GRAPHICS)
+    {
+        graphics_putc(c);
+    }
 }
 
 void debug_push(const char *filename, const char *function)
@@ -64,10 +112,7 @@ void debug_pop(bool correctly)
 void debug_vprintf(const char *fmt, va_list args)
 {
     int channel = output_channel;
-    if (output_channel != OUTPUT_CHANNEL_UART)
-    {
-        output_channel = OUTPUT_CHANNEL_UART;
-    }
+    output_channel = debug_output_channel;
     if (debug_stack != NULL)
     {
         puts(debug_stack->filename);
@@ -76,10 +121,7 @@ void debug_vprintf(const char *fmt, va_list args)
         puts(" .. ");
     }
     vprintf(fmt, args);
-    if (channel != OUTPUT_CHANNEL_UART)
-    {
-        output_channel = channel;
-    }
+    output_channel = channel;
 }
 
 void debug_printf(const char *fmt, ...)
@@ -93,15 +135,9 @@ void debug_printf(const char *fmt, ...)
 void debug_writeline()
 {
     int channel = output_channel;
-    if (output_channel != OUTPUT_CHANNEL_UART)
-    {
-        output_channel = OUTPUT_CHANNEL_UART;
-    }
+    output_channel = debug_output_channel;
     puts("\r\n");
-    if (channel != OUTPUT_CHANNEL_UART)
-    {
-        output_channel = channel;
-    }
+    output_channel = channel;
 }
 
 void debug_hexdump(void *start, void *end)

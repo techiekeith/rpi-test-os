@@ -215,7 +215,7 @@ typedef struct
     uint8_t b3;
     uint8_t b4;
     uint8_t b5;
-} __attribute__((packed)) hw_board_mac_address_t;
+} __attribute__ ((packed)) hw_board_mac_address_t;
 
 typedef struct
 {

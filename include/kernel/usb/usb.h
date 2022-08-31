@@ -269,7 +269,7 @@ typedef struct {
 typedef struct {
     uint8_t descriptor_length;
     descriptor_type_t descriptor_type: 8;
-} __attribute__((packed)) usb_descriptor_header_t;
+} __attribute__ ((packed)) usb_descriptor_header_t;
 
 /**
 	\brief The device descriptor information.
@@ -291,7 +291,7 @@ typedef struct {
     uint8_t product;
     uint8_t serial_number;
     uint8_t configuration_count;
-} __attribute__((packed)) usb_device_descriptor_t;
+} __attribute__ ((packed)) usb_device_descriptor_t;
 
 /**
 	\brief The device qualifier descriptor information.
@@ -309,7 +309,7 @@ typedef struct {
     uint8_t max_packet_size_0;
     uint8_t configuration_count;
     uint8_t reserved_9;
-} __attribute__((packed)) usb_device_qualifier_descriptor_t;
+} __attribute__ ((packed)) usb_device_qualifier_descriptor_t;
 
 /**
 	\brief The configuration descriptor information.
@@ -329,9 +329,9 @@ typedef struct {
         bool remote_wakeup: 1;
         bool self_powered: 1;
         bool reserved_7: 1;
-    } __attribute__((packed)) attributes;
+    } __attribute__ ((packed)) attributes;
     uint8_t maximum_power;
-} __attribute__((packed)) usb_configuration_descriptor_t;
+} __attribute__ ((packed)) usb_configuration_descriptor_t;
 
 /**
 	\brief The other speed configuration descriptor.
@@ -360,7 +360,7 @@ typedef struct {
     uint8_t sub_class;
     uint8_t protocol;
     uint8_t string_index;
-} __attribute__((packed)) usb_interface_descriptor_t;
+} __attribute__ ((packed)) usb_interface_descriptor_t;
 
 /**
 	\brief The endpoint descriptor information.
@@ -375,20 +375,20 @@ typedef struct {
         uint8_t number: 4;
         uint8_t reserved_4_6: 3;
         usb_direction_t direction: 1;
-    } __attribute__((packed)) endpoint_address;
+    } __attribute__ ((packed)) endpoint_address;
     struct {
         usb_transfer_type_t type: 2;
         usb_endpoint_synchronization_t synchronization: 2;
         usb_endpoint_usage_t usage: 2;
         uint8_t reserved_6_7: 2;
-    } __attribute__((packed)) attributes;
+    } __attribute__ ((packed)) attributes;
     struct {
         uint16_t max_size: 11;
         usb_endpoint_transactions_t transactions: 2;
         uint8_t reserved_13_15: 3;
-    } __attribute__((packed)) packet;
+    } __attribute__ ((packed)) packet;
     uint8_t interval;
-} __attribute__((packed)) usb_endpoint_descriptor_t;
+} __attribute__ ((packed)) usb_endpoint_descriptor_t;
 
 /**
 	\brief The string descriptor information.
@@ -400,7 +400,7 @@ typedef struct {
     uint8_t descriptor_length;
     descriptor_type_t descriptor_type: 8;
     uint16_t data[];
-} __attribute__((packed)) usb_string_descriptor_t;
+} __attribute__ ((packed)) usb_string_descriptor_t;
 
 /**
 	\brief Structure to store the details of a USB device that has been
@@ -444,7 +444,7 @@ typedef struct {
     usb_transfer_type_t type: 2;
     usb_direction_t direction: 1;
     uint16_t reserved_19_31: 13;
-} __attribute__((packed)) usb_pipe_address_t;
+} __attribute__ ((packed)) usb_pipe_address_t;
 
 typedef enum {
     USB_DEVICE_REQUEST_GET_STATUS = 0,
@@ -473,7 +473,7 @@ typedef struct {
     uint16_t value;
     uint16_t index;
     uint16_t length;
-} __attribute__((packed)) usb_device_request_t;
+} __attribute__ ((packed)) usb_device_request_t;
 
 inline usb_packet_size_t packet_size_from_number(uint32_t size)
 {
