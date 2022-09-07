@@ -7,8 +7,10 @@
 #include "../../include/common/string.h"
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
+#include "../../include/kernel/interrupt.h"
 #include "../../include/kernel/io.h"
 #include "../../include/kernel/mem_internal.h"
+#include "../../include/kernel/system_timer.h"
 #include "../../include/saa505x/glyphs.h"
 #include "../../include/raster/glyphs_8bit.h"
 
@@ -31,14 +33,73 @@ void set_foreground_color(int color)
 
 void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
 {
-    if (fbinfo.buf)
+    if (!fbinfo.buf) return;
+    uint32_t location = y * fbinfo.pitch + x * fbinfo.bpp;
+    if (location >= fbinfo.buf_size) return;
+    uint32_t real_color = color;
+    if (fbinfo.cursor_enabled && fbinfo.cursor_visible &&
+        x >= fbinfo.current_column * fbinfo.char_width + fbinfo.cursor_left &&
+        x <= fbinfo.current_column * fbinfo.char_width + fbinfo.cursor_right &&
+        y >= fbinfo.current_row * fbinfo.char_height + fbinfo.cursor_top &&
+        y <= fbinfo.current_row * fbinfo.char_height + fbinfo.cursor_bottom)
     {
-        int location = y * fbinfo.pitch + x * fbinfo.bpp;
-        fbinfo.buf[location++] = color & 0xff;
-        if (fbinfo.bpp > 1) fbinfo.buf[location++] = (color >> 8) & 0xff;
-        if (fbinfo.bpp > 2) fbinfo.buf[location++] = (color >> 16) & 0xff;
-        if (fbinfo.bpp > 3) fbinfo.buf[location++] = (color >> 24) & 0xff;
+        real_color = ~real_color;
     }
+    fbinfo.buf[location++] = real_color & 0xff;
+    if (fbinfo.bpp > 1) fbinfo.buf[location++] = (real_color >> 8) & 0xff;
+    if (fbinfo.bpp > 2) fbinfo.buf[location++] = (real_color >> 16) & 0xff;
+    if (fbinfo.bpp > 3) fbinfo.buf[location++] = (real_color >> 24) & 0xff;
+}
+
+static void invert_pixel(uint32_t x, uint32_t y)
+{
+    uint32_t location = y * fbinfo.pitch + x * fbinfo.bpp;
+    fbinfo.buf[location] = ~fbinfo.buf[location];
+    if (fbinfo.bpp > 1) fbinfo.buf[location + 1] = ~fbinfo.buf[location + 1];
+    if (fbinfo.bpp > 2) fbinfo.buf[location + 2] = ~fbinfo.buf[location + 2];
+    if (fbinfo.bpp > 3) fbinfo.buf[location + 3] = ~fbinfo.buf[location + 3];
+}
+
+static void toggle_cursor()
+{
+    if (!fbinfo.buf ||
+        fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
+        fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
+    {
+        return;
+    }
+    int top = fbinfo.current_row * fbinfo.char_height;
+    int left = fbinfo.current_column * fbinfo.char_width;
+    for (int h = fbinfo.cursor_top; h <= fbinfo.cursor_bottom; h++)
+    {
+        for (int w = fbinfo.cursor_left; w <= fbinfo.cursor_right; w++)
+        {
+            invert_pixel(left + w, top + h);
+        }
+    }
+}
+
+void enable_cursor()
+{
+    if (fbinfo.cursor_enabled) return;
+    if (fbinfo.cursor_visible) toggle_cursor();
+    fbinfo.cursor_enabled = true;
+}
+
+bool disable_cursor()
+{
+    DISABLE_INTERRUPTS();
+    bool enabled = fbinfo.cursor_enabled;
+    fbinfo.cursor_enabled = false;
+    ENABLE_INTERRUPTS();
+    if (enabled && fbinfo.cursor_visible) toggle_cursor();
+    return enabled;
+}
+
+void blink_cursor()
+{
+    fbinfo.cursor_visible = !fbinfo.cursor_visible;
+    if (fbinfo.cursor_enabled) toggle_cursor();
 }
 
 static void write_char_at_cursor_8bit(int c)
@@ -49,16 +110,15 @@ static void write_char_at_cursor_8bit(int c)
         return;
     }
     const uint8_t *bitmap = get_glyph_8bit(c);
-    uint8_t w, h;
-    uint8_t mask;
-    for (w = 0; w < fbinfo.char_width; w++)
+    for (int h = fbinfo.char_height - 1; h >= 0; h--)
     {
-        for (h = 0; h < fbinfo.char_height; h++)
+        uint8_t mask = 1;
+        for (int w = fbinfo.char_width - 1; w >= 0; w--)
         {
-            mask = 1 << (fbinfo.char_width - w - 1);
             write_pixel(fbinfo.current_column * fbinfo.char_width + w,
                         fbinfo.current_row * fbinfo.char_height + h,
                         bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
+            mask <<= 1;
         }
     }
 }
@@ -71,16 +131,15 @@ static void write_char_at_cursor_16bit(int c)
         return;
     }
     const uint16_t *bitmap = get_glyph_16bit(c);
-    uint8_t w, h;
-    uint16_t mask;
-    for (w = 0; w < fbinfo.char_width; w++)
+    for (int h = fbinfo.char_height - 1; h >= 0; h--)
     {
-        for (h = 0; h < fbinfo.char_height; h++)
+        uint16_t mask = 1;
+        for (int w = fbinfo.char_width - 1; w >= 0; w--)
         {
-            mask = 1 << (fbinfo.char_width - w - 1);
             write_pixel(fbinfo.current_column * fbinfo.char_width + w,
                 fbinfo.current_row * fbinfo.char_height + h,
                 bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
+            mask <<= 1;
         }
     }
 }
@@ -159,6 +218,7 @@ static void scroll_up()
 void graphics_putc(int c)
 {
     if (!initialized) return;
+    bool cursor_enabled = disable_cursor();
 
     int32_t num_rows = fbinfo.height / fbinfo.char_height;
 
@@ -206,6 +266,8 @@ void graphics_putc(int c)
         scroll_up();
         fbinfo.current_row--;
     }
+
+    if (cursor_enabled) enable_cursor();
 }
 
 static void init_colors(int depth)
@@ -246,16 +308,30 @@ static void set_charset(uint32_t width, uint32_t height)
     fbinfo.current_row = 0;
 }
 
+static void set_cursor_rectangle(uint8_t top, uint8_t right, uint8_t bottom, uint8_t left)
+{
+    fbinfo.cursor_top = top;
+    fbinfo.cursor_right = right;
+    fbinfo.cursor_bottom = bottom;
+    fbinfo.cursor_left = left;
+}
+
 void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyph_function)
 {
+    bool cursor_enabled = disable_cursor();
     get_glyph_8bit = get_glyph_function;
     set_charset(width, height);
+    set_cursor_rectangle(0, width - 1, height - 1, 0);
+    if (cursor_enabled) enable_cursor();
 }
 
 void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_glyph_function)
 {
+    bool cursor_enabled = disable_cursor();
     get_glyph_16bit = get_glyph_function;
     set_charset(width, height);
+    set_cursor_rectangle(0, width - 1, height - 1, 0);
+    if (cursor_enabled) enable_cursor();
 }
 
 void set_display_mode(int width, int height, int depth)
@@ -265,6 +341,8 @@ void set_display_mode(int width, int height, int depth)
         debug_printf("You must initialize graphics before setting the display mode.\r\n");
         return;
     }
+
+    bool cursor_enabled = disable_cursor();
 
     debug_printf("Setting display mode to %dx%d, %d bpp.\r\n", width, height, depth);
     if (set_display_dimensions(width, height, depth) < 0)
@@ -284,6 +362,8 @@ void set_display_mode(int width, int height, int depth)
     init_colors(depth);
     clear_framebuffer();
     cursor_home();
+
+    if (cursor_enabled) enable_cursor();
 }
 
 void graphics_init()
@@ -299,4 +379,6 @@ void graphics_init()
     init_palette();
     initialized = true;
     set_default_display_mode();
+    register_interval_handler("blink_cursor", blink_cursor, CURSOR_BLINK_INTERVAL, true);
+    enable_cursor();
 }

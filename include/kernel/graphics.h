@@ -13,6 +13,7 @@
 #define COLOR_DEPTH 8
 #define DEFAULT_BACKGROUND_COLOR 0
 #define DEFAULT_FOREGROUND_COLOR 239
+#define CURSOR_BLINK_INTERVAL 50
 
 typedef uint8_t *(*get_glyph_8bit_f)(int);
 typedef uint16_t *(*get_glyph_16bit_f)(int);

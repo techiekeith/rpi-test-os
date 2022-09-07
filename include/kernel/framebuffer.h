@@ -66,8 +66,14 @@ typedef struct framebuffer_info
     uint32_t char_height;
     int32_t columns;
     int32_t rows;
-    int32_t current_column;
-    int32_t current_row;
+    int32_t current_column; // Text cursor column position
+    int32_t current_row; // Text cursor row position
+    bool cursor_enabled; // True if software text cursor is enabled
+    bool cursor_visible; // True if software text cursor is currently visible
+    uint8_t cursor_top; // Should be between zero and (fbinfo.char_height - 1)
+    uint8_t cursor_bottom; // Should be equal to or greater than cursor_row_start, and less than (fbinfo.char_height - 1)
+    uint8_t cursor_left; // Should be between zero and (fbinfo.char_width - 1)
+    uint8_t cursor_right; // Should be equal to or greater than cursor_row_start, and less than (fbinfo.char_width - 1)
     volatile uint8_t *buf;
     uint32_t buf_size;
 } framebuffer_info_t;

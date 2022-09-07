@@ -14,24 +14,6 @@ static void *clearer_params[NUM_IRQS];
 
 extern void panic();
 
-__inline__ int INTERRUPTS_ENABLED(void) {
-    int res;
-    __asm__ __volatile__("mrs %[res], CPSR": [res] "=r" (res)::);
-    return ((res >> 7) & 1) == 0;
-}
-
-__inline__ void ENABLE_INTERRUPTS(void) {
-    if (!INTERRUPTS_ENABLED()) {
-        __asm__ __volatile__("cpsie i");
-    }
-}
-
-__inline__ void DISABLE_INTERRUPTS(void) {
-    if (INTERRUPTS_ENABLED()) {
-        __asm__ __volatile__("cpsid i");
-    }
-}
-
 void move_exception_tables(); /* exception.S */
 #define HALT asm("b halt")
 
@@ -107,6 +89,7 @@ void data_abort_handler()
 
 static int handle_interrupts(volatile int32_t flags, int base_irq)
 {
+    int handled = 0;
     if (flags)
     {
         int irq = base_irq;
@@ -126,14 +109,14 @@ static int handle_interrupts(volatile int32_t flags, int base_irq)
                         DISABLE_INTERRUPTS();
                     }
 //                    debug_printf("*** IRQ %d handled ***\r\n", irq);
-                    return 1;
+                    handled = 1;
                 }
             }
             flags >>= 1;
             irq++;
         }
     }
-    return 0;
+    return handled;
 }
 
 void interrupt_handler()
@@ -141,11 +124,14 @@ void interrupt_handler()
 //    debug_printf("\r\n\r\n*** INTERRUPT ***\r\n");
     volatile uint32_t flags = interrupt_registers->irq_basic_pending;
     flags &= 0xff;
-    if (handle_interrupts(flags, 64)) return;
-    if (handle_interrupts(interrupt_registers->irq_gpu_pending2, 32)) return;
-    if (handle_interrupts(interrupt_registers->irq_gpu_pending1, 0)) return;
-    debug_printf("\r\n\r\n*** UNHANDLED INTERRUPT: %02x %08x %08x ***\r\n",
-                 flags, interrupt_registers->irq_gpu_pending2, interrupt_registers->irq_gpu_pending1);
+    int handled = handle_interrupts(flags, 64) |
+            handle_interrupts(interrupt_registers->irq_gpu_pending2, 32) |
+            handle_interrupts(interrupt_registers->irq_gpu_pending1, 0);
+    if (!handled)
+    {
+        debug_printf("\r\n\r\n*** UNHANDLED INTERRUPT: %02x %08x %08x ***\r\n",
+                     flags, interrupt_registers->irq_gpu_pending2, interrupt_registers->irq_gpu_pending1);
+    }
 }
 
 void fast_interrupt_handler()

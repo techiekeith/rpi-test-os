@@ -7,5 +7,5 @@
 
 uint8_t *get_bbc_micro_glyph(int c)
 {
-    return bbc_micro_raster_charset[(c < 32 || c > 126) ? 0 : c - 32];
+    return bbc_micro_raster_charset[(c < 32 || c > 126) ? 95 : c - 32];
 }
