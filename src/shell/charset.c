@@ -37,13 +37,13 @@ static void show_charset()
     show_chars(0x2200, 0x226f);
     puts("\r\n\r\nBox Drawings:\r\n");
     show_chars(0x2500, 0x257f);
-    puts("\r\n\r\nEuro  Arrows  Blocks  Shapes  Repl.\r\n");
+    puts("\r\n\r\nBlock Elements:\r\n");
+    show_chars(0x2580, 0x259f);
+    puts("\r\n\r\nEuro  Arrows  Shapes  Repl.\r\n");
     show_chars(0x20ac, 0x20ac);
     puts("     ");
     show_chars(0x2190, 0x2193);
     puts("    ");
-    show_chars(0x2592, 0x2592);
-    puts("       ");
     show_chars(0x25a0, 0x25a1);
     puts("      ");
     show_chars(0xfffd, 0xfffe);
@@ -51,6 +51,10 @@ static void show_charset()
     show_chars(0xf500, 0xf57f);
     puts("\r\n\r\nPUA U+F580..8B (deprecated SAA505x characters):\r\n");
     show_chars(0xf580, 0xf58b);
+    puts("\r\n\r\nSymbols for Legacy Computing (sextants and quadrants):\r\n");
+    show_chars(0x1fb00, 0x1fb3f);
+    puts("\r\n");
+    show_chars(0x1fb80, 0x1fb9f);
     puts("\r\n");
 }
 

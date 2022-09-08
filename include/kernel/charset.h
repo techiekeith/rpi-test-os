@@ -7,7 +7,8 @@
 typedef enum {
     SAA505X_CHARSET = 0,
     BBC_MICRO_CHARSET,
-    LAST_CHARSET = BBC_MICRO_CHARSET
+    SINCLAIR_CHARSET,
+    LAST_CHARSET = SINCLAIR_CHARSET
 } charset_t;
 
 typedef struct {

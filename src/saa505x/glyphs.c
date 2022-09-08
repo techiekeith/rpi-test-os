@@ -159,5 +159,5 @@ uint16_t *get_saa505x_glyph(int c) {
             glyph_number = saa505x_unicode_block_index[block].block[c - saa505x_unicode_block_index[block].start];
         }
     }
-    return saa505x_glyphs[glyph_number + offset];
+    return glyph_number >= 0 ? saa505x_glyphs[glyph_number + offset]: saa505x_glyphs[-glyph_number];
 }

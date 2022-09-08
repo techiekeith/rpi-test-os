@@ -369,6 +369,9 @@ void set_charset(charset_t charset)
         case BBC_MICRO_CHARSET:
             set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_bbc_micro_glyph);
             break;
+        case SINCLAIR_CHARSET:
+            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_sinclair_glyph);
+            break;
     }
     set_text_dimensions();
 }
