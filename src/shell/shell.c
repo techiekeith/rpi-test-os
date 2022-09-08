@@ -28,7 +28,7 @@ static void show_help_text()
     puts("\r\nCommands:\r\n");
     puts("\tbgcolor <#> - set background color\r\n");
     puts("\tclear - clear the screen\r\n");
-    puts("\tcharset - show character set\r\n");
+    puts("\tcharset [<#>] - show/set character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
     puts("\thalt - halt the shell\r\n");
@@ -112,14 +112,16 @@ static void cmd_bgcolor(int argc, char **argv)
     background_color(argc, argv);
 }
 
-void show_charset();
+void show_or_set_charset(int argc, char **argv);
 static void cmd_charset(int argc, char **argv)
 {
-    show_charset();
+    show_or_set_charset(argc, argv);
 }
 
 static void cmd_clear(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     putc(12);
 }
 
@@ -137,6 +139,8 @@ static void cmd_dump(int argc, char **argv)
 
 static void cmd_help(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     show_help_text();
 }
 
@@ -149,6 +153,8 @@ static void cmd_mailbox(int argc, char **argv)
 void show_memory_usage();
 static void cmd_memory(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     show_memory_usage();
 }
 
@@ -179,12 +185,16 @@ static void cmd_pixels(int argc, char **argv)
 void run_tests();
 static void cmd_test(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     run_tests();
 }
 
 void show_timers();
 static void cmd_timers(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     show_timers();
 }
 

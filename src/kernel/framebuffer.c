@@ -118,7 +118,7 @@ uint32_t apply_rgb_mode(rgb_t color)
         case ABGR32: /* RGB little-endian */
             return abgr32(color);
         default:
-            return fbinfo.channel_mode ? abgr32(color) : argb32(color);
+            return abgr32(color);
     }
 }
 

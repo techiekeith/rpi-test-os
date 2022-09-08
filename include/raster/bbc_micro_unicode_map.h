@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../common/unicode_block.h"
+#include "../kernel/charset.h"
 
 /*
  * Basic Latin (U+0020-007F)

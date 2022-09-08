@@ -5,6 +5,7 @@
 #include "../../include/common/stdbool.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/string.h"
+#include "../../include/kernel/charset.h"
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/interrupt.h"
@@ -322,12 +323,10 @@ static void set_default_display_mode()
     set_display_mode(DISPLAY_WIDTH, DISPLAY_HEIGHT, COLOR_DEPTH);
 }
 
-static void set_charset(uint32_t width, uint32_t height)
+static void set_text_dimensions()
 {
-    fbinfo.char_width = width;
-    fbinfo.char_height = height;
-    fbinfo.columns = fbinfo.width / width;
-    fbinfo.rows = fbinfo.height / height;
+    fbinfo.columns = fbinfo.width / fbinfo.char_width;
+    fbinfo.rows = fbinfo.height / fbinfo.char_height;
     fbinfo.current_column = 0;
     fbinfo.current_row = 0;
 }
@@ -344,7 +343,8 @@ void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyp
 {
     bool cursor_enabled = disable_cursor();
     get_glyph_8bit = get_glyph_function;
-    set_charset(width, height);
+    fbinfo.char_width = width;
+    fbinfo.char_height = height;
     set_cursor_rectangle(0, width - 1, height - 1, 0);
     if (cursor_enabled) enable_cursor();
 }
@@ -353,9 +353,24 @@ void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_gl
 {
     bool cursor_enabled = disable_cursor();
     get_glyph_16bit = get_glyph_function;
-    set_charset(width, height);
+    fbinfo.char_width = width;
+    fbinfo.char_height = height;
     set_cursor_rectangle(0, width - 1, height - 1, 0);
     if (cursor_enabled) enable_cursor();
+}
+
+void set_charset(charset_t charset)
+{
+    switch (charset)
+    {
+        case SAA505X_CHARSET:
+            set_16bit_charset(SAA505X_GLYPH_WIDTH, SAA505X_GLYPH_HEIGHT, get_saa505x_glyph);
+            break;
+        case BBC_MICRO_CHARSET:
+            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_bbc_micro_glyph);
+            break;
+    }
+    set_text_dimensions();
 }
 
 void set_display_mode(int width, int height, int depth)
@@ -377,9 +392,8 @@ void set_display_mode(int width, int height, int depth)
             debug_printf("Cannot set display.\r\n");
         }
     }
-    set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_bbc_micro_glyph);
-//    set_16bit_charset(SAA505X_GLYPH_WIDTH, SAA505X_GLYPH_HEIGHT, get_saa505x_glyph);
-    if (fbinfo.channel_mode && depth == 8)
+    set_text_dimensions();
+    if (depth == 8)
     {
         init_palette();
     }
@@ -402,6 +416,7 @@ void graphics_init()
     set_pixel_order(false);
     init_palette();
     initialized = true;
+    set_charset(SAA505X_CHARSET);
     set_default_display_mode();
     register_interval_handler("blink_cursor", CURSOR_BLINK_INTERVAL, true, blink_cursor, 0, NULL);
     enable_cursor();

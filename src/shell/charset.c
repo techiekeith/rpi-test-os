@@ -3,6 +3,13 @@
  */
 
 #include "../../include/common/stdio.h"
+#include "../../include/common/stdlib.h"
+#include "../../include/kernel/graphics.h"
+
+static void charset_syntax()
+{
+    printf("Syntax: charset [<#>]\r\n");
+}
 
 static void show_chars(int start, int end)
 {
@@ -12,7 +19,7 @@ static void show_chars(int start, int end)
     }
 }
 
-void show_charset()
+static void show_charset()
 {
     puts("\r\nBasic Latin:\r\n");
     show_chars(0x20, 0x7e);
@@ -45,4 +52,21 @@ void show_charset()
     puts("\r\n\r\nPUA U+F580..8B (deprecated SAA505x characters):\r\n");
     show_chars(0xf580, 0xf58b);
     puts("\r\n");
+}
+
+void show_or_set_charset(int argc, char **argv)
+{
+    switch (argc)
+    {
+        case 1:
+            show_charset();
+            break;
+        case 2:
+            charset_t charset = atoi(argv[1]);
+            set_charset(charset);
+            putc('\f');
+            break;
+        default:
+            charset_syntax();
+    }
 }
