@@ -57,7 +57,7 @@ static void system_timer_interval_handler(void *unused)
                 interval_handler_f handler_function = interval_handlers[i].handler_function;
                 interval_handlers[i].counter = interval_handlers[i].interval;
                 interval_handlers[i].enabled = interval_handlers[i].repeat;
-                handler_function();
+                handler_function(i + 1, interval_handlers[i].args);
             }
         }
     }
@@ -125,18 +125,24 @@ void system_timer_init()
     DEBUG_END();
 }
 
-int register_interval_handler(char *name, interval_handler_f handler_function, uint32_t interval, bool repeat)
+int register_interval_handler(char *name, uint32_t interval, bool repeat, interval_handler_f handler_function,
+                              int nargs, void **args)
 {
+    if (nargs < 0 || nargs > MAX_INTERVAL_HANDLER_ARGS) return 0;
     for (int i = 0; i < MAX_INTERVAL_HANDLERS; i++)
     {
         if (!interval_handlers[i].enabled)
         {
             strncpy(interval_handlers[i].name, name, INTERVAL_HANDLER_NAME_LENGTH);
             interval_handlers[i].name[INTERVAL_HANDLER_NAME_LENGTH] = '\0';
-            interval_handlers[i].handler_function = handler_function;
             interval_handlers[i].interval = interval;
             interval_handlers[i].counter = interval;
             interval_handlers[i].repeat = repeat;
+            interval_handlers[i].handler_function = handler_function;
+            interval_handlers[i].nargs = nargs;
+            for (int arg = 0; arg < nargs; arg++) {
+                if (arg < MAX_INTERVAL_HANDLER_ARGS) interval_handlers[i].args[arg] = args[arg];
+            }
             interval_handlers[i].enabled = true;
             return i + 1;
         }

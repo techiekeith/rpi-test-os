@@ -1,8 +1,10 @@
 /*
- * unicode_map.h
+ * saa505x_unicode_map.h
  */
 
 #pragma once
+
+#include "../common/unicode_block.h"
 
 /*
  * Basic Latin (U+0020-007F)
@@ -103,15 +105,9 @@ static int specials[1] = {
 // 0x085: SAA5054   U+00E7 LATIN SMALL LETTER C WITH CEDILLA
 // 0x0a9: SAA5054   ...... OLD ISRAELI SHEKEL SIGN
 
-typedef struct {
-    int start;
-    int end;
-    int *block;
-} unicode_block_idx_t;
-
 #define SAA505X_UNICODE_BLOCKS 10
 
-unicode_block_idx_t unicode_block_index[SAA505X_UNICODE_BLOCKS] = {
+unicode_block_idx_t saa505x_unicode_block_index[SAA505X_UNICODE_BLOCKS] = {
         { .start = 0x0020, .end = 0x007f, .block = basic_latin },
         { .start = 0x00a0, .end = 0x00ff, .block = latin1_supplement },
         { .start = 0x0410, .end = 0x044f, .block = cyrillic },

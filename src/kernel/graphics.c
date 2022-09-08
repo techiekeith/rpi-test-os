@@ -45,19 +45,34 @@ void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
     {
         real_color = ~real_color;
     }
-    fbinfo.buf[location++] = real_color & 0xff;
-    if (fbinfo.bpp > 1) fbinfo.buf[location++] = (real_color >> 8) & 0xff;
-    if (fbinfo.bpp > 2) fbinfo.buf[location++] = (real_color >> 16) & 0xff;
-    if (fbinfo.bpp > 3) fbinfo.buf[location++] = (real_color >> 24) & 0xff;
+    for (uint32_t i = 0; i < fbinfo.bpp; i++)
+    {
+        fbinfo.buf[location + i] = real_color & 0xff;
+        real_color >>= 8;
+    }
 }
 
 static void invert_pixel(uint32_t x, uint32_t y)
 {
     uint32_t location = y * fbinfo.pitch + x * fbinfo.bpp;
-    fbinfo.buf[location] = ~fbinfo.buf[location];
-    if (fbinfo.bpp > 1) fbinfo.buf[location + 1] = ~fbinfo.buf[location + 1];
-    if (fbinfo.bpp > 2) fbinfo.buf[location + 2] = ~fbinfo.buf[location + 2];
-    if (fbinfo.bpp > 3) fbinfo.buf[location + 3] = ~fbinfo.buf[location + 3];
+    if (fbinfo.bpp == 1)
+    {
+        if (fbinfo.buf[location] >= 240)
+        {
+            fbinfo.buf[location] = fbinfo.buf[location] ^ 15;
+        }
+        else
+        {
+            fbinfo.buf[location] = 239 - fbinfo.buf[location];
+        }
+    }
+    else
+    {
+        for (uint32_t i = 0; i < fbinfo.bpp; i++)
+        {
+            fbinfo.buf[location + i] = ~fbinfo.buf[location + i];
+        }
+    }
 }
 
 static void toggle_cursor()
@@ -70,11 +85,15 @@ static void toggle_cursor()
     }
     int top = fbinfo.current_row * fbinfo.char_height;
     int left = fbinfo.current_column * fbinfo.char_width;
-    for (int h = fbinfo.cursor_top; h <= fbinfo.cursor_bottom; h++)
+    int bottom = top + fbinfo.cursor_bottom;
+    int right = left + fbinfo.cursor_right;
+    top += fbinfo.cursor_top;
+    left += fbinfo.cursor_left;
+    for (int h = top; h <= bottom; h++)
     {
-        for (int w = fbinfo.cursor_left; w <= fbinfo.cursor_right; w++)
+        for (int w = left; w <= right; w++)
         {
-            invert_pixel(left + w, top + h);
+            invert_pixel(w, h);
         }
     }
 }
@@ -96,8 +115,13 @@ bool disable_cursor()
     return enabled;
 }
 
-void blink_cursor()
+void blink_cursor(int handle, void **args)
 {
+    // Consume unused varargs
+    (void) handle;
+    (void) args;
+
+    // Blink the cursor
     fbinfo.cursor_visible = !fbinfo.cursor_visible;
     if (fbinfo.cursor_enabled) toggle_cursor();
 }
@@ -379,6 +403,6 @@ void graphics_init()
     init_palette();
     initialized = true;
     set_default_display_mode();
-    register_interval_handler("blink_cursor", blink_cursor, CURSOR_BLINK_INTERVAL, true);
+    register_interval_handler("blink_cursor", CURSOR_BLINK_INTERVAL, true, blink_cursor, 0, NULL);
     enable_cursor();
 }

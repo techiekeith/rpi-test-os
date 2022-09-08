@@ -5,7 +5,7 @@
 #include "../../include/common/stdint.h"
 #include "../../include/saa505x/glyphs.h"
 #include "../../include/saa505x/source_glyphs.h"
-#include "../../include/saa505x/unicode_map.h"
+#include "../../include/saa505x/saa505x_unicode_map.h"
 
 static uint16_t saa505x_glyphs[SAA505X_MAX_GRAPHICS][SAA505X_GLYPH_HEIGHT];
 
@@ -154,9 +154,9 @@ uint16_t *get_saa505x_glyph(int c) {
     }
     for (int block = 0; block < SAA505X_UNICODE_BLOCKS; block++)
     {
-        if (c >= unicode_block_index[block].start && c <= unicode_block_index[block].end)
+        if (c >= saa505x_unicode_block_index[block].start && c <= saa505x_unicode_block_index[block].end)
         {
-            glyph_number = unicode_block_index[block].block[c - unicode_block_index[block].start];
+            glyph_number = saa505x_unicode_block_index[block].block[c - saa505x_unicode_block_index[block].start];
         }
     }
     return saa505x_glyphs[glyph_number + offset];

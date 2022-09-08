@@ -105,7 +105,7 @@ rgb_t apply_palette_mode(int color_index)
         case RGB_332_BITS:
             return rgb_332_bits(color_index);
         default:
-            return rgb_685_levels(color_index);
+            return rgb_685_levels_with_greyscale(color_index);
     }
 }
 

@@ -27,16 +27,19 @@ typedef struct {
 #define SYSTEM_TIMER_TICK_INTERVAL      10000
 #define MAX_INTERVAL_HANDLERS           20
 #define INTERVAL_HANDLER_NAME_LENGTH    15
+#define MAX_INTERVAL_HANDLER_ARGS       4
 
-typedef void (*interval_handler_f)();
+typedef void (*interval_handler_f)(int handle, void **args);
 
 typedef struct {
-    interval_handler_f handler_function;
     uint32_t interval;
     uint32_t counter;
     bool repeat;
     bool enabled;
     char name[INTERVAL_HANDLER_NAME_LENGTH + 1];
+    interval_handler_f handler_function;
+    int nargs;
+    void *args[MAX_INTERVAL_HANDLER_ARGS];
 } interval_handler_t;
 
 extern uint64_t system_time;
@@ -49,5 +52,6 @@ void system_timer_busy_wait(uint32_t usecs);
 void system_timer_3_irq_clearer(void *unused);
 uint64_t get_system_timer_counter();
 void system_timer_init();
-int register_interval_handler(char *name, interval_handler_f function, uint32_t interval, bool repeat);
+int register_interval_handler(char *name, uint32_t interval, bool repeat, interval_handler_f handler_function,
+                              int nargs, void **args);
 void deregister_interval_handler(int handle);

@@ -31,7 +31,7 @@ void show_timers()
     for (int i = 0; i < MAX_INTERVAL_HANDLERS; i++)
     {
         if (interval_handlers[i].enabled) {
-            printf("[%02d] %s: interval %d ms, counter %d ms\r\n", i,
+            printf("[%02d] %s: interval %d/100 sec, next in %d/100 sec\r\n", i,
                    interval_handlers[i].name,
                    interval_handlers[i].interval,
                    interval_handlers[i].counter);

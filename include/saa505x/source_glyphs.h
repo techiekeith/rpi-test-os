@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../common/stdint.h"
+#include "glyphs.h"
 
 static uint8_t saa505x_source_glyphs[SAA505X_SOURCE_GLYPHS][SAA505X_SOURCE_GLYPH_ROWS] = {
   { 000, 000, 000, 000, 000, 000, 000, 000, 000 }, /* U+0020 SPACE */
