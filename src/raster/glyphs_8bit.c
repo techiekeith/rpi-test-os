@@ -20,7 +20,8 @@ static uint8_t *get_raster_glyph(int c, int default_glyph_number, int max_blocks
     {
         if (c >= block_index[block].start && c <= block_index[block].end)
         {
-            glyph_number = block_index[block].block[c - block_index[block].start];
+            int value = block_index[block].block[c - block_index[block].start];
+            if (value >= 0) glyph_number = value;
         }
     }
     return charset[glyph_number];
