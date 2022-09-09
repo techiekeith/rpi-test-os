@@ -366,8 +366,8 @@ void set_charset(charset_t charset)
         case SAA505X_CHARSET:
             set_16bit_charset(SAA505X_GLYPH_WIDTH, SAA505X_GLYPH_HEIGHT, get_saa505x_glyph);
             break;
-        case BBC_MICRO_CHARSET:
-            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_bbc_micro_glyph);
+        case ACORN_CHARSET:
+            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_acorn_glyph);
             break;
         case SINCLAIR_CHARSET:
             set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_sinclair_glyph);

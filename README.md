@@ -3,7 +3,10 @@
 My first attempt at writing an operating system for a Raspberry Pi, derived initially from [Jake Sandler's tutorial](https://github.com/jsandler18/raspi-kernel)
 with embellishments from a variety of other sources.
 
-SAA505x glyphs are courtesy of Mullard.
+Acorn, Commodore, Mullard (SAA505x) and Sinclair character glyphs contained in this project are reproduced from online
+documentation and/or binaries, and included in this project without permission from the owners. I have extended these
+character sets to include some glyphs not present in the originals. Glyphs original to this project are covered by this
+project's license terms.
 
 ## Prerequisites
 
