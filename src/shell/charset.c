@@ -39,22 +39,26 @@ static void show_charset()
     show_chars(0x2500, 0x257f);
     puts("\r\n\r\nBlock Elements:\r\n");
     show_chars(0x2580, 0x259f);
-    puts("\r\n\r\nEuro  Arrows  Shapes  Repl.\r\n");
+    puts("\r\n\r\nEUR  Arrows  Shapes  Misc.  Spec\r\n");
     show_chars(0x20ac, 0x20ac);
-    puts("     ");
+    puts("    ");
     show_chars(0x2190, 0x2193);
     puts("    ");
     show_chars(0x25a0, 0x25a1);
     puts("      ");
+    show_chars(0x2660, 0x2660);
+    show_chars(0x2663, 0x2663);
+    show_chars(0x2665, 0x2666);
+    show_chars(0x26aa, 0x26ab);
+    show_chars(0x2713, 0x2713);
+    puts("  ");
     show_chars(0xfffd, 0xfffe);
-    puts("\r\n\r\nPUA U+F500..7F (SAA505x box graphics):\r\n");
-    show_chars(0xf500, 0xf57f);
-    puts("\r\n\r\nPUA U+F580..8B (deprecated SAA505x characters):\r\n");
-    show_chars(0xf580, 0xf58b);
-    puts("\r\n\r\nSymbols for Legacy Computing (sextants and quadrants):\r\n");
+    puts("\r\n\r\nSAA505x unmapped @ PUA U+F500:\r\n");
+    show_chars(0xf500, 0xf54b);
+    puts("\r\n\r\nSymbols for Legacy Computing:\r\n");
     show_chars(0x1fb00, 0x1fb3f);
     puts("\r\n");
-    show_chars(0x1fb80, 0x1fb9f);
+    show_chars(0x1fb70, 0x1fb9f);
     puts("\r\n");
 }
 
