@@ -86,7 +86,7 @@ static int geometric_shapes[2] = {
 };
 
 /*
- * Private Use Area (U+F580-F58B)
+ * Private Use Area (U+F540-F54B)
  */
 static int private_use[12] = {
         0x061, 0x062, 0x063, 0x064, 0x072, 0x073, 0x077, 0x078, 0x080, 0x083, 0x085, 0x0a9
@@ -135,7 +135,7 @@ unicode_block_idx_t saa505x_unicode_block_index[SAA505X_UNICODE_BLOCKS] = {
         { .start =  0x2190, .end =  0x2193, .block = arrows },
         { .start =  0x2580, .end =  0x259f, .block = box_graphics },
         { .start =  0x25a0, .end =  0x25a1, .block = geometric_shapes },
-        { .start =  0xf580, .end =  0xf58b, .block = private_use },
+        { .start =  0xf540, .end =  0xf54b, .block = private_use },
         { .start =  0xfffd, .end =  0xfffd, .block = specials },
         { .start = 0x1fb00, .end = 0x1fb3b, .block = legacy_computing_symbols },
 };

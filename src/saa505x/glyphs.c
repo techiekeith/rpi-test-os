@@ -138,9 +138,9 @@ void generate_saa505x_glyphs() {
  * U+100000 to U+10FFFF map to the bottom row of double-height characters in the BMP
  */
 uint16_t *get_saa505x_glyph(int c) {
-    if ((c & 0x1fff80) == 0xf500)
+    if ((c & 0x1fffc0) == 0xf500)
     {
-        return saa505x_glyphs[c & 0x7f];
+        return saa505x_glyphs[c & 0x3f];
     }
     int glyph_number = SAA505X_SOURCE_GLYPHS - 1;
     int offset = 128;

@@ -5,6 +5,10 @@
 #include "../../include/common/stdint.h"
 #include "../../include/raster/acorn.h"
 #include "../../include/raster/acorn_unicode_map.h"
+#include "../../include/raster/commodore_pet.h"
+#include "../../include/raster/commodore_pet_unicode_map.h"
+#include "../../include/raster/commodore_64.h"
+#include "../../include/raster/commodore_64_unicode_map.h"
 #include "../../include/raster/sinclair.h"
 #include "../../include/raster/sinclair_unicode_map.h"
 
@@ -26,6 +30,18 @@ uint8_t *get_acorn_glyph(int c)
 {
     return get_raster_glyph(c, 0x0e2 /* U+25A1 WHITE SQUARE */, ACORN_UNICODE_BLOCKS,
                             acorn_unicode_block_index, acorn_raster_charset);
+}
+
+uint8_t *get_commodore_pet_glyph(int c)
+{
+    return get_raster_glyph(c, 0x0aa /* U+25A1 WHITE SQUARE */, COMMODORE_PET_UNICODE_BLOCKS,
+                            commodore_pet_unicode_block_index, commodore_pet_raster_charset);
+}
+
+uint8_t *get_commodore_64_glyph(int c)
+{
+    return get_raster_glyph(c, 0x0aa /* U+25A1 WHITE SQUARE */, COMMODORE_64_UNICODE_BLOCKS,
+                            commodore_64_unicode_block_index, commodore_64_raster_charset);
 }
 
 uint8_t *get_sinclair_glyph(int c)

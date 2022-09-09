@@ -369,6 +369,12 @@ void set_charset(charset_t charset)
         case ACORN_CHARSET:
             set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_acorn_glyph);
             break;
+        case COMMODORE_PET_CHARSET:
+            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_commodore_pet_glyph);
+            break;
+        case COMMODORE_64_CHARSET:
+            set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_commodore_64_glyph);
+            break;
         case SINCLAIR_CHARSET:
             set_8bit_charset(RASTER_8BIT_GLYPH_WIDTH, RASTER_8BIT_GLYPH_HEIGHT, get_sinclair_glyph);
             break;

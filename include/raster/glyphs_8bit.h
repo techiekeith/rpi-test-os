@@ -8,4 +8,6 @@
 #define RASTER_8BIT_GLYPH_HEIGHT    8
 
 uint8_t *get_acorn_glyph(int c);
+uint8_t *get_commodore_pet_glyph(int c);
+uint8_t *get_commodore_64_glyph(int c);
 uint8_t *get_sinclair_glyph(int c);
