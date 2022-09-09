@@ -3,8 +3,8 @@
  */
 
 #include "../../include/common/stdint.h"
-#include "../../include/raster/bbc_micro.h"
-#include "../../include/raster/bbc_micro_unicode_map.h"
+#include "../../include/raster/acorn.h"
+#include "../../include/raster/acorn_unicode_map.h"
 #include "../../include/raster/sinclair.h"
 #include "../../include/raster/sinclair_unicode_map.h"
 
@@ -22,10 +22,10 @@ static uint8_t *get_raster_glyph(int c, int default_glyph_number, int max_blocks
     return charset[glyph_number];
 }
 
-uint8_t *get_bbc_micro_glyph(int c)
+uint8_t *get_acorn_glyph(int c)
 {
-    return get_raster_glyph(c, 0x0e2 /* U+25A1 WHITE SQUARE */, BBC_MICRO_UNICODE_BLOCKS,
-                            bbc_micro_unicode_block_index, bbc_micro_raster_charset);
+    return get_raster_glyph(c, 0x0e2 /* U+25A1 WHITE SQUARE */, ACORN_UNICODE_BLOCKS,
+                            acorn_unicode_block_index, acorn_raster_charset);
 }
 
 uint8_t *get_sinclair_glyph(int c)

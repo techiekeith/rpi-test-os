@@ -6,7 +6,7 @@
 
 typedef enum {
     SAA505X_CHARSET = 0,
-    BBC_MICRO_CHARSET,
+    ACORN_CHARSET,
     SINCLAIR_CHARSET,
     LAST_CHARSET = SINCLAIR_CHARSET
 } charset_t;

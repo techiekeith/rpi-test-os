@@ -1,12 +1,12 @@
 /*
- * bbc_micro.h
+ * acorn.h
  */
 
 #pragma once
 
 #include "../common/stdint.h"
 
-uint8_t bbc_micro_raster_charset[228][8] = {
+uint8_t acorn_raster_charset[228][8] = {
         /* 0-95: Original BBC Microcomputer raster characters (MOS 1.20) */
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* U+0020 SPACE */
         { 0x18, 0x18, 0x18, 0x18, 0x18, 0x00, 0x18, 0x00 }, /* U+0021 EXCLAMATION MARK */
