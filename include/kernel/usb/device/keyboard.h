@@ -31,7 +31,7 @@ typedef struct {
     bool right_shift : 1; // @5
     bool right_alt : 1; // 'alt gr' @6
     bool right_gui : 1; // @7
-} __attribute__ ((__packed__)) keyboard_modifiers_t;
+} __attribute__ ((packed)) keyboard_modifiers_t;
 
 /**
 	\brief The current state of keyboard LEDs.
@@ -48,7 +48,7 @@ typedef struct {
     bool power : 1;
     bool mute : 1;
     bool shift : 1;
-} __attribute__ ((__packed__)) keyboard_leds_t;
+} __attribute__ ((packed)) keyboard_leds_t;
 
 /**
 	\brief Keyboard specific data.

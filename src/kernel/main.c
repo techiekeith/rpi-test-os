@@ -9,6 +9,7 @@
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/heap.h"
 #include "../../include/kernel/interrupt.h"
+#include "../../include/kernel/io.h"
 #include "../../include/kernel/system_timer.h"
 #include "../../include/kernel/uart.h"
 
@@ -21,7 +22,10 @@ void UsbInitialise();
 #include "../../include/kernel/usb/usb.h"
 #endif
 #ifdef USPI
-int USPiInitialize();
+int USPiInitialize (void);
+int USPiKeyboardAvailable (void);
+typedef void TUSPiKeyPressedHandler (const char *pString);
+void USPiKeyboardRegisterKeyPressedHandler (TUSPiKeyPressedHandler *pKeyPressedHandler);
 #endif
 #endif
 
@@ -35,6 +39,9 @@ void kernel_main(uint32_t board_id)
 
     // Initialise the UART - must be done before we can print anything
     uart_init();
+    set_input_channel(INPUT_CHANNEL_UART);
+    set_output_channel(OUTPUT_CHANNEL_UART);
+    set_debug_output_channel(OUTPUT_CHANNEL_UART);
     printf("Board ID is %p.\r\n", board_id);
     printf("Peripheral base address is at %p.\r\n", peripheral_base);
 
@@ -63,6 +70,7 @@ void kernel_main(uint32_t board_id)
 
     puts("Initializing graphics.\r\n");
     graphics_init();
+    set_output_channel(OUTPUT_CHANNEL_ALL);
 
 #ifdef USB_SUPPORT
     puts("Initializing USB host controller.\r\n");
@@ -74,6 +82,17 @@ void kernel_main(uint32_t board_id)
 #endif
 #ifdef USPI
     USPiInitialize();
+    if (USPiKeyboardAvailable())
+    {
+        puts("USB keyboard detected. Initialising FIFO and registering input handler.\r\n");
+        usb_keyboard_fifo_init();
+        set_input_channel(INPUT_CHANNEL_ANY);
+        USPiKeyboardRegisterKeyPressedHandler(uspi_key_input_handler);
+    }
+    else
+    {
+        puts("USB keyboard not detected. Not registering input handler.\r\n");
+    }
 #endif
 #endif
 
@@ -81,10 +100,8 @@ void kernel_main(uint32_t board_id)
     while (!halted)
     {
         puts("Starting shell.\r\n");
-//        set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
         printf("\f\r\nRaspberry Pi %ldK\r\n\r\n", mem_size >> 10);
         halted = shell();
-//        set_output_channel(OUTPUT_CHANNEL_UART);
         puts("Shell stopped.\r\n");
     }
 

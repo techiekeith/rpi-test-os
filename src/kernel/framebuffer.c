@@ -105,7 +105,7 @@ rgb_t apply_palette_mode(int color_index)
         case RGB_332_BITS:
             return rgb_332_bits(color_index);
         default:
-            return rgb_685_levels(color_index);
+            return rgb_685_levels_with_greyscale(color_index);
     }
 }
 
@@ -118,7 +118,7 @@ uint32_t apply_rgb_mode(rgb_t color)
         case ABGR32: /* RGB little-endian */
             return abgr32(color);
         default:
-            return fbinfo.channel_mode ? abgr32(color) : argb32(color);
+            return abgr32(color);
     }
 }
 
@@ -247,8 +247,7 @@ static int framebuffer_allocate()
     return 0;
 }
 
-static int set_display_dimensions_via_framebuffer_channel(uint32_t width, uint32_t height, uint32_t depth,
-                                                          uint32_t char_width, uint32_t char_height)
+static int set_display_dimensions_via_framebuffer_channel(uint32_t width, uint32_t height, uint32_t depth)
 {
     DEBUG_START("set_display_dimensions_via_framebuffer_channel");
 
@@ -279,12 +278,6 @@ static int set_display_dimensions_via_framebuffer_channel(uint32_t width, uint32
     fbinfo.depth = fbinit.depth;
     fbinfo.bpp = fbinit.depth >> 3;
     fbinfo.pitch = fbinit.pitch;
-    fbinfo.char_width = char_width;
-    fbinfo.char_height = char_height;
-    fbinfo.columns = fbinfo.width / char_width;
-    fbinfo.rows = fbinfo.height / char_height;
-    fbinfo.current_column = 0;
-    fbinfo.current_row = 0;
     fbinfo.buf = (void *)((size_t)fbinit.address & 0x3fffffff);
     fbinfo.buf_size = fbinit.size;
 
@@ -294,8 +287,7 @@ static int set_display_dimensions_via_framebuffer_channel(uint32_t width, uint32
     return 0;
 }
 
-static int set_display_dimensions_via_property_channel(uint32_t width, uint32_t height, uint32_t depth,
-                                                       uint32_t char_width, uint32_t char_height)
+static int set_display_dimensions_via_property_channel(uint32_t width, uint32_t height, uint32_t depth)
 {
     DEBUG_START("set_display_dimensions_via_property_channel");
 
@@ -383,19 +375,13 @@ static int set_display_dimensions_via_property_channel(uint32_t width, uint32_t 
     fbinfo.bpp = fbinfo.depth >> 3;
     fbinfo.pitch = fbinfo.width * fbinfo.bpp;
     fbinfo.buf_size = fbinfo.pitch * fbinfo.height;
-    fbinfo.char_width = char_width;
-    fbinfo.char_height = char_height;
-    fbinfo.columns = fbinfo.width / fbinfo.char_width;
-    fbinfo.rows = fbinfo.height / fbinfo.char_height;
-    fbinfo.current_column = 0;
-    fbinfo.current_row = 0;
 
     rv = framebuffer_allocate();
     DEBUG_END();
     return rv;
 }
 
-int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth, uint32_t char_width, uint32_t char_height)
+int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth)
 {
     DEBUG_START("set_display_dimensions");
     int rv;
@@ -404,21 +390,21 @@ int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth, uint
     {
         if (fbinfo.channel_mode)
         {
-            rv = set_display_dimensions_via_framebuffer_channel(width, height, depth, char_width, char_height);
+            rv = set_display_dimensions_via_framebuffer_channel(width, height, depth);
         }
         else
         {
-            rv = set_display_dimensions_via_property_channel(width, height, depth, char_width, char_height);
+            rv = set_display_dimensions_via_property_channel(width, height, depth);
         }
     }
     else
     {
         // Discover whether to use property channel or framebuffer channel
-        rv = set_display_dimensions_via_property_channel(width, height, depth, char_width, char_height);
+        rv = set_display_dimensions_via_property_channel(width, height, depth);
         if (rv != 0)
         {
             debug_printf("Allocate framebuffer via property channel failed, trying framebuffer channel instead.\r\n");
-            rv = set_display_dimensions_via_framebuffer_channel(width, height, depth, char_width, char_height);
+            rv = set_display_dimensions_via_framebuffer_channel(width, height, depth);
             fbinfo.channel_mode = true;
         }
         fbinfo.mode_discovered = true;

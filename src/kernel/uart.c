@@ -6,6 +6,7 @@
 #include "../../include/common/utf8.h"
 #include "../../include/kernel/barrier.h"
 #include "../../include/kernel/delay.h"
+#include "../../include/kernel/fifo.h"
 #include "../../include/kernel/gpio.h"
 #include "../../include/kernel/interrupt.h"
 #include "../../include/kernel/mmio.h"
@@ -13,21 +14,14 @@
 #include "../../include/kernel/uart.h"
 
 static uart_control_t control;
-static uart_fifo_t *uart_rx_fifo;
 
 static void uart_read()
 {
     volatile uart_flags_t flags;
     flags.as_int = mmio_read(UART0_FR);
-    if (flags.receive_queue_full) {
-        uart_rx_fifo->hw_fifo_full++;
-    }
     while (!flags.receive_queue_empty)
     {
-        if (uart_rx_fifo->buffer_full) break;
-        uart_rx_fifo->buffer[uart_rx_fifo->end++] = mmio_read(UART0_DR);
-        uart_rx_fifo->end %= UART_FIFO_BUFFER_SIZE;
-        if (uart_rx_fifo->end == uart_rx_fifo->start) uart_rx_fifo->buffer_full = 1;
+        fifo_add(UART_RX_FIFO, mmio_read(UART0_DR));
         flags.as_int = mmio_read(UART0_FR);
     }
 }
@@ -89,16 +83,13 @@ void uart_init() {
     control.transmit_enabled = 1;
     control.receive_enabled = 1;
     mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));
-
-    /* Initialize RX FIFO. */
-    uart_rx_fifo = (uart_fifo_t *)UART_RX_FIFO;
-    memset(uart_rx_fifo, 0, sizeof(uart_fifo_t));
-    uart_rx_fifo->buffer = (unsigned char *)UART_RX_FIFO_BUFFER;
-    memset(uart_rx_fifo->buffer, 0, UART_FIFO_BUFFER_SIZE);
 }
 
 void uart_enable_interrupts()
 {
+    /* Initialize UART RX FIFO. */
+    fifo_init(UART_RX_FIFO, UART_RX_FIFO_BUFFER, UART_RX_FIFO_BUFFER_SIZE);
+
     /* Register UART interrupt handler. */
     register_irq_handler(UART_INT, NULL, NULL, uart_interrupt_handler, NULL);
 
@@ -124,21 +115,4 @@ void uart_putc(int c)
     for (char *p = buffer; *p; p++) {
         mmio_write(UART0_DR, *p);
     }
-}
-
-unsigned char uart_getc()
-{
-    unsigned char rx_char;
-    while (1)
-    {
-        if (uart_rx_fifo->start != uart_rx_fifo->end)
-        {
-            rx_char = uart_rx_fifo->buffer[uart_rx_fifo->start++];
-            uart_rx_fifo->buffer_full = 0;
-            uart_rx_fifo->start %= UART_FIFO_BUFFER_SIZE;
-            break;
-        }
-        asm("wfi");
-    }
-    return rx_char;
 }

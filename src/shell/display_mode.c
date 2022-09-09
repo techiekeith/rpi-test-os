@@ -12,7 +12,7 @@ DEBUG_INIT("display_mode");
 
 static void mode_syntax()
 {
-    puts("\r\nSyntax: mode <width> <height> <depth>\r\n");
+    puts("\r\nSyntax: mode [<width> <height> <depth>]\r\n");
 }
 
 static void output_syntax()
@@ -20,9 +20,27 @@ static void output_syntax()
     puts("\r\nSyntax: out <fb|uart>\r\n");
 }
 
+static void show_display_mode()
+{
+    printf("Display mode: %dx%d, %d bpp.\r\n", fbinfo.width, fbinfo.height, fbinfo.depth);
+    printf("Framebuffer size: %d kB.\r\n", fbinfo.buf_size / 1024);
+    printf("Palette mode %d, RGB mode %d.\r\n", fbinfo.palette_mode, fbinfo.rgb_mode);
+    printf("Character dimensions: %dx%d.\r\n", fbinfo.char_width, fbinfo.char_height);
+    printf("Text resolution: %dx%d.\r\n", fbinfo.columns, fbinfo.rows);
+    printf("Text cursor: current_row %d, current_column %d, enabled %d, visible %d, (%d,%d)->(%d,%d).\r\n",
+           fbinfo.current_row, fbinfo.current_column, fbinfo.cursor_enabled, fbinfo.cursor_visible,
+           fbinfo.cursor_left, fbinfo.cursor_top, fbinfo.cursor_right, fbinfo.cursor_bottom);
+}
+
 void display_mode(int argc, char **argv)
 {
     DEBUG_START("display_mode");
+    if (argc == 1)
+    {
+        show_display_mode();
+        DEBUG_END();
+        return;
+    }
     if (argc < 4)
     {
         mode_syntax();
@@ -32,13 +50,13 @@ void display_mode(int argc, char **argv)
     int width = atoi(argv[1]);
     int height = atoi(argv[2]);
     int depth = atoi(argv[3]);
-    if (width < 640 || width > 3840)
+    if (width < 256 || width > 3840)
     {
-        printf("\r\nInvalid width '%s'. Valid values are between 640 and 3840.\r\n", argv[1]);
+        printf("\r\nInvalid width '%s'. Valid values are between 256 and 3840.\r\n", argv[1]);
     }
-    else if (height < 400 || height > 2160)
+    else if (height < 192 || height > 2160)
     {
-        printf("\r\nInvalid height '%s'. Valid values are between 400 and 2160.\r\n", argv[2]);
+        printf("\r\nInvalid height '%s'. Valid values are between 192 and 2160.\r\n", argv[2]);
     }
     else if (depth % 8 || depth < 8 || depth > 32)
     {

@@ -16,7 +16,7 @@ typedef struct
     uint8_t green: 8;
     uint8_t blue: 8;
     uint8_t alpha: 8;
-} __attribute__((packed)) rgb_t;
+} __attribute__ ((packed)) rgb_t;
 
 typedef enum
 {
@@ -66,8 +66,14 @@ typedef struct framebuffer_info
     uint32_t char_height;
     int32_t columns;
     int32_t rows;
-    int32_t current_column;
-    int32_t current_row;
+    int32_t current_column; // Text cursor column position
+    int32_t current_row; // Text cursor row position
+    bool cursor_enabled; // True if software text cursor is enabled
+    bool cursor_visible; // True if software text cursor is currently visible
+    uint8_t cursor_top; // Should be between zero and (fbinfo.char_height - 1)
+    uint8_t cursor_bottom; // Should be equal to or greater than cursor_row_start, and less than (fbinfo.char_height - 1)
+    uint8_t cursor_left; // Should be between zero and (fbinfo.char_width - 1)
+    uint8_t cursor_right; // Should be equal to or greater than cursor_row_start, and less than (fbinfo.char_width - 1)
     volatile uint8_t *buf;
     uint32_t buf_size;
 } framebuffer_info_t;
@@ -77,4 +83,4 @@ extern framebuffer_info_t fbinfo;
 void framebuffer_init();
 int set_pixel_order(bool rgb);
 int init_palette();
-int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth, uint32_t char_width, uint32_t char_height);
+int set_display_dimensions(uint32_t width, uint32_t height, uint32_t depth);

@@ -11,7 +11,7 @@ typedef struct {
     usb_configuration_descriptor_t configuration;
     usb_interface_descriptor_t interface;
     usb_endpoint_descriptor_t endpoint;
-} __attribute__((packed)) hub_configuration_descriptor_t;
+} __attribute__ ((packed)) hub_configuration_descriptor_t;
 
 typedef enum {
     HUB_PORT_CONTROL_GLOBAL = 0,
@@ -29,11 +29,11 @@ typedef struct {
         uint8_t think_time: 2;
         bool indicators: 1;
         uint8_t reserved_8_15: 8;
-    } __attribute__((packed)) attributes;
+    } __attribute__ ((packed)) attributes;
     uint8_t power_good_delay;
     uint8_t maximum_hub_power;
     uint8_t data[];
-} __attribute__((packed)) usb_hub_descriptor_t;
+} __attribute__ ((packed)) usb_hub_descriptor_t;
 
 /**
 	\brief The device number of the root hub.

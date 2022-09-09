@@ -18,6 +18,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "../../include/common/stdarg.h"
+#include "../../include/common/stdbool.h"
 #include "../../include/common/string.h"
 #include "../../include/kernel/board.h"
 #include "../../include/kernel/interrupt.h"
@@ -30,19 +31,6 @@ int usb_power_on();
 
 DEBUG_INIT("uspi_compat");
 
-typedef struct {
-    uint64_t when;
-    TKernelTimerHandler *pHandler; // ignore entry if NULL
-    void *pParam;
-    void *pContext;
-} timer_queue_t;
-
-// 20 is the maximum in the reference code, so should be good enough here
-#define MAX_USPI_TIMERS 20
-#define NEVER 0xffffffffffffffffULL
-timer_queue_t uspi_timers[MAX_USPI_TIMERS];
-uint64_t next_expected_timer_event;
-
 void MsDelay (unsigned nMilliSeconds)
 {
     system_timer_busy_wait(1000 * nMilliSeconds);
@@ -53,108 +41,23 @@ void usDelay (unsigned nMicroSeconds)
     system_timer_busy_wait(nMicroSeconds);
 }
 
-static uint64_t handle_timers()
+static void handle_uspi_interrupt(int handle, void **args)
 {
-    uint64_t now = get_system_timer_counter();
-    uint64_t next = NEVER;
-    for (int i = 0; i < MAX_USPI_TIMERS; i++)
-    {
-        if (uspi_timers[i].pHandler != NULL)
-        {
-            if (now > uspi_timers[i].when)
-            {
-                TKernelTimerHandler *pHandler = uspi_timers[i].pHandler;
-                debug_printf("Timer handle %d triggered.\r\n", i + 1);
-                uspi_timers[i].pHandler = NULL;
-                (*pHandler)(i + 1, uspi_timers[i].pParam, uspi_timers[i].pContext);
-            }
-            else if (next > uspi_timers[i].when)
-            {
-                next = uspi_timers[i].when;
-            }
-        }
-    }
-    return next;
-}
-
-static void usb_driver_timer_interrupt_handler(void *unused)
-{
-    (void) unused;
-
-    uint64_t now, next;
-    do {
-        next = handle_timers();
-        now = get_system_timer_counter();
-    } while (now > next);
-    if (next == NEVER)
-    {
-        debug_printf("No timers triggered.\r\n");
-    }
-    else
-    {
-        unsigned nDelay = next_expected_timer_event - get_system_timer_counter();
-        system_timer_set_3(nDelay);
-        debug_printf("Reset timeout to %d us.\r\n", nDelay);
-    }
-}
-
-static void usb_driver_timer_interrupt_init()
-{
-    memset(uspi_timers, 0, MAX_USPI_TIMERS * sizeof(timer_queue_t));
-    next_expected_timer_event = NEVER;
-    register_irq_handler(SYSTEM_TIMER_3, NULL, NULL, usb_driver_timer_interrupt_handler, NULL);
+    TKernelTimerHandler *pHandler = (TKernelTimerHandler *) args[0];
+    void *pParam = (void *) args[1];
+    void *pContext = (void *) args[2];
+    pHandler(handle, pParam, pContext);
 }
 
 unsigned StartKernelTimer (unsigned nDelay, TKernelTimerHandler *pHandler, void *pParam, void *pContext)
 {
-    DEBUG_START("StartKernelTimer");
-
-    for (int i = 0; i < MAX_USPI_TIMERS; i++)
-    {
-        if (uspi_timers[i].pHandler == NULL)
-        {
-            uint64_t now = get_system_timer_counter();
-            uspi_timers[i].when = now + nDelay;
-            uspi_timers[i].pHandler = pHandler;
-            uspi_timers[i].pParam = pParam;
-            uspi_timers[i].pContext = pContext;
-            if (next_expected_timer_event > uspi_timers[i].when)
-            {
-                next_expected_timer_event = uspi_timers[i].when;
-                system_timer_set(nDelay);
-            }
-            debug_printf("Registered new timer with handle %d.\r\n", i + 1);
-            DEBUG_END();
-            return i + 1;
-        }
-    }
-
-    debug_printf("Cannot register new timer, no timers available.\r\n");
-
-    DEBUG_END();
-    return 0;
+    void *args[3] = { pHandler, pParam, pContext };
+    return register_interval_handler("uspi", nDelay, false, handle_uspi_interrupt, 3, args);
 }
 
 void CancelKernelTimer (unsigned hTimer)
 {
-    DEBUG_START("CancelKernelTimer");
-
-    if (hTimer < 1 || hTimer > MAX_USPI_TIMERS)
-    {
-        debug_printf("Invalid timer handle %d.\r\n", hTimer);
-        DEBUG_END();
-        return;
-    }
-    if (uspi_timers[hTimer - 1].pHandler == NULL)
-    {
-        debug_printf("Timer handle %d is inactive.\r\n", hTimer);
-        DEBUG_END();
-        return;
-    }
-    uspi_timers[hTimer - 1].pHandler = NULL;
-    debug_printf("Timer handle %d cancelled.\r\n", hTimer);
-
-    DEBUG_END();
+    deregister_interval_handler(hTimer);
 }
 
 void ConnectInterrupt (unsigned nIRQ, TInterruptHandler *pHandler, void *pParam)
@@ -164,8 +67,6 @@ void ConnectInterrupt (unsigned nIRQ, TInterruptHandler *pHandler, void *pParam)
     if (nIRQ == USB_CONTROLLER)
     {
         register_irq_handler(nIRQ, NULL, NULL, pHandler, pParam);
-        // Register the interrupt handler for the timers as well.
-        usb_driver_timer_interrupt_init();
     }
     else
     {
@@ -223,6 +124,7 @@ void uspi_assertion_failed (const char *pExpr, const char *pFile, unsigned nLine
     DEBUG_START("uspi_assertion_failed");
     debug_stacktrace();
     debug_printf(pExpr, pFile, nLine);
+    debug_writeline();
     DEBUG_END();
 }
 

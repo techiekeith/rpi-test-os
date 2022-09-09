@@ -7,27 +7,16 @@
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/utf8.h"
-#include "../../include/kernel/graphics.h"
 #include "../../include/kernel/io.h"
-#include "../../include/kernel/uart.h"
 
 char getc()
 {
-    // TODO get from USB keyboard
-    return uart_getc();
+    return kernel_getc();
 }
 
 void putc(int c)
 {
-    int channel = get_output_channel();
-    if (channel == OUTPUT_CHANNEL_UART)
-    {
-        uart_putc(c);
-    }
-    else if (channel == OUTPUT_CHANNEL_GRAPHICS)
-    {
-        graphics_putc(c);
-    }
+    kernel_putc(c);
 }
 
 void print_truncated_string_with_offset(const char *str, size_t n, int offset)

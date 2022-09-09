@@ -55,6 +55,24 @@ typedef struct {
     uint32_t irq_basic_disable;
 } interrupt_registers_t;
 
+__inline__ int INTERRUPTS_ENABLED(void) {
+    int res;
+    __asm__ __volatile__("mrs %[res], CPSR": [res] "=r" (res)::);
+    return ((res >> 7) & 1) == 0;
+}
+
+__inline__ void ENABLE_INTERRUPTS(void) {
+    if (!INTERRUPTS_ENABLED()) {
+        __asm__ __volatile__("cpsie i");
+    }
+}
+
+__inline__ void DISABLE_INTERRUPTS(void) {
+    if (INTERRUPTS_ENABLED()) {
+        __asm__ __volatile__("cpsid i");
+    }
+}
+
 void interrupts_init();
 typedef void (*interrupt_handler_f)(void *);
 typedef void (*interrupt_clearer_f)(void *);

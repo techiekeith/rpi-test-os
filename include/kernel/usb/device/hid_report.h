@@ -78,7 +78,7 @@ typedef struct {
     bool is_volatile : 1; // NonVolatile=0,Volatile=1 Inputs cannot be volatile @7
     bool buffered_bytes : 1; // BitField=0,BufferedBytes=1 @8
     uint32_t reserved_9_31 : 23; // @9
-} __attribute__ ((__packed__)) hid_main_item_t;
+} __attribute__ ((packed)) hid_main_item_t;
 
 /**
 	\brief A main collection index in an hid report descriptor.
@@ -219,7 +219,7 @@ typedef struct {
         hid_usage_page_led_t led : 16;
     };
     hid_usage_page_t page : 16;
-} __attribute__ ((__packed__)) hid_full_usage_t;
+} __attribute__ ((packed)) hid_full_usage_t;
 
 typedef enum {
     SYSTEM_NONE = 0,
@@ -248,7 +248,7 @@ typedef struct {
     int8_t current : 4;
     int8_t luminous_intensity : 4;
     uint8_t reserved_28_31 : 4;
-} __attribute__ ((__packed__)) hid_unit_t;
+} __attribute__ ((packed)) hid_unit_t;
 
 /**
 	\brief A parsed report field, with value.

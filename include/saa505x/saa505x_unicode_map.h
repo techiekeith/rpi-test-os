@@ -1,8 +1,10 @@
 /*
- * unicode_map.h
+ * saa505x_unicode_map.h
  */
 
 #pragma once
+
+#include "../kernel/charset.h"
 
 /*
  * Basic Latin (U+0020-007F)
@@ -69,6 +71,14 @@ static int arrows[4] = {
 };
 
 /*
+ * Box graphics (U+2580-259F)
+ */
+static int box_graphics[0x20] = {
+        0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, -0x7f, 0x000, 0x000, 0x000, -0x55, 0x000, 0x000, 0x000,
+        -0x6a, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000
+};
+
+/*
  * Geometric Shapes (U+25A0-25A1)
  */
 static int geometric_shapes[2] = {
@@ -89,6 +99,16 @@ static int specials[1] = {
         0x13e
 };
 
+/*
+ * Legacy Computing Symbols (U+1FB00-1FBFF)
+ */
+static int legacy_computing_symbols[0x3c] = {
+        -0x41, -0x42, -0x43, -0x44, -0x45, -0x46, -0x47, -0x48, -0x49, -0x4a, -0x4b, -0x4c, -0x4d, -0x4e, -0x4f, -0x50,
+        -0x51, -0x52, -0x53, -0x54, -0x56, -0x57, -0x58, -0x59, -0x5a, -0x5b, -0x5c, -0x5d, -0x5e, -0x5f, -0x60, -0x61,
+        -0x62, -0x63, -0x64, -0x65, -0x66, -0x67, -0x68, -0x69, -0x6b, -0x6c, -0x6d, -0x6e, -0x6f, -0x70, -0x71, -0x72,
+        -0x73, -0x74, -0x75, -0x76, -0x77, -0x78, -0x79, -0x7a, -0x7b, -0x7c, -0x7d, -0x7e
+};
+
 // Not in a block:
 // 0x061: SAA5051/2 U+002C COMMA
 // 0x062: SAA5051/2 U+002E FULL STOP
@@ -103,23 +123,19 @@ static int specials[1] = {
 // 0x085: SAA5054   U+00E7 LATIN SMALL LETTER C WITH CEDILLA
 // 0x0a9: SAA5054   ...... OLD ISRAELI SHEKEL SIGN
 
-typedef struct {
-    int start;
-    int end;
-    int *block;
-} unicode_block_idx_t;
+#define SAA505X_UNICODE_BLOCKS 12
 
-#define UNICODE_BLOCKS 10
-
-unicode_block_idx_t unicode_block_index[UNICODE_BLOCKS] = {
-        { .start = 0x0020, .end = 0x007f, .block = basic_latin },
-        { .start = 0x00a0, .end = 0x00ff, .block = latin1_supplement },
-        { .start = 0x0410, .end = 0x044f, .block = cyrillic },
-        { .start = 0x05d0, .end = 0x05ea, .block = hebrew },
-        { .start = 0x2010, .end = 0x2027, .block = general_punctuation },
-        { .start = 0x20ac, .end = 0x20ac, .block = currency_symbols },
-        { .start = 0x2190, .end = 0x2193, .block = arrows },
-        { .start = 0x25a0, .end = 0x25a1, .block = geometric_shapes },
-        { .start = 0xf580, .end = 0xf58b, .block = private_use },
-        { .start = 0xfffd, .end = 0xfffd, .block = specials },
+unicode_block_idx_t saa505x_unicode_block_index[SAA505X_UNICODE_BLOCKS] = {
+        { .start =  0x0020, .end =  0x007f, .block = basic_latin },
+        { .start =  0x00a0, .end =  0x00ff, .block = latin1_supplement },
+        { .start =  0x0410, .end =  0x044f, .block = cyrillic },
+        { .start =  0x05d0, .end =  0x05ea, .block = hebrew },
+        { .start =  0x2010, .end =  0x2027, .block = general_punctuation },
+        { .start =  0x20ac, .end =  0x20ac, .block = currency_symbols },
+        { .start =  0x2190, .end =  0x2193, .block = arrows },
+        { .start =  0x2580, .end =  0x259f, .block = box_graphics },
+        { .start =  0x25a0, .end =  0x25a1, .block = geometric_shapes },
+        { .start =  0xf580, .end =  0xf58b, .block = private_use },
+        { .start =  0xfffd, .end =  0xfffd, .block = specials },
+        { .start = 0x1fb00, .end = 0x1fb3b, .block = legacy_computing_symbols },
 };
