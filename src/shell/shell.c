@@ -35,7 +35,7 @@ static void show_help_text()
     puts("\thelp - this text\r\n");
     puts("\tmailbox (list|<method_name|method_id>) [...] - mailbox methods\r\n");
     puts("\tmemory - show memory usage\r\n");
-    puts("\tmode <width> <height> <depth> - set display mode\r\n");
+    puts("\tmode [<width> <height> <depth>] - show/set display mode\r\n");
     puts("\tout (fb|uart) - select output\r\n");
     puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette (modes are integers 0-4)\r\n");
     puts("\tpixels [(rgb|bgr)] - show/set pixel order\r\n");

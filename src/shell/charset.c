@@ -66,8 +66,7 @@ void show_or_set_charset(int argc, char **argv)
             show_charset();
             break;
         case 2:
-            charset_t charset = atoi(argv[1]);
-            set_charset(charset);
+            set_charset(atoi(argv[1]));
             putc('\f');
             break;
         default:

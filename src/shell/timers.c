@@ -17,9 +17,6 @@ void show_timers()
            system_time, skipped_intervals, last_now, last_next);
     printf("System timer registers: counter %llu compare1 %u compare3 %u\r\n",
            get_system_timer_counter(), mmio_read(SYSTEM_TIMER_COMPARE_1), mmio_read(SYSTEM_TIMER_COMPARE_3));
-    printf("Text cursor state: current_row %d, current_column %d, enabled %d, visible %d, (%d,%d)->(%d%d)\r\n",
-           fbinfo.current_row, fbinfo.current_column, fbinfo.cursor_enabled, fbinfo.cursor_visible,
-           fbinfo.cursor_left, fbinfo.cursor_top, fbinfo.cursor_right, fbinfo.cursor_bottom);
 
     uint32_t arm_timer_control = get_arm_timer_control();
     if (arm_timer_control)
