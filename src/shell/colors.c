@@ -30,6 +30,26 @@ void foreground_color(int argc, char **argv)
     set_foreground_color(color);
 }
 
+void border_color(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        printf("Syntax: border off | <#>\r\n");
+        return;
+    }
+    int old_border_size = get_border_size();
+    if (strcmp(argv[1], "off"))
+    {
+        int color = atoi(argv[1]);
+        set_border(color, 32);
+    }
+    else
+    {
+        set_border(0, 0);
+    }
+    if (old_border_size != get_border_size()) putc('\f');
+}
+
 void set_pixels(int argc, char **argv)
 {
     if (argc > 2 || (argc == 2 && strcmp(argv[1], "rgb") && strcmp(argv[1], "bgr")))
@@ -68,21 +88,24 @@ void show_palette(int argc, char **argv)
         int rv = set_palette_mode(argc, argv);
         if (rv < 0) return;
     }
-    putc(12);
+    putc('\f');
     int count = 0;
     int h, w;
     int max_columns = 20;
     int max_rows = PALETTE_COLORS / max_columns + (PALETTE_COLORS % max_columns != 0);
-    int normal_row_height = fbinfo.height / max_rows;
+    int border_size = get_border_size();
+    int width = fbinfo.width - border_size * 2;
+    int height = fbinfo.height - border_size * 2;
+    int normal_row_height = height / max_rows;
     h = normal_row_height;
-    w = fbinfo.width / max_columns;
+    w = width / max_columns;
     for (int row = 0; row < max_rows; row++)
     {
         if (PALETTE_COLORS - count < max_columns)
         {
             max_columns = PALETTE_COLORS - count;
-            w = fbinfo.width / max_columns;
-            h = fbinfo.height - row * normal_row_height;
+            w = width / max_columns;
+            h = height - row * normal_row_height;
         }
         for (int column = 0; column < max_columns; column++)
         {

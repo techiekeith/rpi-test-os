@@ -27,6 +27,7 @@ static void show_help_text()
 {
     puts("\r\nCommands:\r\n");
     puts("\tbgcolor <#> - set background color\r\n");
+    puts("\tborder off | <#> - set the display border\r\n");
     puts("\tclear - clear the screen\r\n");
     puts("\tcharset [<#>] - show/set character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
@@ -122,13 +123,19 @@ static void cmd_clear(int argc, char **argv)
 {
     (void) argc;
     (void) argv;
-    putc(12);
+    putc('\f');
 }
 
 void foreground_color(int argc, char **argv);
 static void cmd_color(int argc, char **argv)
 {
     foreground_color(argc, argv);
+}
+
+void border_color(int argc, char **argv);
+static void cmd_border(int argc, char **argv)
+{
+    border_color(argc, argv);
 }
 
 void show_dump(int argc, char **argv);
@@ -182,12 +189,10 @@ static void cmd_pixels(int argc, char **argv)
     set_pixels(argc, argv);
 }
 
-void run_tests();
+void run_tests(int argc, char **argv);
 static void cmd_test(int argc, char **argv)
 {
-    (void) argc;
-    (void) argv;
-    run_tests();
+    run_tests(argc, argv);
 }
 
 void show_timers();
@@ -216,6 +221,7 @@ typedef struct {
 command_t commands[] = {
         { .name = "help",    .function = &cmd_help },
         { .name = "bgcolor", .function = &cmd_bgcolor },
+        { .name = "border",  .function = &cmd_border },
         { .name = "charset", .function = &cmd_charset },
         { .name = "clear",   .function = &cmd_clear },
         { .name = "color",   .function = &cmd_color },
