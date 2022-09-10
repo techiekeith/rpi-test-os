@@ -14,19 +14,8 @@
 #include "../../include/kernel/uart.h"
 
 int shell();
-#ifdef USB_SUPPORT
-#ifdef CSUD
-void UsbInitialise();
-#endif
-#ifdef CSUD_PORT
-#include "../../include/kernel/usb/usb.h"
-#endif
 #ifdef USPI
-int USPiInitialize (void);
-int USPiKeyboardAvailable (void);
-typedef void TUSPiKeyPressedHandler (const char *pString);
-void USPiKeyboardRegisterKeyPressedHandler (TUSPiKeyPressedHandler *pKeyPressedHandler);
-#endif
+#include "../../include/uspi/uspi_compat.h"
 #endif
 
 #if defined(__cplusplus)
@@ -72,15 +61,8 @@ void kernel_main(uint32_t board_id)
     graphics_init();
     set_output_channel(OUTPUT_CHANNEL_ALL);
 
-#ifdef USB_SUPPORT
-    puts("Initializing USB host controller.\r\n");
-#ifdef CSUD
-    UsbInitialise();
-#endif
-#ifdef CSUD_PORT
-    usb_init();
-#endif
 #ifdef USPI
+    puts("Initializing USB host controller.\r\n");
     USPiInitialize();
     if (USPiKeyboardAvailable())
     {
@@ -93,7 +75,6 @@ void kernel_main(uint32_t board_id)
     {
         puts("USB keyboard not detected. Not registering input handler.\r\n");
     }
-#endif
 #endif
 
     int halted = 0;
