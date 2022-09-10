@@ -1,6 +1,4 @@
 RASPI_MODEL?=2
-# USB_SUPPORT=csud
-# USB_SUPPORT=csud_port
 USB_SUPPORT=uspi
 
 ifeq ($(RASPI_MODEL),1)
@@ -27,16 +25,9 @@ OBJCOPY=$(COMPILER_PREFIX)objcopy
 SRC_DIR=src
 DIST_DIR=dist
 
-ifeq ($(USB_SUPPORT),csud)
-	SUBDIRS=common kernel raster saa505x shell test csud $(SOFTWARE_MATH_LIB)
-	DRIVER_FLAGS=-D USB_SUPPORT -D CSUD
-else ifeq ($(USB_SUPPORT),csud_port)
-	SUBDIRS=common kernel raster saa505x shell test kernel/usb kernel/usb/device $(SOFTWARE_MATH_LIB)
-	DRIVER_FLAGS=-D USB_SUPPORT -D CSUD_PORT
-else ifeq ($(USB_SUPPORT),uspi)
+ifeq ($(USB_SUPPORT),uspi)
 	SUBDIRS=common kernel raster saa505x shell test uspi $(SOFTWARE_MATH_LIB)
-	USPI_FLAGS=-D RASPPI=$(RASPI_MODEL)
-	DRIVER_FLAGS=-D USB_SUPPORT -D USPI $(USPI_FLAGS)
+	DRIVER_FLAGS=-D USPI -D RASPPI=$(RASPI_MODEL)
 else
 	SUBDIRS=common kernel saa505x shell test $(SOFTWARE_MATH_LIB)
 	DRIVER_FLAGS=
