@@ -6,6 +6,7 @@
 #include "../../include/common/stdio.h"
 #include "../../include/kernel/arm_timer.h"
 #include "../../include/kernel/board.h"
+#include "../../include/kernel/dma.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/heap.h"
 #include "../../include/kernel/interrupt.h"
@@ -38,16 +39,13 @@ void kernel_main(uint32_t board_id)
     puts("Initializing kernel heap.\r\n");
     heap_init();
 
-    // Get the serial number and MAC address
+    // Get the serial number and MAC address - must be performed in this order
     get_serial_number();
     get_mac_address();
 
     // Discover RAM capacity
     size_t mem_size = get_mem_size();
     printf("Memory available: %dK.\r\n", mem_size >> 10);
-
-//    puts("Initializing Memory Module.\n");
-//    uint64_t mem_size = mem_init(mem_size);
 
     puts("Initializing interrupts.\r\n");
     interrupts_init();
@@ -56,6 +54,9 @@ void kernel_main(uint32_t board_id)
     puts("Initializing timers.\r\n");
     system_timer_init();
     arm_timer_init();
+
+    puts("Initializing DMA.\r\n");
+    dma_init();
 
     puts("Initializing graphics.\r\n");
     graphics_init();

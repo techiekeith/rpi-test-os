@@ -99,6 +99,7 @@ void show_palette(int argc, char **argv)
     int normal_row_height = height / max_rows;
     h = normal_row_height;
     w = width / max_columns;
+    bool cursor_enabled = disable_cursor();
     for (int row = 0; row < max_rows; row++)
     {
         if (PALETTE_COLORS - count < max_columns)
@@ -111,16 +112,15 @@ void show_palette(int argc, char **argv)
         {
             if (count < PALETTE_COLORS)
             {
+                void *p = (void *)(fbinfo.buf + fbinfo.pitch * (border_size + row * normal_row_height) + fbinfo.bpp * (border_size + column * w));
                 for (int y = 0; y < h; y++)
                 {
-                    for (int x = 0; x < w; x++)
-                    {
-                        write_pixel(x + column * w, y + row * normal_row_height, colors[count]);
-                    }
+                    clear_framebuffer_area(p, colors[count], w * fbinfo.bpp);
+                    p += fbinfo.pitch;
                 }
                 count++;
             }
         }
     }
+    if (cursor_enabled) enable_cursor();
 }
-

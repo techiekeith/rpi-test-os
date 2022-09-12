@@ -31,6 +31,7 @@ static void show_help_text()
     puts("\tclear - clear the screen\r\n");
     puts("\tcharset [<#>] - show/set character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
+    puts("\tdmacopy <src> <dest> <size> - copy <size> bytes from <src> to <dest>\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
@@ -38,8 +39,10 @@ static void show_help_text()
     puts("\tmemory - show memory usage\r\n");
     puts("\tmode [<width> <height> <depth>] - show/set display mode\r\n");
     puts("\tout (fb|uart) - select output\r\n");
-    puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette (modes are integers 0-4)\r\n");
+    puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette\r\n");
+    puts("\tpeek[32] <addr> - read memory at <addr>\r\n");
     puts("\tpixels [(rgb|bgr)] - show/set pixel order\r\n");
+    puts("\tpoke[32] <addr> <value> - write memory at <addr>\r\n");
     puts("\treset - reset the shell\r\n");
     puts("\ttest - run tests\r\n");
     puts("\ttimers - get system timer information\r\n");
@@ -102,21 +105,11 @@ static int split(char *str, int delim, int max_args, char **argp)
     return arg_count;
 }
 
-/*
- * Shell commands follow here - switch off unused parameter warnings for these
- */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-void background_color(int argc, char **argv);
-static void cmd_bgcolor(int argc, char **argv)
+static void cmd_help(int argc, char **argv)
 {
-    background_color(argc, argv);
-}
-
-void show_or_set_charset(int argc, char **argv);
-static void cmd_charset(int argc, char **argv)
-{
-    show_or_set_charset(argc, argv);
+    (void) argc;
+    (void) argv;
+    show_help_text();
 }
 
 static void cmd_clear(int argc, char **argv)
@@ -126,87 +119,24 @@ static void cmd_clear(int argc, char **argv)
     putc('\f');
 }
 
+void background_color(int argc, char **argv);
+void show_or_set_charset(int argc, char **argv);
 void foreground_color(int argc, char **argv);
-static void cmd_color(int argc, char **argv)
-{
-    foreground_color(argc, argv);
-}
-
 void border_color(int argc, char **argv);
-static void cmd_border(int argc, char **argv)
-{
-    border_color(argc, argv);
-}
-
+void dma_copy_bytes(int argc, char **argv);
 void show_dump(int argc, char **argv);
-static void cmd_dump(int argc, char **argv)
-{
-    show_dump(argc, argv);
-}
-
-static void cmd_help(int argc, char **argv)
-{
-    (void) argc;
-    (void) argv;
-    show_help_text();
-}
-
 void mailbox_options(int argc, char **argv);
-static void cmd_mailbox(int argc, char **argv)
-{
-    mailbox_options(argc, argv);
-}
-
-void show_memory_usage();
-static void cmd_memory(int argc, char **argv)
-{
-    (void) argc;
-    (void) argv;
-    show_memory_usage();
-}
-
+void show_memory_usage(int argc, char **argv);
 void display_mode(int argc, char **argv);
-static void cmd_mode(int argc, char **argv)
-{
-    display_mode(argc, argv);
-}
-
 void set_output(int argc, char **argv);
-static void cmd_out(int argc, char **argv)
-{
-    set_output(argc, argv);
-}
-
 void show_palette(int argc, char **argv);
-static void cmd_palette(int argc, char **argv)
-{
-    show_palette(argc, argv);
-}
-
+void peek_memory_8bit(int argc, char **argv);
+void peek_memory_32bit(int argc, char **argv);
 void set_pixels(int argc, char **argv);
-static void cmd_pixels(int argc, char **argv)
-{
-    set_pixels(argc, argv);
-}
-
+void poke_memory_8bit(int argc, char **argv);
+void poke_memory_32bit(int argc, char **argv);
 void run_tests(int argc, char **argv);
-static void cmd_test(int argc, char **argv)
-{
-    run_tests(argc, argv);
-}
-
-void show_timers();
-static void cmd_timers(int argc, char **argv)
-{
-    (void) argc;
-    (void) argv;
-    show_timers();
-}
-
-/*
- * Shell commands end here - switch unused parameter warnings back on
- */
-#pragma GCC diagnostic pop
+void show_timers(int argc, char **argv);
 
 static void prompt()
 {
@@ -220,22 +150,27 @@ typedef struct {
 
 command_t commands[] = {
         { .name = "help",    .function = &cmd_help },
-        { .name = "bgcolor", .function = &cmd_bgcolor },
-        { .name = "border",  .function = &cmd_border },
-        { .name = "charset", .function = &cmd_charset },
+        { .name = "bgcolor", .function = &background_color },
+        { .name = "border",  .function = &border_color },
+        { .name = "charset", .function = &show_or_set_charset },
         { .name = "clear",   .function = &cmd_clear },
-        { .name = "color",   .function = &cmd_color },
-        { .name = "dump",    .function = &cmd_dump },
+        { .name = "color",   .function = &foreground_color },
+        { .name = "dmacopy", .function = &dma_copy_bytes },
+        { .name = "dump",    .function = &show_dump },
         { .name = "halt",    .function = NULL },
-        { .name = "mailbox", .function = &cmd_mailbox },
-        { .name = "memory",  .function = &cmd_memory },
-        { .name = "mode",    .function = &cmd_mode },
-        { .name = "out",     .function = &cmd_out },
-        { .name = "palette", .function = &cmd_palette },
-        { .name = "pixels",  .function = &cmd_pixels },
+        { .name = "mailbox", .function = &mailbox_options },
+        { .name = "memory",  .function = &show_memory_usage },
+        { .name = "mode",    .function = &display_mode },
+        { .name = "out",     .function = &set_output },
+        { .name = "palette", .function = &show_palette },
+        { .name = "peek",    .function = &peek_memory_8bit },
+        { .name = "peek32",  .function = &peek_memory_32bit },
+        { .name = "pixels",  .function = &set_pixels },
+        { .name = "poke",    .function = &poke_memory_8bit },
+        { .name = "poke32",  .function = &poke_memory_32bit },
         { .name = "reset",   .function = NULL },
-        { .name = "test",    .function = &cmd_test },
-        { .name = "timers",  .function = &cmd_timers },
+        { .name = "test",    .function = &run_tests },
+        { .name = "timers",  .function = &show_timers },
         { .name = NULL,      .function = &bad_command }, /* this one goes last */
 };
 

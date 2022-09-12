@@ -19,6 +19,7 @@ typedef enum {
     SYSTEM_TIMER_1      = 0x01,
     SYSTEM_TIMER_3      = 0x03,
     USB_CONTROLLER      = 0x09,
+    DMA0_INT            = 0x10,
     GPU0_AUX            = 0x1d,
     I2C_SPI_SLV_INT     = 0x2b,
     GPU1_PWA0           = 0x2d,

@@ -2,10 +2,12 @@
  * memory.c
  */
 
+#include "../../include/common/stdbool.h"
 #include "../../include/common/stdint.h"
 #include "../../include/common/stdio.h"
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
+#include "../../include/kernel/dma.h"
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/heap.h"
@@ -90,7 +92,11 @@ static void show_arm_memory_usage(void *arm_memory_start, void *arm_memory_end)
     uint8_t *last = &__end - 1;
 #pragma GCC diagnostic pop
     printf(" %30s | %08x | %08x\r\n", "Exception Table", 0, 63);
-    printf(" %30s | %08x | %08x\r\n", "Reserved", 64, sp - 1);
+    printf(" %30s | %08x | %08x\r\n", "Reserved", 64, 0x37f);
+    printf(" %30s | %08x | %08x\r\n", "FIFO queues", 0x380, 0xbff);
+    printf(" %30s | %08x | %08x\r\n", "Reserved", 0xc00, 0xfff);
+    printf(" %30s | %08x | %08x\r\n", "DMA control blocks", 0x1000, 0x1fff);
+    printf(" %30s | %08x | %08x\r\n", "Reserved", 0x2000, sp - 1);
     printf(" %30s | %08x | %08x\r\n", "Stack", sp, &_start - 1);
     printf(" %30s | %08x | %08x\r\n", "Kernel", &_start, last);
     if (all_pages_array)
@@ -142,8 +148,10 @@ static void show_videocore_memory_usage(void *vc_memory_start, void *vc_memory_e
     set_foreground_color(239); // White
 }
 
-void show_memory_usage()
+void show_memory_usage(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     property_message_tag_t tags[3];
     tags[0].proptag = HW_GET_ARM_MEMORY;
     tags[1].proptag = HW_GET_VIDEOCORE_MEMORY;
@@ -213,7 +221,7 @@ void stack_dump()
 
 static void dump_syntax()
 {
-    puts("\r\nSyntax: (stack|<start_addr>) (<end_addr>|+<size>)\r\n");
+    puts("\r\nSyntax: dump (stack|<start_addr>) (<end_addr>|+<size>)\r\n");
 }
 
 void show_dump(int argc, char **argv)
@@ -244,4 +252,106 @@ void show_dump(int argc, char **argv)
         end = strtol(argv[2], NULL, 0);
     }
     memory_dump(start, end);
+}
+
+static void peek_syntax()
+{
+    puts("\r\nSyntax: peek[32] <addr>\r\n");
+}
+
+static void peek_memory(int argc, char **argv, bool word)
+{
+    if (argc < 2)
+    {
+        peek_syntax();
+        return;
+    }
+    size_t address = (size_t) strtol(argv[1], NULL, 0);
+    if (word)
+    {
+        uint32_t value = *((uint32_t *)address);
+        printf("Word @ %p: %d / 0x%08x\r\n", address, value, value);
+    }
+    else
+    {
+        uint8_t value = *((uint8_t *)address);
+        printf("Byte @ %p: %d / 0x%02x / 0b%08b\r\n", address, value, value, value);
+    }
+}
+
+void peek_memory_8bit(int argc, char **argv)
+{
+    peek_memory(argc, argv, false);
+}
+
+void peek_memory_32bit(int argc, char **argv)
+{
+    peek_memory(argc, argv, true);
+}
+
+static void poke_syntax()
+{
+    puts("\r\nSyntax: poke[32] <addr> <value>\r\n");
+}
+
+static void poke_memory(int argc, char **argv, bool word)
+{
+    if (argc < 3)
+    {
+        poke_syntax();
+        return;
+    }
+    size_t address = (size_t) strtol(argv[1], NULL, 0);
+    int value = strtol(argv[2], NULL, 0);
+    if (word)
+    {
+        *((uint32_t *)address) = value;
+    }
+    else
+    {
+        *((uint8_t *)address) = value;
+    }
+}
+
+void poke_memory_8bit(int argc, char **argv)
+{
+    poke_memory(argc, argv, false);
+}
+
+void poke_memory_32bit(int argc, char **argv)
+{
+    poke_memory(argc, argv, true);
+}
+
+static void dma_copy_syntax()
+{
+    puts("\r\nSyntax: dmacopy <src> <dest> <size>\r\n");
+}
+
+void dma_copy_bytes(int argc, char **argv)
+{
+    if (argc < 4)
+    {
+        dma_copy_syntax();
+        return;
+    }
+    size_t src = (size_t) strtol(argv[1], NULL, 0);
+    if (!src)
+    {
+        dma_copy_syntax();
+        return;
+    }
+    size_t dst = (size_t) strtol(argv[2], NULL, 0);
+    if (!dst)
+    {
+        dma_copy_syntax();
+        return;
+    }
+    size_t bytes = (size_t) strtol(argv[3], NULL, 0);
+    if (!bytes)
+    {
+        dma_copy_syntax();
+        return;
+    }
+    dma_copy((void *)dst, (void *)src, bytes);
 }

@@ -11,8 +11,10 @@
 
 extern uint32_t get_arm_timer_control();
 
-void show_timers()
+void show_timers(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     printf("System timer: system_time %llu, skipped_intervals %u, last_now %llu, last_next %llu\r\n",
            system_time, skipped_intervals, last_now, last_next);
     printf("System timer registers: counter %llu compare1 %u compare3 %u\r\n",

@@ -23,9 +23,9 @@ extern uint32_t colors[PALETTE_COLORS];
 
 void set_background_color(int color);
 void set_foreground_color(int color);
-void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyph_function);
-void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_glyph_function);
-void write_pixel(uint32_t x, uint32_t y, const uint32_t color);
+void enable_cursor();
+bool disable_cursor();
+void clear_framebuffer_area(void *buffer, uint32_t color, size_t size);
 void graphics_putc(int c);
 void set_border(int new_border_color, int new_border_size);
 int get_border_size();

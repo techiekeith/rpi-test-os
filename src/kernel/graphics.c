@@ -7,6 +7,7 @@
 #include "../../include/common/stdlib.h"
 #include "../../include/common/string.h"
 #include "../../include/kernel/charset.h"
+#include "../../include/kernel/dma.h"
 #include "../../include/kernel/framebuffer.h"
 #include "../../include/kernel/graphics.h"
 #include "../../include/kernel/interrupt.h"
@@ -25,68 +26,67 @@ static get_glyph_16bit_f get_glyph_16bit;
 static bool initialized;
 uint32_t colors[PALETTE_COLORS];
 
-void set_background_color(int color)
+static void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
 {
-    background_color = color;
-}
-
-void set_foreground_color(int color)
-{
-    foreground_color = color;
-}
-
-void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
-{
-    if (!fbinfo.buf) return;
     uint32_t location = (y + border_size) * fbinfo.pitch + (x + border_size) * fbinfo.bpp;
-    if (location >= fbinfo.buf_size) return;
-    uint32_t real_color = color;
-    if (fbinfo.cursor_enabled && fbinfo.cursor_visible &&
-        x >= fbinfo.current_column * fbinfo.char_width + fbinfo.cursor_left &&
-        x <= fbinfo.current_column * fbinfo.char_width + fbinfo.cursor_right &&
-        y >= fbinfo.current_row * fbinfo.char_height + fbinfo.cursor_top &&
-        y <= fbinfo.current_row * fbinfo.char_height + fbinfo.cursor_bottom)
+    uint16_t *p16;
+    uint32_t *p32;
+    switch (fbinfo.bpp)
     {
-        real_color = ~real_color;
-    }
-    for (uint32_t i = 0; i < fbinfo.bpp; i++)
-    {
-        fbinfo.buf[location + i] = real_color & 0xff;
-        real_color >>= 8;
+        case 1:
+            fbinfo.buf[location] = color;
+            break;
+        case 2:
+            p16 = (uint16_t *)(fbinfo.buf + location);
+            *p16 = color;
+            break;
+        case 3:
+            fbinfo.buf[location++] = color & 0xff;
+            fbinfo.buf[location++] = (color >> 8) & 0xff;
+            fbinfo.buf[location] = (color >> 16);
+            break;
+        case 4:
+            p32 = (uint32_t *)(fbinfo.buf + location);
+            *p32 = color;
+            break;
     }
 }
 
 static void invert_pixel(uint32_t x, uint32_t y)
 {
     uint32_t location = (y + border_size) * fbinfo.pitch + (x + border_size) * fbinfo.bpp;
-    if (fbinfo.bpp == 1)
+    uint16_t *p16;
+    uint32_t *p32;
+    switch (fbinfo.bpp)
     {
-        if (fbinfo.buf[location] >= 240)
-        {
-            fbinfo.buf[location] = fbinfo.buf[location] ^ 15;
-        }
-        else
-        {
-            fbinfo.buf[location] = 239 - fbinfo.buf[location];
-        }
-    }
-    else
-    {
-        for (uint32_t i = 0; i < fbinfo.bpp; i++)
-        {
-            fbinfo.buf[location + i] = ~fbinfo.buf[location + i];
-        }
+        case 1:
+            if (fbinfo.buf[location] >= 240)
+            {
+                fbinfo.buf[location] = fbinfo.buf[location] ^ 15;
+            }
+            else
+            {
+                fbinfo.buf[location] = 239 - fbinfo.buf[location];
+            }
+            break;
+        case 2:
+            p16 = (uint16_t *)(fbinfo.buf + location);
+            *p16 = ~*p16;
+            break;
+        case 3:
+            fbinfo.buf[location] = ~fbinfo.buf[location];
+            fbinfo.buf[location + 1] = ~fbinfo.buf[location + 1];
+            fbinfo.buf[location + 2] = ~fbinfo.buf[location + 2];
+            break;
+        case 4:
+            p32 = (uint32_t *)(fbinfo.buf + location);
+            *p32 = ~*p32;
+            break;
     }
 }
 
 static void toggle_cursor()
 {
-    if (!fbinfo.buf ||
-        fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
-        fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
-    {
-        return;
-    }
     int top = fbinfo.current_row * fbinfo.char_height;
     int left = fbinfo.current_column * fbinfo.char_width;
     int bottom = top + fbinfo.cursor_bottom;
@@ -100,6 +100,16 @@ static void toggle_cursor()
             invert_pixel(w, h);
         }
     }
+}
+
+void set_background_color(int color)
+{
+    background_color = color;
+}
+
+void set_foreground_color(int color)
+{
+    foreground_color = color;
 }
 
 void enable_cursor()
@@ -119,7 +129,7 @@ bool disable_cursor()
     return enabled;
 }
 
-void blink_cursor(int handle, void **args)
+static void blink_cursor(int handle, void **args)
 {
     // Consume unused varargs
     (void) handle;
@@ -130,52 +140,43 @@ void blink_cursor(int handle, void **args)
     if (fbinfo.cursor_enabled) toggle_cursor();
 }
 
-static void write_char_at_cursor_8bit(int c)
+static void write_char_8bit(int c)
 {
-    if (fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
-        fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
-    {
-        return;
-    }
+    int x = fbinfo.current_column * fbinfo.char_width;
+    int y = fbinfo.current_row * fbinfo.char_height;
+    int fgcolor = colors[foreground_color];
+    int bgcolor = colors[background_color];
     const uint8_t *bitmap = get_glyph_8bit(c);
     for (int h = fbinfo.char_height - 1; h >= 0; h--)
     {
-        uint8_t mask = 1;
+        uint8_t bits = bitmap[h];
         for (int w = fbinfo.char_width - 1; w >= 0; w--)
         {
-            write_pixel(fbinfo.current_column * fbinfo.char_width + w,
-                        fbinfo.current_row * fbinfo.char_height + h,
-                        bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
-            mask <<= 1;
+            write_pixel(x + w, y + h, bits & 1 ? fgcolor : bgcolor);
+            bits >>= 1;
         }
     }
 }
 
-static void write_char_at_cursor_16bit(int c)
+static void write_char_16bit(int c)
 {
-    if (fbinfo.current_column < 0 || fbinfo.current_column >= fbinfo.columns ||
-        fbinfo.current_row < 0 || fbinfo.current_row >= fbinfo.rows)
-    {
-        return;
-    }
+    int x = fbinfo.current_column * fbinfo.char_width;
+    int y = fbinfo.current_row * fbinfo.char_height;
+    int fgcolor = colors[foreground_color];
+    int bgcolor = colors[background_color];
     const uint16_t *bitmap = get_glyph_16bit(c);
     for (int h = fbinfo.char_height - 1; h >= 0; h--)
     {
-        uint16_t mask = 1;
+        uint16_t bits = bitmap[h];
         for (int w = fbinfo.char_width - 1; w >= 0; w--)
         {
-            write_pixel(fbinfo.current_column * fbinfo.char_width + w,
-                fbinfo.current_row * fbinfo.char_height + h,
-                bitmap[h] & mask ? colors[foreground_color] : colors[background_color]);
-            mask <<= 1;
+            write_pixel(x + w, y + h, bits & 1 ? fgcolor : bgcolor);
+            bits >>= 1;
         }
     }
 }
 
-static void write_char_at_cursor(int c)
-{
-    fbinfo.char_width <= 8 ? write_char_at_cursor_8bit(c) : write_char_at_cursor_16bit(c);
-}
+static void (*write_char_at_cursor)(int);
 
 static void move_cursor_backwards()
 {
@@ -197,7 +198,7 @@ static void move_cursor_forwards()
     }
 }
 
-static void clear_framebuffer_area(void *buffer, uint32_t color, size_t size)
+void clear_framebuffer_area(void *buffer, uint32_t color, size_t size)
 {
     switch(fbinfo.depth)
     {
@@ -283,6 +284,7 @@ static void move_or_copy_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, in
     {
         rect_y = fbinfo.height - dst_start_y;
     }
+
     int row_size = fbinfo.bpp * rect_x;
     int blank_size = fbinfo.bpp * dx;
     void *src = (void *)fbinfo.buf + fbinfo.pitch * src_start_y + fbinfo.bpp * src_start_x;
@@ -294,27 +296,29 @@ static void move_or_copy_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, in
         dst += fbinfo.pitch * (rect_y - 1);
         increment = -increment;
     }
-    for (int i = rect_y; i; i--)
+    dma_copy_multiple(dst, src, row_size, rect_y, increment);
+
+    if (!copy)
     {
-        memmove(dst, src, row_size);
-        src += increment;
-        dst += increment;
-        if (!copy && dx != 0)
+        if (dx != 0)
         {
-            clear_framebuffer_area(src + ((dx > 0) ? 0 : (rect_x - abs(dx))), colors[background_color], blank_size);
+            for (int i = rect_y; i; i--)
+            {
+                clear_framebuffer_area(src + ((dx > 0) ? 0 : (rect_x - abs(dx))), colors[background_color], blank_size);
+            }
         }
-    }
-    if (!copy && dy != 0)
-    {
-        void *blank = (void *)fbinfo.buf + fbinfo.pitch * src_start_y + fbinfo.bpp * src_start_x;
-        if (dy < 0)
+        if (dy != 0)
         {
-            blank += fbinfo.pitch * (rect_y - abs(dy));
-        }
-        for (int i = abs(dy); i; i--)
-        {
-            clear_framebuffer_area(blank, colors[background_color], row_size);
-            blank += fbinfo.pitch;
+            void *blank = (void *)fbinfo.buf + fbinfo.pitch * src_start_y + fbinfo.bpp * src_start_x;
+            if (dy < 0)
+            {
+                blank += fbinfo.pitch * (rect_y - abs(dy));
+            }
+            for (int i = abs(dy); i; i--)
+            {
+                clear_framebuffer_area(blank, colors[background_color], row_size);
+                blank += fbinfo.pitch;
+            }
         }
     }
 }
@@ -325,7 +329,7 @@ static void scroll_down()
     {
         uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
         size_t all_but_one_rows = fbinfo.buf_size - row_size;
-        memmove((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
+        dma_copy((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
         clear_framebuffer_area((void *)fbinfo.buf, colors[background_color], row_size);
         return;
     }
@@ -344,7 +348,7 @@ static void scroll_up()
     {
         uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
         size_t all_but_one_rows = fbinfo.buf_size - row_size;
-        memmove((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
+        dma_copy((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
         clear_framebuffer_area((void *)(fbinfo.buf + all_but_one_rows), colors[background_color], row_size);
         return;
     }
@@ -465,9 +469,10 @@ int get_border_size()
     return border_size > 0 ? border_size : 0;
 }
 
-void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyph_function)
+static void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyph_function)
 {
     bool cursor_enabled = disable_cursor();
+    write_char_at_cursor = write_char_8bit;
     get_glyph_8bit = get_glyph_function;
     fbinfo.char_width = width;
     fbinfo.char_height = height;
@@ -475,9 +480,10 @@ void set_8bit_charset(uint32_t width, uint32_t height, get_glyph_8bit_f get_glyp
     if (cursor_enabled) enable_cursor();
 }
 
-void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_glyph_function)
+static void set_16bit_charset(uint32_t width, uint32_t height, get_glyph_16bit_f get_glyph_function)
 {
     bool cursor_enabled = disable_cursor();
+    write_char_at_cursor = write_char_16bit;
     get_glyph_16bit = get_glyph_function;
     fbinfo.char_width = width;
     fbinfo.char_height = height;
