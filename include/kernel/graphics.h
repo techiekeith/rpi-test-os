@@ -31,4 +31,6 @@ void set_border(int new_border_color, int new_border_size);
 int get_border_size();
 void set_charset(charset_t charset);
 void set_display_mode(int width, int height, int depth);
+void set_dma_enabled(bool value);
+bool is_dma_enabled();
 void graphics_init();

@@ -17,7 +17,12 @@ static void mode_syntax()
 
 static void output_syntax()
 {
-    puts("\r\nSyntax: out <fb|uart>\r\n");
+    puts("\r\nSyntax: out [(fb|uart|all)]\r\n");
+}
+
+static void set_graphics_dma_syntax()
+{
+    puts("\r\nSyntax: gfxdma [(on|off)]\r\n");
 }
 
 static void show_display_mode()
@@ -75,23 +80,38 @@ void set_output(int argc, char **argv)
     DEBUG_START("set_output");
     if (argc < 2)
     {
-        output_syntax();
+        printf("Output channel 'uart' is %s.\r\n", get_output_channel() & OUTPUT_CHANNEL_UART);
+        printf("Output channel 'fb' is %s.\r\n", get_output_channel() & OUTPUT_CHANNEL_GRAPHICS);
     }
-    else if (!strcmp("oldfb", argv[1]))
+    else if (!strcmp("uart", argv[1]))
     {
-        set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
+        set_output_channel(OUTPUT_CHANNEL_UART);
     }
     else if (!strcmp("fb", argv[1]))
     {
         set_output_channel(OUTPUT_CHANNEL_GRAPHICS);
     }
-    else if (!strcmp("uart", argv[1]))
+    else if (!strcmp("all", argv[1]))
     {
-        set_output_channel(OUTPUT_CHANNEL_UART);
+        set_output_channel(OUTPUT_CHANNEL_ALL);
     }
     else
     {
         output_syntax();
     }
     DEBUG_END();
+}
+
+void set_graphics_dma(int argc, char **argv)
+{
+    if (argc < 2)
+    {
+        printf("Graphics DMA is %s.\r\n", is_dma_enabled() ? "enabled" : "disabled");
+        return;
+    }
+    if (strcmp("on", argv[1]) && strcmp("off", argv[1]))
+    {
+        set_graphics_dma_syntax();
+    }
+    set_dma_enabled(!strcmp("on", argv[1]));
 }

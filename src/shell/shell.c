@@ -27,19 +27,20 @@ static void show_help_text()
 {
     puts("\r\nCommands:\r\n");
     puts("\tbgcolor <#> - set background color\r\n");
-    puts("\tborder off | <#> - set the display border\r\n");
+    puts("\tborder (off|<#>) - set the display border\r\n");
     puts("\tclear - clear the screen\r\n");
     puts("\tcharset [<#>] - show/set character set\r\n");
     puts("\tcolor <#> - set foreground color\r\n");
     puts("\tdmacopy <src> <dest> <size> - copy <size> bytes from <src> to <dest>\r\n");
     puts("\tdump (stack|<start_addr>) (<end_addr>|+<size>) - memory dump\r\n");
+    puts("\tgfxdma [(on|off)] - show/set graphics DMA\r\n");
     puts("\thalt - halt the shell\r\n");
     puts("\thelp - this text\r\n");
     puts("\tmailbox (list|<method_name|method_id>) [...] - mailbox methods\r\n");
     puts("\tmemory - show memory usage\r\n");
     puts("\tmode [<width> <height> <depth>] - show/set display mode\r\n");
-    puts("\tout (fb|uart) - select output\r\n");
-    puts("\tpalette (<palette-mode> <rgb-mode>) - show/set colour palette\r\n");
+    puts("\tout [(fb|uart|all)] - show/set output\r\n");
+    puts("\tpalette [<palette-mode> <rgb-mode>] - show/set colour palette\r\n");
     puts("\tpeek[32] <addr> - read memory at <addr>\r\n");
     puts("\tpixels [(rgb|bgr)] - show/set pixel order\r\n");
     puts("\tpoke[32] <addr> <value> - write memory at <addr>\r\n");
@@ -125,6 +126,7 @@ void foreground_color(int argc, char **argv);
 void border_color(int argc, char **argv);
 void dma_copy_bytes(int argc, char **argv);
 void show_dump(int argc, char **argv);
+void set_graphics_dma(int argc, char **argv);
 void mailbox_options(int argc, char **argv);
 void show_memory_usage(int argc, char **argv);
 void display_mode(int argc, char **argv);
@@ -157,6 +159,7 @@ command_t commands[] = {
         { .name = "color",   .function = &foreground_color },
         { .name = "dmacopy", .function = &dma_copy_bytes },
         { .name = "dump",    .function = &show_dump },
+        { .name = "gfxdma",  .function = &set_graphics_dma },
         { .name = "halt",    .function = NULL },
         { .name = "mailbox", .function = &mailbox_options },
         { .name = "memory",  .function = &show_memory_usage },

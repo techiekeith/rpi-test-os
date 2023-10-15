@@ -24,66 +24,73 @@ static int border_size = 0;
 static get_glyph_8bit_f get_glyph_8bit;
 static get_glyph_16bit_f get_glyph_16bit;
 static bool initialized;
+static bool dma_enabled;
 uint32_t colors[PALETTE_COLORS];
 
-static void write_pixel(uint32_t x, uint32_t y, const uint32_t color)
+typedef void (*write_pixel_f)(uint32_t x, uint32_t y, uint32_t color);
+typedef void (*invert_pixel_f)(uint32_t x, uint32_t y);
+
+static void write_pixel_8bit(uint32_t x, uint32_t y, const uint32_t color)
 {
-    uint32_t location = (y + border_size) * fbinfo.pitch + (x + border_size) * fbinfo.bpp;
-    uint16_t *p16;
-    uint32_t *p32;
-    switch (fbinfo.bpp)
-    {
-        case 1:
-            fbinfo.buf[location] = color;
-            break;
-        case 2:
-            p16 = (uint16_t *)(fbinfo.buf + location);
-            *p16 = color;
-            break;
-        case 3:
-            fbinfo.buf[location++] = color & 0xff;
-            fbinfo.buf[location++] = (color >> 8) & 0xff;
-            fbinfo.buf[location] = (color >> 16);
-            break;
-        case 4:
-            p32 = (uint32_t *)(fbinfo.buf + location);
-            *p32 = color;
-            break;
-    }
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + x + border_size;
+    *p = color;
 }
 
-static void invert_pixel(uint32_t x, uint32_t y)
+static void write_pixel_16bit(uint32_t x, uint32_t y, const uint32_t color)
 {
-    uint32_t location = (y + border_size) * fbinfo.pitch + (x + border_size) * fbinfo.bpp;
-    uint16_t *p16;
-    uint32_t *p32;
-    switch (fbinfo.bpp)
-    {
-        case 1:
-            if (fbinfo.buf[location] >= 240)
-            {
-                fbinfo.buf[location] = fbinfo.buf[location] ^ 15;
-            }
-            else
-            {
-                fbinfo.buf[location] = 239 - fbinfo.buf[location];
-            }
-            break;
-        case 2:
-            p16 = (uint16_t *)(fbinfo.buf + location);
-            *p16 = ~*p16;
-            break;
-        case 3:
-            fbinfo.buf[location] = ~fbinfo.buf[location];
-            fbinfo.buf[location + 1] = ~fbinfo.buf[location + 1];
-            fbinfo.buf[location + 2] = ~fbinfo.buf[location + 2];
-            break;
-        case 4:
-            p32 = (uint32_t *)(fbinfo.buf + location);
-            *p32 = ~*p32;
-            break;
-    }
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + ((x + border_size) << 1);
+    uint16_t *p16 = (uint16_t *)p;
+    *p16 = color;
 }
+
+static void write_pixel_24bit(uint32_t x, uint32_t y, const uint32_t color)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + (x + border_size) * 3;
+    *p++ = color & 0xff;
+    *p++ = (color >> 8) & 0xff;
+    *p++ = (color >> 16);
+}
+
+static void write_pixel_32bit(uint32_t x, uint32_t y, const uint32_t color)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + ((x + border_size) << 2);
+    uint32_t *p32 = (uint32_t *)p;
+    *p32 = color;
+}
+
+static void invert_pixel_8bit(uint32_t x, uint32_t y)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + x + border_size;
+    uint8_t color = *p;
+    *p = (color >= 240) ? color ^ 15 : 239 - color;
+}
+
+static void invert_pixel_16bit(uint32_t x, uint32_t y)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + ((x + border_size) << 1);
+    uint16_t *p16 = (uint16_t *)p;
+    *p16 = ~*p16;
+}
+
+static void invert_pixel_24bit(uint32_t x, uint32_t y)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + (x + border_size) * 3;
+    *p = ~*p;
+    *(p + 1) = ~*(p + 1);
+    *(p + 2) = ~*(p + 2);
+}
+
+static void invert_pixel_32bit(uint32_t x, uint32_t y)
+{
+    uint8_t *p = (uint8_t *)fbinfo.buf + (y + border_size) * fbinfo.pitch + ((x + border_size) << 2);
+    uint32_t *p32 = (uint32_t *)p;
+    *p32 = ~*p32;
+}
+
+static write_pixel_f write_pixel_functions[4] = { write_pixel_8bit, write_pixel_16bit, write_pixel_24bit, write_pixel_32bit };
+static invert_pixel_f invert_pixel_functions[4] = { invert_pixel_8bit, invert_pixel_16bit, invert_pixel_24bit, invert_pixel_32bit };
+static write_pixel_f write_pixel;
+static invert_pixel_f invert_pixel;
 
 static void toggle_cursor()
 {
@@ -246,6 +253,18 @@ static void cursor_home()
     fbinfo.current_row = 0;
 }
 
+static void memmove_multiple(void *dest, const void *src, size_t bytes, int ntimes, int seek)
+{
+    void *p = (void *)src;
+    void *q = dest;
+    while (ntimes--)
+    {
+        memmove(q, p, bytes);
+        q += seek;
+        p += seek;
+    }
+}
+
 static void move_or_copy_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, int dx, int dy, bool copy)
 {
     if ((!dx && !dy) || !w || !h) return;
@@ -296,7 +315,15 @@ static void move_or_copy_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, in
         dst += fbinfo.pitch * (rect_y - 1);
         increment = -increment;
     }
-    dma_copy_multiple(dst, src, row_size, rect_y, increment);
+
+    if (dma_enabled)
+    {
+        dma_copy_multiple(dst, src, row_size, rect_y, increment);
+    }
+    else
+    {
+        memmove_multiple(dst, src, row_size, rect_y, increment);
+    }
 
     if (!copy)
     {
@@ -329,7 +356,14 @@ static void scroll_down()
     {
         uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
         size_t all_but_one_rows = fbinfo.buf_size - row_size;
-        dma_copy((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
+        if (dma_enabled)
+        {
+            dma_copy((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
+        }
+        else
+        {
+            memmove((void *)fbinfo.buf + row_size, (const void *)fbinfo.buf, all_but_one_rows);
+        }
         clear_framebuffer_area((void *)fbinfo.buf, colors[background_color], row_size);
         return;
     }
@@ -348,7 +382,14 @@ static void scroll_up()
     {
         uint32_t row_size = fbinfo.pitch * fbinfo.char_height;
         size_t all_but_one_rows = fbinfo.buf_size - row_size;
-        dma_copy((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
+        if (dma_enabled)
+        {
+            dma_copy((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
+        }
+        else
+        {
+            memmove((void *)fbinfo.buf, (const void *)(fbinfo.buf + row_size), all_but_one_rows);
+        }
         clear_framebuffer_area((void *)(fbinfo.buf + all_but_one_rows), colors[background_color], row_size);
         return;
     }
@@ -416,6 +457,9 @@ void graphics_putc(int c)
 
 static void init_colors(int depth)
 {
+    int idx = (depth >> 3) - 1;
+    write_pixel = write_pixel_functions[idx];
+    invert_pixel = invert_pixel_functions[idx];
     for (int i = 0; i < PALETTE_COLORS; i++)
     {
         if (depth == 8)
@@ -543,6 +587,16 @@ void set_display_mode(int width, int height, int depth)
     cursor_home();
 
     if (cursor_enabled) enable_cursor();
+}
+
+void set_dma_enabled(bool value)
+{
+    dma_enabled = value;
+}
+
+bool is_dma_enabled()
+{
+    return dma_enabled;
 }
 
 void graphics_init()

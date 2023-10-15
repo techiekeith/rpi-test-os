@@ -34,7 +34,7 @@ void border_color(int argc, char **argv)
 {
     if (argc != 2)
     {
-        printf("Syntax: border off | <#>\r\n");
+        printf("Syntax: border (off|<#>)\r\n");
         return;
     }
     int old_border_size = get_border_size();
@@ -68,7 +68,7 @@ int set_palette_mode(int argc, char **argv)
 {
     if (argc < 3)
     {
-        printf("\r\nSyntax: palette (<palette-mode> <rgb-mode>)\r\n");
+        printf("\r\nSyntax: palette [<palette-mode> <rgb-mode>]\r\n");
         return -1;
     }
     int palette_mode = atoi(argv[1]);
