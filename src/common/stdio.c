@@ -19,7 +19,7 @@ void putc(int c)
     kernel_putc(c);
 }
 
-void print_truncated_string_with_offset(const char *str, size_t n, int offset)
+static void print_truncated_string_with_offset(const char *str, size_t n, int offset)
 {
     size_t i;
     char *p = (char *)str;
@@ -36,7 +36,7 @@ void puts(const char *str)
     print_truncated_string_with_offset(str, 0, 0);
 }
 
-void print_string_with_modifiers(const char *str, int align, int pad_char, int double_height, size_t min_width, size_t max_width)
+static void print_string_with_modifiers(const char *str, int align, int pad_char, int double_height, size_t min_width, size_t max_width)
 {
     int offset = double_height ? 0xe0000 + (double_height << 16) : 0;
     pad_char += offset;
